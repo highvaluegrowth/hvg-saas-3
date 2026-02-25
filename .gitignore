@@ -4,6 +4,7 @@
 .pnp.js
 
 service-account.json
+.agent/
 
 # testing
 /coverage

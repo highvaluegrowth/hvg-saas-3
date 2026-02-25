@@ -6,7 +6,7 @@ SCRIPT_NAME = os.path.basename(__file__)
 
 # Directories to ignore completely
 IGNORE_DIRS = {
-    '.git', '__pycache__', 'node_modules', 'venv', 'env', '.next', 'build', 'coverage', 'service-account.json',
+    '.git', '__pycache__', 'node_modules', 'venv', 'env', '.next', 'build', 'coverage', '.agent', 
     '.idea', '.vscode', 'dist', 'build', 'coverage', '.worktrees', '.claude', '.firebase'
 }
 
@@ -18,7 +18,7 @@ IGNORE_EXTENSIONS = {
 
 # Specific filenames to ignore
 IGNORE_FILES = {
-    OUTPUT_FILE, SCRIPT_NAME, 'package-lock.json', 'yarn.lock'
+    OUTPUT_FILE, SCRIPT_NAME, 'package-lock.json', 'yarn.lock', 'service-account.json', 'firebase-debug.log', 'firebase.json'
 }
 
 def is_ignored(path):
