@@ -21,8 +21,8 @@ Multi-tenant SaaS platform for managing sober-living houses and resident recover
 
 1. **Clone repository**
    ```bash
-   git clone https://github.com/peteroleary/highvaluegrowth.git
-   cd highvaluegrowth
+   git clone https://github.com/highvaluegrowth/hvg-saas-3.git
+   cd hvg-saas-3
    ```
 
 2. **Install dependencies**
@@ -73,7 +73,7 @@ This starts:
 ## Project Structure
 
 ```
-highvaluegrowth/
+hvg-saas-3/
 ├── app/                    # Next.js App Router
 │   ├── (auth)/            # Auth routes (login, register)
 │   ├── (dashboard)/       # Protected dashboard routes

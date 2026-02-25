@@ -6,8 +6,8 @@ SCRIPT_NAME = os.path.basename(__file__)
 
 # Directories to ignore completely
 IGNORE_DIRS = {
-    '.git', '__pycache__', 'node_modules', 'venv', 'env', 
-    '.idea', '.vscode', 'dist', 'build', 'coverage'
+    '.git', '__pycache__', 'node_modules', 'venv', 'env', '.next', 'build', 'coverage', 'service-account.json',
+    '.idea', '.vscode', 'dist', 'build', 'coverage', '.worktrees', '.claude', '.firebase'
 }
 
 # File extensions to ignore (binaries, images, locks)

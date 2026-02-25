@@ -86,9 +86,9 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace 'com.highvaluegrowth.mobile'
+    namespace 'com.hvg-saas-3.mobile'
     defaultConfig {
-        applicationId 'com.highvaluegrowth.mobile'
+        applicationId 'com.hvg-saas-3.mobile'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

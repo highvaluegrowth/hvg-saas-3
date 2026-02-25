@@ -100,7 +100,7 @@ Upgrade path: feature-flag specific flows (e.g. personalized program planning) t
 `/mobile` directory inside the existing repo. Shared TypeScript types in `/shared/types/`.
 
 ```
-hvg-saas2/
+hvg-saas-3/
   app/                    ← existing Next.js web dashboard
   features/               ← existing web features
   shared/
@@ -214,7 +214,7 @@ All new routes under `app/api/mobile/` — isolated from web routes (`/api/tenan
 ### System Prompt (assembled server-side per request)
 ```
 [PERSONA]
-You are a recovery support guide for High Value Growth...
+You are a recovery support guide for HighValueGrowth...
 
 [USER CONTEXT]
 Name: {displayName}
