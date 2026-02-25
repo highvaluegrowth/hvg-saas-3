@@ -39,7 +39,7 @@ export function Sidebar({ tenantId, isOpen = true, onClose }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={`
-          fixed lg:static inset-y-0 left-0 z-30
+          fixed inset-y-0 left-0 z-30
           w-64 bg-white border-r border-gray-200
           transition-transform duration-300 ease-in-out
           lg:translate-x-0
@@ -80,10 +80,9 @@ export function Sidebar({ tenantId, isOpen = true, onClose }: SidebarProps) {
                   className={`
                     flex items-center px-3 py-2 rounded-lg text-sm font-medium
                     transition-colors duration-150
-                    ${
-                      isActive
-                        ? 'bg-indigo-50 text-indigo-600'
-                        : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                    ${isActive
+                      ? 'bg-indigo-50 text-indigo-600'
+                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                     }
                   `}
                   onClick={onClose}

@@ -20,11 +20,18 @@ export const navigationItems: NavigationItem[] = [
     description: 'Overview and quick stats',
   },
   {
-    label: 'Houses',
-    href: '/houses',
-    icon: 'building',
-    roles: ['tenant_admin', 'staff_admin', 'super_admin'],
-    description: 'Manage recovery houses',
+    label: 'Events',
+    href: '/events',
+    icon: 'calendar',
+    roles: 'all',
+    description: 'Program events and activities',
+  },
+  {
+    label: 'Courses',
+    href: '/lms',
+    icon: 'book',
+    roles: ['tenant_admin', 'super_admin'],
+    description: 'Course builder and LMS',
   },
   {
     label: 'Residents',
@@ -34,32 +41,18 @@ export const navigationItems: NavigationItem[] = [
     description: 'Resident directory',
   },
   {
+    label: 'Houses',
+    href: '/houses',
+    icon: 'building',
+    roles: ['tenant_admin', 'staff_admin', 'super_admin'],
+    description: 'Manage recovery houses',
+  },
+  {
     label: 'Staff',
     href: '/staff',
     icon: 'user',
     roles: ['tenant_admin', 'staff_admin', 'super_admin'],
     description: 'Staff management',
-  },
-  {
-    label: 'Events',
-    href: '/events',
-    icon: 'calendar',
-    roles: 'all',
-    description: 'Program events and activities',
-  },
-  {
-    label: 'Vehicles',
-    href: '/vehicles',
-    icon: 'vehicle',
-    roles: ['tenant_admin', 'staff_admin', 'staff', 'super_admin'],
-    description: 'Fleet management',
-  },
-  {
-    label: 'Transportation',
-    href: '/rides',
-    icon: 'map',
-    roles: 'all',
-    description: 'Rides and transportation',
   },
   {
     label: 'Chores',
@@ -76,6 +69,20 @@ export const navigationItems: NavigationItem[] = [
     description: 'Incident reports',
   },
   {
+    label: 'Vehicles',
+    href: '/vehicles',
+    icon: 'vehicle',
+    roles: ['tenant_admin', 'staff_admin', 'staff', 'super_admin'],
+    description: 'Fleet management',
+  },
+  {
+    label: 'Transportation',
+    href: '/rides',
+    icon: 'map',
+    roles: 'all',
+    description: 'Rides and transportation',
+  },
+  {
     label: 'Join Requests',
     href: '/join-requests',
     icon: 'inbox',
@@ -88,14 +95,7 @@ export const navigationItems: NavigationItem[] = [
     icon: 'settings',
     roles: ['tenant_admin', 'super_admin'],
     description: 'Organization settings',
-  },
-  {
-    label: 'Courses',
-    href: '/lms',
-    icon: 'book',
-    roles: ['tenant_admin', 'super_admin'],
-    description: 'Course builder and LMS',
-  },
+  }
 ];
 
 /**

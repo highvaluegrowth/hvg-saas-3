@@ -79,7 +79,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 lg:flex">
+    <div className="min-h-screen bg-gray-50">
       <Sidebar
         tenantId={tenantId}
         isOpen={sidebarOpen}

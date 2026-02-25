@@ -418,10 +418,16 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Address</p>
-              <p className="text-sm text-gray-900">{house.address.street}</p>
-              <p className="text-sm text-gray-900">
-                {house.address.city}, {house.address.state} {house.address.zip}
-              </p>
+              {house.address ? (
+                <>
+                  <p className="text-sm text-gray-900">{house.address.street}</p>
+                  <p className="text-sm text-gray-900">
+                    {house.address.city}, {house.address.state} {house.address.zip}
+                  </p>
+                </>
+              ) : (
+                <p className="text-sm text-gray-400 italic">No address provided</p>
+              )}
             </div>
             {house.phone && (
               <div>
