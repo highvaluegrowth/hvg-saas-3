@@ -3,6 +3,8 @@
 /.pnp
 .pnp.js
 
+service-account.json
+
 # testing
 /coverage
 
@@ -43,7 +45,6 @@ firebase-debug.log
 .worktrees/
 # Firebase service account keys (never commit these)
 *-firebase-adminsdk-*.json
-service-account.json
 
 # OS Files
 .DS_Store
