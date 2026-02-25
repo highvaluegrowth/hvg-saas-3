@@ -12,6 +12,7 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen name="index" options={{ title: 'Home', tabBarLabel: 'Home' }} />
+      <Tabs.Screen name="lms" options={{ title: 'Courses', tabBarLabel: 'Courses', headerShown: false }} />
       <Tabs.Screen name="chat" options={{ title: 'Recovery Guide', tabBarLabel: 'AI Guide' }} />
       <Tabs.Screen name="schedule" options={{ title: 'Schedule', tabBarLabel: 'Schedule' }} />
       <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarLabel: 'Profile' }} />

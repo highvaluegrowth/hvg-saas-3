@@ -124,6 +124,45 @@ service cloud.firestore {
       allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.userId;
     }
 
+    // ─── Global LMS Courses ──────────────────────────────────────────────────
+    // Courses can be public for all, or restricted to a specific tenant
+    match /courses/{courseId} {
+      allow read: if isAuthenticated() && (
+        resource.data.isPublic == true ||
+        resource.data.ownerTenantId == 'system' ||
+        isTenantMember(resource.data.ownerTenantId)
+      );
+      allow create: if isSuperAdmin() || isTenantStaffAdmin(request.resource.data.ownerTenantId);
+      allow update, delete: if isSuperAdmin() || isTenantStaffAdmin(resource.data.ownerTenantId);
+      
+      // Subcollections inside courses
+      match /{document=**} {
+         allow read: if isAuthenticated() && (
+            get(/databases/$(database)/documents/courses/$(courseId)).data.isPublic == true ||
+            get(/databases/$(database)/documents/courses/$(courseId)).data.ownerTenantId == 'system' ||
+            isTenantMember(get(/databases/$(database)/documents/courses/$(courseId)).data.ownerTenantId)
+         );
+         allow write: if isSuperAdmin() || isTenantStaffAdmin(get(/databases/$(database)/documents/courses/$(courseId)).data.ownerTenantId);
+      }
+    }
+
+    // ─── Gamification ────────────────────────────────────────────────────────
+    // Global Leaderboard and Tenant Leaderboards
+    match /gamification/{boardId} {
+      // Anyone authenticated can read global or their tenant's points
+      allow read: if isAuthenticated();
+      
+      // Points should only be incremented by secure Cloud Functions (or SuperAdmin)
+      // We block client-side updates to prevent cheating
+      allow write: if isSuperAdmin();
+      
+      match /profiles/{uid} {
+         allow read: if isAuthenticated();
+         // Clients cannot manually update their score
+         allow write: if isSuperAdmin();
+      }
+    }
+
     // Deny all other access by default
     match /{document=**} {
       allow read, write: if false;
