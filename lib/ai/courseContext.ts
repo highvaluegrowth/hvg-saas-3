@@ -16,7 +16,11 @@ export async function getCourseContextForAI(tenantId: string, userId: string): P
             return "The user is not currently enrolled in any LMS courses.";
         }
 
-        const enrollments = enrollmentsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+        const enrollments = enrollmentsSnap.docs.map(d => ({
+            id: d.id,
+            ...(d.data() as { courseId: string; status?: string; progress?: number; dueDate?: { toDate: () => Date } }),
+        }));
+
 
         // 2. Map through enrollments to get the related Course data
         for (const enrollment of enrollments) {
