@@ -25,7 +25,8 @@
         <category android:name="android.intent.category.DEFAULT"/>
         <category android:name="android.intent.category.BROWSABLE"/>
         <data android:scheme="hvg"/>
-        <data android:scheme="com.highvaluegrowth.mobile"/>
+        <data android:scheme="com.hvg_saas_3.mobile"/>
+        <data android:scheme="exp+hvg-mobile"/>
       </intent-filter>
     </activity>
   </application>

@@ -16,8 +16,8 @@ const AuthContext = createContext<AuthState>({
   firebaseUser: null,
   appUser: null,
   loading: true,
-  signOut: async () => {},
-  refreshAppUser: async () => {},
+  signOut: async () => { },
+  refreshAppUser: async () => { },
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -36,13 +36,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           const freshToken = await user.getIdToken(true);
           await saveAuthToken(freshToken);
         }, 55 * 60 * 1000);
+        // Unblock app immediately — profile fetch runs in the background
+        setLoading(false);
         try {
           const { user: au } = await userApi.getMe();
           setAppUser(au);
         } catch {
           setAppUser(null);
         }
-        setLoading(false);
         return () => clearInterval(refreshInterval);
       } else {
         await clearAuthToken();

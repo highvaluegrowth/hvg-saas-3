@@ -1,4 +1,4 @@
-package com.highvaluegrowth.mobile
+package com.hvg_saas_3.mobile
 
 import android.app.Application
 import android.content.res.Configuration

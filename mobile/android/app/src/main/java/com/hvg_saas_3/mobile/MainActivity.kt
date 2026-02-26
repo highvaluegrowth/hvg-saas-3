@@ -1,4 +1,4 @@
-package com.highvaluegrowth.mobile
+package com.hvg_saas_3.mobile
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

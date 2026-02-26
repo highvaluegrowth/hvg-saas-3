@@ -14,11 +14,11 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.highvaluegrowth.mobile",
+      "bundleIdentifier": "com.hvg_saas_3.mobile",
       "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
-      "package": "com.highvaluegrowth.mobile",
+      "package": "com.hvg_saas_3.mobile",
       "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
