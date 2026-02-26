@@ -6,6 +6,8 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { authService } from '@/features/auth/services/authService';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { Header } from '@/components/dashboard/Header';
+import { AISidebar } from '@/components/ai-sidebar/AISidebar';
+import { useAISidebarStore } from '@/lib/stores/aiSidebarStore';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -18,6 +20,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
   const { user, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [tenantName, setTenantName] = useState<string>('');
+  const { isOpen } = useAISidebarStore();
 
   useEffect(() => {
     if (!loading) {
@@ -79,23 +82,27 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 flex overflow-hidden">
       <Sidebar
         tenantId={tenantId}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
 
-      <div className="lg:pl-64 flex flex-col min-h-screen">
+      <div
+        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 lg:pl-64 ${isOpen ? 'lg:pr-80' : ''}`}
+      >
         <Header
           tenantName={tenantName}
           onMenuClick={() => setSidebarOpen(true)}
         />
 
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 overflow-y-auto">
           {children}
         </main>
       </div>
+
+      <AISidebar />
     </div>
   );
 }

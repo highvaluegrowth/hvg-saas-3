@@ -27,7 +27,9 @@ export async function GET(request: NextRequest) {
         id: doc.id,
         role: doc.data().role,
         content: doc.data().content,
-        createdAt: doc.data().createdAt?.toDate?.() ?? null,
+        component: doc.data().component,       // NEW
+        componentData: doc.data().componentData, // NEW
+        createdAt: doc.data().createdAt?.toMillis() ?? Date.now(), // Use epoch ms as required by Zustand store
       }));
 
       return NextResponse.json({ messages });
