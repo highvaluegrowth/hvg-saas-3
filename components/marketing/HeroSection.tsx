@@ -37,57 +37,14 @@ export function HeroSection() {
                     resident LMS, AI recovery coaching, and scheduling. All in one place.
                 </p>
 
-                {/* 3 CTAs */}
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-14">
-                    {/* Primary: Operator Demo */}
+                {/* CTAs */}
+                <div className="flex flex-col items-center justify-center gap-6 mb-14">
+                    <AppStoreBadges />
                     <a
                         href="#demo"
-                        id="cta-schedule-demo"
-                        className="inline-flex items-center gap-2 px-7 py-4 rounded-xl text-white font-semibold text-base transition-all duration-200 cursor-pointer hover:opacity-90 hover:-translate-y-0.5 shadow-lg"
-                        style={{ background: '#059669', boxShadow: '0 8px 24px rgba(5,150,105,0.35)' }}
+                        className="text-sm font-semibold leading-6 text-emerald-600 hover:text-emerald-500"
                     >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-                        </svg>
-                        Schedule a Demo
-                    </a>
-
-                    {/* Secondary: Find a Bed → App */}
-                    <a
-                        href="#"
-                        id="cta-find-bed"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-7 py-4 rounded-xl font-semibold text-base transition-all duration-200 cursor-pointer hover:-translate-y-0.5"
-                        style={{
-                            background: 'rgba(8,145,178,0.08)',
-                            color: '#0891B2',
-                            border: '2px solid rgba(8,145,178,0.3)',
-                        }}
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
-                        </svg>
-                        Find a Bed
-                    </a>
-
-                    {/* Tertiary: Solo Recovery → App */}
-                    <a
-                        href="#"
-                        id="cta-solo-recovery"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-7 py-4 rounded-xl font-semibold text-base transition-all duration-200 cursor-pointer hover:-translate-y-0.5"
-                        style={{
-                            background: 'rgba(22,78,99,0.06)',
-                            color: '#164E63',
-                            border: '2px solid rgba(22,78,99,0.15)',
-                        }}
-                    >
-                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456Z" />
-                        </svg>
-                        Start AI Recovery
+                        Are you an operator? Schedule a demo &rarr;
                     </a>
                 </div>
 

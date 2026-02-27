@@ -15,8 +15,8 @@ export function MarketingNavbar() {
     return (
         <nav
             className={`fixed top-4 left-4 right-4 z-50 rounded-2xl transition-all duration-300 ${scrolled
-                    ? 'bg-white/90 backdrop-blur-md shadow-lg border border-white/60'
-                    : 'bg-white/70 backdrop-blur-sm shadow-md border border-white/40'
+                ? 'bg-white/90 backdrop-blur-md shadow-lg border border-white/60'
+                : 'bg-white/70 backdrop-blur-sm shadow-md border border-white/40'
                 }`}
             style={{ fontFamily: 'var(--font-figtree), sans-serif' }}
         >
@@ -37,7 +37,8 @@ export function MarketingNavbar() {
                         { label: 'For Operators', href: '#operators' },
                         { label: 'For Residents', href: '#residents' },
                         { label: 'AI Recovery', href: '#ai-recovery' },
-                        { label: 'Pricing', href: '#demo' },
+                        { label: 'Transparency', href: '/transparency' },
+                        { label: 'Donate', href: '/donate' },
                     ].map((link) => (
                         <a
                             key={link.href}
