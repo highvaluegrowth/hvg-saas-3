@@ -19,6 +19,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
   const router = useRouter();
   const { user, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [tenantName, setTenantName] = useState<string>('');
   const [tenantStatus, setTenantStatus] = useState<string | null>(null);
   const { isOpen, sidebarWidth } = useAISidebarStore();
@@ -89,10 +90,13 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
         tenantId={tenantId}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
+        isCollapsed={isSidebarCollapsed}
+        onToggleCollapse={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
       />
 
       <div
-        className={`flex-1 flex flex-col min-h-screen lg:pl-64`}
+        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'
+          }`}
         style={
           isOpen && typeof window !== 'undefined' && window.innerWidth >= 1024
             ? { paddingRight: `${sidebarWidth}px`, transition: 'padding-right 0.3s ease' }
