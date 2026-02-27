@@ -120,7 +120,7 @@ export default function ChoreDetailPage({ params }: { params: Promise<{ tenantId
     }
   }
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent" /></div>;
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-4 border-cyan-600 border-t-transparent" /></div>;
   if (error || !chore) return <div className="p-4 bg-red-50 text-red-800 rounded-lg">{error || 'Chore not found'}</div>;
 
   return (

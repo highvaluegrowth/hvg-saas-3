@@ -32,7 +32,7 @@ export default function LMSDashboard({ params }: { params: Promise<{ tenantId: s
                             <span className={`text-xs px-2 py-1 rounded-full ${course.isPublic ? 'bg-sky-100 text-sky-700' : 'bg-slate-100 text-slate-700'}`}>
                                 {course.isPublic ? 'Public' : 'Residents Only'}
                             </span>
-                            <span className={`text-xs px-2 py-1 rounded-full ${course.published ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                            <span className={`text-xs px-2 py-1 rounded-full ${course.published ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-100 text-emerald-700'}`}>
                                 {course.published ? 'Published' : 'Draft'}
                             </span>
                         </div>

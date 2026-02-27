@@ -18,8 +18,8 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                     }`}
                 style={
                     isUser
-                        ? { background: '#FEF3C7', color: '#1C1917', border: '1px solid rgba(245,158,11,0.2)' }
-                        : { background: '#ECEDE8', color: '#1C1917', border: '1px solid rgba(113,131,85,0.15)' }
+                        ? { background: '#CFFAFE', color: '#164E63', border: '1px solid rgba(8,145,178,0.2)' }
+                        : { background: '#FFFFFF', color: '#164E63', border: '1px solid rgba(8,145,178,0.15)' }
                 }
             >
                 {message.content}

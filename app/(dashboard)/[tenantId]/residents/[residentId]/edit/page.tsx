@@ -89,7 +89,7 @@ function Field({
   options?: { value: string; label: string }[];
   fullWidth?: boolean;
 }) {
-  const cls = 'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500';
+  const cls = 'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500';
   return (
     <div className={fullWidth ? 'col-span-2' : ''}>
       <label className="block text-sm font-medium text-gray-700">
@@ -307,7 +307,7 @@ export default function EditResidentPage({ params }: EditResidentPageProps) {
           </CardHeader>
           <CardContent>
             <textarea
-              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
               rows={4}
               value={form.notes}
               onChange={(e) => update('notes', e.target.value)}
@@ -324,7 +324,7 @@ export default function EditResidentPage({ params }: EditResidentPageProps) {
           <Button
             type="submit"
             disabled={saving}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="bg-cyan-600 hover:bg-cyan-700 text-white"
           >
             {saving ? 'Saving...' : 'Save Changes'}
           </Button>

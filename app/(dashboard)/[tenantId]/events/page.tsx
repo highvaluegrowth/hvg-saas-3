@@ -65,15 +65,15 @@ const TYPE_BADGE_CLASSES: Record<ProgramEventType, string> = {
   group_meeting: '',
   house_meeting: '',
   class: '',
-  course: 'bg-indigo-100 text-indigo-800',
+  course: 'bg-cyan-100 text-cyan-800',
   na_meeting: 'bg-blue-100 text-blue-800',
   aa_meeting: 'bg-blue-100 text-blue-800',
-  church: 'bg-purple-100 text-purple-800',
-  bible_study: 'bg-purple-100 text-purple-800',
+  church: 'bg-cyan-100 text-cyan-800',
+  bible_study: 'bg-emerald-100 text-emerald-800',
   therapy_session: '',
   job_training: 'bg-teal-100 text-teal-800',
   community_service: 'bg-teal-100 text-teal-800',
-  outing: 'bg-orange-100 text-orange-800',
+  outing: 'bg-cyan-100 text-cyan-800',
   other: '',
 };
 
@@ -102,7 +102,7 @@ function EventCard({ event, tenantId }: { event: ProgramEvent; tenantId: string 
 
   return (
     <Link href={`/${tenantId}/events/${event.id}`} className="block group">
-      <Card className="border border-gray-200 bg-white hover:border-indigo-300 hover:shadow-md transition-all duration-150">
+      <Card className="border border-gray-200 bg-white hover:border-cyan-300 hover:shadow-md transition-all duration-150">
         <CardContent className="p-5">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
@@ -111,7 +111,7 @@ function EventCard({ event, tenantId }: { event: ProgramEvent; tenantId: string 
                   {TYPE_LABELS[event.type]}
                 </Badge>
               </div>
-              <h3 className="text-base font-semibold text-gray-900 group-hover:text-indigo-600 truncate">
+              <h3 className="text-base font-semibold text-gray-900 group-hover:text-cyan-600 truncate">
                 {event.title}
               </h3>
               <p className="text-sm text-gray-500 mt-1">
@@ -132,7 +132,7 @@ function EventCard({ event, tenantId }: { event: ProgramEvent; tenantId: string 
               </div>
             </div>
             <div className="flex-shrink-0 text-right">
-              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-indigo-50 text-indigo-700 text-sm font-semibold">
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-cyan-50 text-cyan-700 text-sm font-semibold">
                 {event.attendeeIds.length}
               </span>
               <p className="text-xs text-gray-500 mt-1">attendees</p>
@@ -176,28 +176,26 @@ export default function EventsPage({ params }: EventsPageProps) {
           <div className="flex rounded-md border border-gray-200 overflow-hidden">
             <button
               onClick={() => setView('list')}
-              className={`px-3 py-1.5 text-sm font-medium transition-colors ${
-                view === 'list'
-                  ? 'bg-indigo-600 text-white'
+              className={`px-3 py-1.5 text-sm font-medium transition-colors ${view === 'list'
+                  ? 'bg-cyan-600 text-white'
                   : 'bg-white text-gray-600 hover:bg-gray-50'
-              }`}
+                }`}
             >
               List
             </button>
             <button
               onClick={() => setView('calendar')}
-              className={`px-3 py-1.5 text-sm font-medium transition-colors border-l border-gray-200 ${
-                view === 'calendar'
-                  ? 'bg-indigo-600 text-white'
+              className={`px-3 py-1.5 text-sm font-medium transition-colors border-l border-gray-200 ${view === 'calendar'
+                  ? 'bg-cyan-600 text-white'
                   : 'bg-white text-gray-600 hover:bg-gray-50'
-              }`}
+                }`}
             >
               Calendar
             </button>
           </div>
           {userCanWrite && (
             <Link href={`/${tenantId}/events/new`}>
-              <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
+              <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">
                 Add Event
               </Button>
             </Link>
@@ -211,7 +209,7 @@ export default function EventsPage({ params }: EventsPageProps) {
           {loading && (
             <div className="flex items-center justify-center py-16">
               <div className="text-center">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent"></div>
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-cyan-600 border-t-transparent"></div>
                 <p className="mt-4 text-gray-600">Loading events...</p>
               </div>
             </div>
@@ -225,8 +223,8 @@ export default function EventsPage({ params }: EventsPageProps) {
 
           {!loading && !error && events.length === 0 && (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-16 h-16 rounded-full bg-indigo-50 flex items-center justify-center mb-4">
-                <svg className="w-8 h-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="w-16 h-16 rounded-full bg-cyan-50 flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
@@ -236,7 +234,7 @@ export default function EventsPage({ params }: EventsPageProps) {
               </p>
               {userCanWrite && (
                 <Link href={`/${tenantId}/events/new`}>
-                  <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                  <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">
                     Add Event
                   </Button>
                 </Link>

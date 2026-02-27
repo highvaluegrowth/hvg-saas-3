@@ -50,7 +50,7 @@ export function Sidebar({ tenantId, isOpen = true, onClose }: SidebarProps) {
           {/* Logo */}
           <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
             <Link href={`/${tenantId}`} className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 bg-cyan-600 rounded-lg flex items-center justify-center">
                 <span className="text-white font-bold text-lg">HVG</span>
               </div>
               <span className="font-semibold text-gray-900">High Value Growth</span>
@@ -81,14 +81,14 @@ export function Sidebar({ tenantId, isOpen = true, onClose }: SidebarProps) {
                     flex items-center px-3 py-2 rounded-lg text-sm font-medium
                     transition-colors duration-150
                     ${isActive
-                      ? 'bg-indigo-50 text-indigo-600'
+                      ? 'bg-cyan-50 text-cyan-600'
                       : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
                     }
                   `}
                   onClick={onClose}
                 >
                   <svg
-                    className={`w-5 h-5 mr-3 ${isActive ? 'text-indigo-600' : 'text-gray-400'}`}
+                    className={`w-5 h-5 mr-3 ${isActive ? 'text-cyan-600' : 'text-gray-400'}`}
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -109,8 +109,8 @@ export function Sidebar({ tenantId, isOpen = true, onClose }: SidebarProps) {
           {/* User info */}
           <div className="p-4 border-t border-gray-200">
             <div className="flex items-center">
-              <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                <span className="text-indigo-600 font-medium text-sm">
+              <div className="w-8 h-8 bg-cyan-100 rounded-full flex items-center justify-center">
+                <span className="text-cyan-600 font-medium text-sm">
                   {user?.email?.charAt(0).toUpperCase()}
                 </span>
               </div>

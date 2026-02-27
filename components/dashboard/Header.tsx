@@ -48,7 +48,7 @@ export function Header({ tenantName, onMenuClick }: HeaderProps) {
         {/* AI Sidebar Toggle */}
         <button
           onClick={() => setOpen(!isOpen)}
-          className="text-gray-400 hover:text-amber-500 relative transition-colors"
+          className="text-gray-400 hover:text-emerald-500 relative transition-colors"
           title="Toggle AI Assistant"
         >
           <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

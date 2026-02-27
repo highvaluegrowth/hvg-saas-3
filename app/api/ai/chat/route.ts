@@ -122,6 +122,45 @@ const operatorTools: Tool[] = [
           },
         },
       },
+      {
+        name: 'build_lms_course',
+        description: 'Draft, structure, and save a new LMS course module directly to the courses collection',
+        parameters: {
+          type: Type.OBJECT,
+          required: ['title', 'description', 'modules'],
+          properties: {
+            title: { type: Type.STRING, description: 'Course title' },
+            description: { type: Type.STRING, description: 'Course description' },
+            modules: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING },
+              description: 'List of module titles to be created within the course',
+            },
+          },
+        },
+      },
+      {
+        name: 'optimize_transport_routes',
+        description: 'Fetch pending ride requests and group them by proximity/time to optimize daily itineraries',
+        parameters: { type: Type.OBJECT, properties: {} },
+      },
+      {
+        name: 'draft_incident_report',
+        description: 'Generate a formal, structured incident report from conversational shorthand inputs',
+        parameters: {
+          type: Type.OBJECT,
+          required: ['summary', 'incidentDate', 'involvedResidents'],
+          properties: {
+            summary: { type: Type.STRING, description: 'Detailed formal summary expanding on the shorthand inputs' },
+            incidentDate: { type: Type.STRING, description: 'ISO 8601 date of the incident' },
+            involvedResidents: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING },
+              description: 'List of resident IDs or names involved',
+            },
+          },
+        },
+      },
     ],
   },
 ];
@@ -236,6 +275,41 @@ async function executeOperatorTool(
     return { success: true, choreId: ref.id, title: args.title, assigneeIds: args.residentIds };
   }
 
+  if (toolName === 'build_lms_course') {
+    // Scaffold functionality: Create course shell in Firestore
+    const ref = adminDb.collection(`tenants/${tenantId}/courses`).doc();
+    await ref.set({
+      title: args.title,
+      description: args.description,
+      modules: args.modules,
+      status: 'draft',
+      createdBy,
+      createdAt: now,
+    });
+    return { success: true, courseId: ref.id, title: args.title, message: 'LMS Course drafted successfully' };
+  }
+
+  if (toolName === 'optimize_transport_routes') {
+    // Scaffold functionality: Return dummy optimized itinerary based on pending rides
+    const snap = await adminDb.collection(`tenants/${tenantId}/rides`).where('status', 'in', ['pending', 'scheduled']).get();
+    const pendingRides = snap.docs.map(d => ({ id: d.id, destination: d.data().destination, time: d.data().scheduledAt?.toDate?.()?.toISOString() }));
+    return { success: true, optimizedGroups: [{ zone: 'North Route', rides: pendingRides.slice(0, 2) }, { zone: 'South Route', rides: pendingRides.slice(2) }] };
+  }
+
+  if (toolName === 'draft_incident_report') {
+    // Scaffold functionality: Save formal incident report
+    const ref = adminDb.collection(`tenants/${tenantId}/incidents`).doc();
+    await ref.set({
+      summary: args.summary,
+      incidentDate: args.incidentDate ? new Date(args.incidentDate as string) : now,
+      involvedResidents: args.involvedResidents,
+      status: 'review_pending',
+      createdBy,
+      createdAt: now,
+    });
+    return { success: true, incidentId: ref.id, summarySnippet: (args.summary as string).substring(0, 50) + '...' };
+  }
+
   return { error: `Unknown operator tool: ${toolName}` };
 }
 
@@ -243,8 +317,8 @@ async function executeOperatorTool(
 
 function buildResidentSystemPrompt(appUser: { displayName?: string; sobrietyDate?: Date | null; recoveryGoals?: string[] }, routeContext?: string): string {
   return [
-    `You are a compassionate AI recovery guide for ${appUser.displayName ?? 'this resident'}.`,
-    `You are deeply integrated with their sober living program. You care about their wellbeing.`,
+    `You are the HVG Agent, acting as a warm, humanist Recovery Program Guide for ${appUser.displayName ?? 'this resident'}.`,
+    `You are deeply integrated with their sober living program. You care about their wellbeing. Avoid clinical, cold, or overly robotic language.`,
     appUser.sobrietyDate
       ? `They have been sober since ${appUser.sobrietyDate.toDateString()}.`
       : 'Their sobriety start date has not been set — encourage them to set it in their profile.',
@@ -261,13 +335,14 @@ function buildResidentSystemPrompt(appUser: { displayName?: string; sobrietyDate
 
 function buildOperatorSystemPrompt(appUser: { displayName?: string; role?: string }, tenantId: string, routeContext?: string): string {
   return [
-    `You are an intelligent operations assistant for ${appUser.displayName ?? 'this operator'}, a ${appUser.role ?? 'house manager'} at their sober living organization.`,
-    `You help them manage their house efficiently — events, chores, transportation, resident join requests, and reporting.`,
+    `You are the HVG Agent, acting as a House Operations & Program Architect for ${appUser.displayName ?? 'this operator'}, a ${appUser.role ?? 'house manager'} at their sober living organization.`,
+    `Your goal is to be structured, insightful, and anticipate workflow bottlenecks before they happen.`,
+    `You help them manage their house efficiently — events, chores, transportation, resident join requests, course building, formatting incident reports, and extracting operational insights.`,
     `Their tenantId is: ${tenantId}.`,
     routeContext ? `Current page context: ${routeContext}` : '',
     'You can retrieve pending chores, upcoming events, ride requests, and join requests using the tools available.',
-    'You can also create new events and assign chores directly — always confirm details before writing.',
-    'Be concise, professional, and action-oriented.',
+    'You can also create new events, assign chores, scaffold LMS courses, and draft formal incident reports.',
+    'Be concise, professional, action-oriented, and highly analytical.',
     'For sensitive resident health decisions, defer to clinical staff.',
   ].filter(Boolean).join(' ');
 }

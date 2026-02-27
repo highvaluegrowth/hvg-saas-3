@@ -80,7 +80,7 @@ export function StaffSelector({
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
       />
 
       <div className={`border border-gray-200 rounded-md overflow-y-auto ${maxHeight}`}>
@@ -99,7 +99,7 @@ export function StaffSelector({
                       type={singleSelect ? 'radio' : 'checkbox'}
                       checked={checked}
                       onChange={() => toggle(member.id)}
-                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      className="rounded border-gray-300 text-cyan-600 focus:ring-cyan-500"
                     />
                     <span className="text-sm text-gray-900">
                       {member.firstName} {member.lastName}

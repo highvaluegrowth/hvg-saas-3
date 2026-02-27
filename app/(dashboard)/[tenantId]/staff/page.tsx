@@ -56,7 +56,7 @@ export default function StaffPage({ params }: StaffPageProps) {
         </div>
         {userCanManage && (
           <Link href={`/${tenantId}/staff/new`}>
-            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
+            <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">
               Add Staff Member
             </Button>
           </Link>
@@ -122,7 +122,7 @@ export default function StaffPage({ params }: StaffPageProps) {
                       </p>
                       {userCanManage && (
                         <Link href={`/${tenantId}/staff/new`} className="mt-4">
-                          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white" size="sm">
+                          <Button className="bg-cyan-600 hover:bg-cyan-700 text-white" size="sm">
                             Add Staff Member
                           </Button>
                         </Link>
@@ -136,7 +136,7 @@ export default function StaffPage({ params }: StaffPageProps) {
                     <TableCell>
                       <Link
                         href={`/${tenantId}/staff/${member.id}`}
-                        className="font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
+                        className="font-medium text-cyan-600 hover:text-cyan-800 hover:underline"
                       >
                         {member.firstName} {member.lastName}
                       </Link>

@@ -66,8 +66,38 @@ export function AISidebar() {
         }
     }, [messages.length, isLoading]);
 
+    // Resizing logic
+    const isResizing = useRef(false);
+    const { sidebarWidth, setSidebarWidth } = useAISidebarStore();
+
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!isResizing.current) return;
+            const newWidth = window.innerWidth - e.clientX;
+            // constraints
+            if (newWidth > 320 && newWidth < window.innerWidth * 0.5) {
+                setSidebarWidth(newWidth);
+            }
+        };
+
+        const handleMouseUp = () => {
+            isResizing.current = false;
+        };
+
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+        return () => {
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [setSidebarWidth]);
+
+    const handleMouseDown = () => {
+        isResizing.current = true;
+    };
+
     if (!isOpen) {
-        return null; /* Optional: Or render a tiny collapsed toggle strip here instead of in Layout */
+        return null;
     }
 
     async function handleSend(text: string) {
@@ -121,14 +151,23 @@ export function AISidebar() {
                 className={`flex flex-col shadow-2xl transition-transform duration-300 z-50 lg:z-40
                     fixed right-0 
                     bottom-0 h-[85vh] w-full rounded-t-3xl border-t  /* Mobile bottom drawer */
-                    lg:top-0 lg:h-screen lg:w-80 lg:rounded-none lg:border-t-0 lg:border-l /* Desktop side panel */
+                    lg:top-0 lg:h-screen lg:rounded-none lg:border-t-0 lg:border-l /* Desktop side panel */
                 `}
                 style={{
-                    background: '#FDFBF7',
-                    borderColor: '#E8E0D5',
+                    width: typeof window !== 'undefined' && window.innerWidth >= 1024
+                        ? `${sidebarWidth}px`
+                        : '100%',
+                    background: 'rgba(248, 250, 252, 0.95)',
+                    backdropFilter: 'blur(12px)',
+                    borderColor: 'rgba(8, 145, 178, 0.15)',
                     transform: isOpen ? 'translate(0, 0)' : 'translate(0, 100%)',
                 }}
             >
+                {/* Drag Handle for desktop */}
+                <div
+                    className="hidden lg:block absolute left-0 top-0 w-2 h-full cursor-col-resize -translate-x-1/2 bg-transparent hover:bg-cyan-500/20 transition-colors z-50"
+                    onMouseDown={handleMouseDown}
+                />
                 {/* Visual handle for mobile drawer */}
                 <div className="w-full flex justify-center pt-3 pb-1 lg:hidden">
                     <div className="w-12 h-1.5 bg-stone-300 rounded-full" />

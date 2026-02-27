@@ -31,17 +31,17 @@ export function SidebarHeader({ persona, onClose, onClear }: SidebarHeaderProps)
     return (
         <div
             className="flex items-center justify-between px-4 py-3 border-b"
-            style={{ borderColor: 'rgba(113,131,85,0.15)' }}
+            style={{ borderColor: 'rgba(8, 145, 178, 0.15)' }}
         >
             {/* Agent identity */}
             <div className="flex items-center gap-2.5">
                 <div className="w-8 h-8 rounded-xl flex items-center justify-center"
-                    style={{ background: 'rgba(245,158,11,0.12)', color: '#F59E0B' }}>
+                    style={{ background: 'rgba(8, 145, 178, 0.12)', color: '#0891B2' }}>
                     {info.icon}
                 </div>
                 <div>
-                    <p className="text-sm font-semibold leading-tight" style={{ color: '#1C1917' }}>HVG Assistant</p>
-                    <p className="text-xs leading-tight" style={{ color: '#718355' }}>{info.label}</p>
+                    <p className="text-sm font-semibold leading-tight" style={{ color: '#164E63' }}>HVG Assistant</p>
+                    <p className="text-xs leading-tight" style={{ color: '#0891B2' }}>{info.label}</p>
                 </div>
             </div>
 
@@ -50,7 +50,7 @@ export function SidebarHeader({ persona, onClose, onClear }: SidebarHeaderProps)
                 <button
                     type="button"
                     onClick={onClear}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors duration-150 cursor-pointer hover:bg-amber-50"
+                    className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors duration-150 cursor-pointer hover:bg-cyan-50"
                     title="Clear conversation"
                     aria-label="Clear conversation"
                 >
@@ -61,7 +61,7 @@ export function SidebarHeader({ persona, onClose, onClear }: SidebarHeaderProps)
                 <button
                     type="button"
                     onClick={onClose}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors duration-150 cursor-pointer hover:bg-amber-50"
+                    className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors duration-150 cursor-pointer hover:bg-cyan-50"
                     title="Close sidebar"
                     aria-label="Close AI sidebar"
                 >

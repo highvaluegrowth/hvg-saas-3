@@ -8,7 +8,7 @@ interface TableProps {
 export function Table({ children, className }: TableProps) {
   return (
     <div className="overflow-x-auto">
-      <table className={cn('min-w-full divide-y divide-gray-200', className)}>
+      <table className={cn('min-w-full divide-y divide-border', className)}>
         {children}
       </table>
     </div>
@@ -17,7 +17,7 @@ export function Table({ children, className }: TableProps) {
 
 export function TableHeader({ children, className }: TableProps) {
   return (
-    <thead className={cn('bg-gray-50', className)}>
+    <thead className={cn('bg-muted/50', className)}>
       {children}
     </thead>
   );
@@ -25,7 +25,7 @@ export function TableHeader({ children, className }: TableProps) {
 
 export function TableBody({ children, className }: TableProps) {
   return (
-    <tbody className={cn('bg-white divide-y divide-gray-200', className)}>
+    <tbody className={cn('bg-card divide-y divide-border', className)}>
       {children}
     </tbody>
   );
@@ -33,7 +33,7 @@ export function TableBody({ children, className }: TableProps) {
 
 export function TableRow({ children, className }: TableProps) {
   return (
-    <tr className={cn('hover:bg-gray-50 transition-colors', className)}>
+    <tr className={cn('hover:bg-muted/50 transition-colors', className)}>
       {children}
     </tr>
   );
@@ -51,8 +51,8 @@ export function TableCell({ children, className, as = 'td' }: TableCellProps) {
       className={cn(
         'px-6 py-4 text-sm',
         as === 'th'
-          ? 'text-left font-medium text-gray-500 uppercase tracking-wider'
-          : 'text-gray-900',
+          ? 'text-left font-medium text-muted-foreground uppercase tracking-wider'
+          : 'text-foreground',
         className
       )}
     >

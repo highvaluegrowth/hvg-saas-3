@@ -59,7 +59,7 @@ function statusClass(status: IncidentStatus): string {
 }
 
 function typeClass(_type: IncidentType): string {
-  return 'bg-purple-100 text-purple-800';
+  return 'bg-cyan-100 text-cyan-800';
 }
 
 export default function IncidentsPage({ params }: { params: Promise<{ tenantId: string }> }) {
@@ -72,7 +72,7 @@ export default function IncidentsPage({ params }: { params: Promise<{ tenantId: 
 
   const filtered = activeTab === 'all' ? incidents : incidents.filter((i) => i.status === activeTab);
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent" /></div>;
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-4 border-cyan-600 border-t-transparent" /></div>;
   if (error) return <div className="p-4 bg-red-50 text-red-800 rounded-lg">Error: {error}</div>;
 
   return (
@@ -98,15 +98,14 @@ export default function IncidentsPage({ params }: { params: Promise<{ tenantId: 
               <button
                 key={tab.value}
                 onClick={() => setActiveTab(tab.value)}
-                className={`py-2 text-sm font-medium border-b-2 transition-colors ${
-                  activeTab === tab.value
-                    ? 'border-indigo-600 text-indigo-600'
+                className={`py-2 text-sm font-medium border-b-2 transition-colors ${activeTab === tab.value
+                    ? 'border-cyan-600 text-cyan-600'
                     : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }`}
+                  }`}
               >
                 {tab.label}
                 {count > 0 && (
-                  <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${activeTab === tab.value ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-600'}`}>
+                  <span className={`ml-2 px-1.5 py-0.5 rounded-full text-xs ${activeTab === tab.value ? 'bg-cyan-100 text-cyan-700' : 'bg-gray-100 text-gray-600'}`}>
                     {count}
                   </span>
                 )}
@@ -133,7 +132,7 @@ export default function IncidentsPage({ params }: { params: Promise<{ tenantId: 
         <div className="space-y-3">
           {filtered.map((incident: Incident) => (
             <Link key={incident.id} href={`/${tenantId}/incidents/${incident.id}`}>
-              <div className="bg-white rounded-lg border border-gray-200 p-4 hover:border-indigo-300 hover:shadow-sm transition-all">
+              <div className="bg-white rounded-lg border border-gray-200 p-4 hover:border-cyan-300 hover:shadow-sm transition-all">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-semibold text-gray-900 truncate">{incident.title}</h3>

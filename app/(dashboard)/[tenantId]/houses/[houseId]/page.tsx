@@ -171,7 +171,7 @@ function AddRoomModal({
           <Button
             type="submit"
             disabled={submitting}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="bg-cyan-600 hover:bg-cyan-700 text-white"
           >
             {submitting ? 'Adding...' : 'Add Room'}
           </Button>
@@ -270,7 +270,7 @@ function AddBedModal({
           <Button
             type="submit"
             disabled={submitting}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="bg-cyan-600 hover:bg-cyan-700 text-white"
           >
             {submitting ? 'Adding...' : 'Add Bed'}
           </Button>
@@ -381,7 +381,7 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
     return (
       <div className="rounded-md bg-red-50 border border-red-200 p-4">
         <p className="text-sm text-red-700">{error || 'House not found.'}</p>
-        <Link href={`/${tenantId}/houses`} className="mt-2 inline-block text-sm text-indigo-600 hover:underline">
+        <Link href={`/${tenantId}/houses`} className="mt-2 inline-block text-sm text-cyan-600 hover:underline">
           Back to houses
         </Link>
       </div>
@@ -396,7 +396,7 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Link href={`/${tenantId}/houses`} className="text-sm text-gray-500 hover:text-indigo-600">
+            <Link href={`/${tenantId}/houses`} className="text-sm text-gray-500 hover:text-cyan-600">
               Houses
             </Link>
             <span className="text-gray-400">/</span>
@@ -468,7 +468,7 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
           </h2>
           <Button
             onClick={() => setAddRoomOpen(true)}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="bg-cyan-600 hover:bg-cyan-700 text-white"
           >
             Add Room
           </Button>
@@ -479,7 +479,7 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
             <p className="text-gray-500 text-sm">No rooms yet.</p>
             <p className="text-gray-400 text-sm mt-1">Add a room to start tracking beds and occupancy.</p>
             <Button
-              className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white"
+              className="mt-4 bg-cyan-600 hover:bg-cyan-700 text-white"
               onClick={() => setAddRoomOpen(true)}
             >
               Add First Room

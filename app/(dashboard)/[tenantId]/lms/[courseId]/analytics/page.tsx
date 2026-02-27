@@ -8,7 +8,7 @@ export default function CourseAnalyticsPage({ params }: { params: Promise<{ tena
     const stats = [
         { label: 'Total Enrolled', value: '42', color: 'text-blue-600' },
         { label: 'Completion Rate', value: '68%', color: 'text-emerald-600' },
-        { label: 'Average Score', value: '88/100', color: 'text-purple-600' },
+        { label: 'Average Score', value: '88/100', color: 'text-cyan-600' },
     ];
 
     return (
@@ -50,7 +50,7 @@ export default function CourseAnalyticsPage({ params }: { params: Promise<{ tena
                             </tr>
                             <tr className="hover:bg-muted/30">
                                 <td className="px-6 py-4 font-medium">Jane Smith</td>
-                                <td className="px-6 py-4"><span className="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs">In Progress</span></td>
+                                <td className="px-6 py-4"><span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full text-xs">In Progress</span></td>
                                 <td className="px-6 py-4">40%</td>
                                 <td className="px-6 py-4 text-right text-muted-foreground">Yesterday</td>
                             </tr>

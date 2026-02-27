@@ -289,7 +289,7 @@ export default function NewHousePage({ params }: NewHousePageProps) {
               <Button
                 type="submit"
                 disabled={submitting}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                className="bg-cyan-600 hover:bg-cyan-700 text-white"
               >
                 {submitting ? 'Creating...' : 'Create House'}
               </Button>

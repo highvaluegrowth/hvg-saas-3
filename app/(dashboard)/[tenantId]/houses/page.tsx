@@ -43,8 +43,8 @@ function LoadingSkeleton() {
 function EmptyState({ tenantId, userCanManage }: { tenantId: string; userCanManage: boolean }) {
   return (
     <div className="text-center py-16">
-      <div className="mx-auto w-16 h-16 flex items-center justify-center rounded-full bg-indigo-50 mb-4">
-        <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="mx-auto w-16 h-16 flex items-center justify-center rounded-full bg-cyan-50 mb-4">
+        <svg className="w-8 h-8 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
         </svg>
       </div>
@@ -54,7 +54,7 @@ function EmptyState({ tenantId, userCanManage }: { tenantId: string; userCanMana
       </p>
       {userCanManage && (
         <Link href={`/${tenantId}/houses/new`}>
-          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
+          <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">
             Add Your First House
           </Button>
         </Link>
@@ -72,7 +72,7 @@ function HouseRow({ house, tenantId }: { house: House; tenantId: string }) {
       <TableCell>
         <Link
           href={`/${tenantId}/houses/${house.id}`}
-          className="font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
+          className="font-medium text-cyan-600 hover:text-cyan-800 hover:underline"
         >
           {house.name}
         </Link>
@@ -142,7 +142,7 @@ export default function HousesPage({ params }: HousesPageProps) {
         </div>
         {userCanManage && (
           <Link href={`/${tenantId}/houses/new`}>
-            <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
+            <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">
               Add House
             </Button>
           </Link>

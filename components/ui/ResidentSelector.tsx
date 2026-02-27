@@ -87,13 +87,13 @@ export function ResidentSelector({
           {selectedResidents.map((r) => (
             <span
               key={r.id}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-xs font-medium"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-cyan-100 text-cyan-800 text-xs font-medium"
             >
               {r.name}
               <button
                 type="button"
                 onClick={() => toggle(r.id)}
-                className="text-indigo-500 hover:text-indigo-700 ml-0.5 leading-none"
+                className="text-cyan-500 hover:text-cyan-700 ml-0.5 leading-none"
                 aria-label={`Remove ${r.name}`}
               >
                 ×
@@ -108,7 +108,7 @@ export function ResidentSelector({
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
       />
 
       <div className={`border border-gray-200 rounded-md overflow-y-auto ${maxHeight}`}>
@@ -127,7 +127,7 @@ export function ResidentSelector({
                       type="checkbox"
                       checked={checked}
                       onChange={() => toggle(resident.id)}
-                      className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                      className="rounded border-gray-300 text-cyan-600 focus:ring-cyan-500"
                     />
                     <span className="text-sm text-gray-900">{resident.name}</span>
                   </label>

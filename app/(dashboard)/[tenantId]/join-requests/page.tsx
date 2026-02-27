@@ -155,7 +155,7 @@ export default function JoinRequestsPage({ params }: { params: Params }) {
                 </div>
 
                 {!req.residentId && (
-                  <p className="mt-2 text-xs text-amber-600">
+                  <p className="mt-2 text-xs text-emerald-600">
                     ⚠ Link this app user to a resident record before approving.
                   </p>
                 )}

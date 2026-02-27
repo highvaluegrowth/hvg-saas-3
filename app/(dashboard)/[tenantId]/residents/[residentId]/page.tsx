@@ -220,8 +220,8 @@ export default function ResidentProfilePage({ params }: ResidentProfilePageProps
               <InfoRow label="Full Name" value={`${resident.firstName} ${resident.lastName}`} />
               <InfoRow label="Date of Birth" value={`${formatDate(resident.dateOfBirth)} (Age ${age})`} />
               <InfoRow label="Gender" value={resident.gender.replace('_', ' ')} />
-              <InfoRow label="Email" value={<a href={`mailto:${resident.email}`} className="text-indigo-600 hover:underline">{resident.email}</a>} />
-              <InfoRow label="Phone" value={<a href={`tel:${resident.phone}`} className="text-indigo-600 hover:underline">{resident.phone}</a>} />
+              <InfoRow label="Email" value={<a href={`mailto:${resident.email}`} className="text-cyan-600 hover:underline">{resident.email}</a>} />
+              <InfoRow label="Phone" value={<a href={`tel:${resident.phone}`} className="text-cyan-600 hover:underline">{resident.phone}</a>} />
             </dl>
           </Section>
 
@@ -256,7 +256,7 @@ export default function ResidentProfilePage({ params }: ResidentProfilePageProps
             <dl>
               <InfoRow label="Name" value={resident.emergencyContact?.name} />
               <InfoRow label="Phone" value={resident.emergencyContact?.phone ? (
-                <a href={`tel:${resident.emergencyContact.phone}`} className="text-indigo-600 hover:underline">
+                <a href={`tel:${resident.emergencyContact.phone}`} className="text-cyan-600 hover:underline">
                   {resident.emergencyContact.phone}
                 </a>
               ) : '—'} />
@@ -336,7 +336,7 @@ export default function ResidentProfilePage({ params }: ResidentProfilePageProps
                         placeholder="resident@email.com"
                         value={linkEmail}
                         onChange={e => setLinkEmail(e.target.value)}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
                         required
                       />
                       <Button

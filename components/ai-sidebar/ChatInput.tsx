@@ -60,21 +60,21 @@ export function ChatInput({ onSend, isLoading, userRole }: ChatInputProps) {
     }, [value]);
 
     return (
-        <div className="border-t p-3 relative" style={{ borderColor: 'rgba(113,131,85,0.15)', background: '#FDFBF7' }}>
+        <div className="border-t p-3 relative" style={{ borderColor: 'rgba(8,145,178,0.15)', background: 'transparent' }}>
             {/* Slash command autocomplete */}
             {showMenu && (
                 <div
                     className="absolute bottom-full left-3 right-3 mb-1 rounded-xl overflow-hidden shadow-lg z-10"
-                    style={{ background: 'white', border: '1px solid rgba(245,158,11,0.2)' }}
+                    style={{ background: 'white', border: '1px solid rgba(8,145,178,0.2)' }}
                 >
                     {suggestions.map((cmd) => (
                         <button
                             key={cmd.command}
                             type="button"
                             onClick={() => selectCommand(cmd.command)}
-                            className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors duration-150 cursor-pointer hover:bg-amber-50"
+                            className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors duration-150 cursor-pointer hover:bg-cyan-50"
                         >
-                            <span className="font-mono text-xs font-semibold w-24 shrink-0" style={{ color: '#F59E0B' }}>{cmd.command}</span>
+                            <span className="font-mono text-xs font-semibold w-24 shrink-0" style={{ color: '#0891B2' }}>{cmd.command}</span>
                             <span className="text-xs" style={{ color: '#78716C' }}>{cmd.description}</span>
                         </button>
                     ))}
@@ -92,13 +92,13 @@ export function ChatInput({ onSend, isLoading, userRole }: ChatInputProps) {
                     className="flex-1 resize-none rounded-xl px-3 py-2.5 text-sm outline-none transition-all duration-200"
                     style={{
                         background: 'white',
-                        border: '1px solid rgba(113,131,85,0.2)',
-                        color: '#1C1917',
+                        border: '1px solid rgba(8,145,178,0.2)',
+                        color: '#164E63',
                         minHeight: '40px',
                         maxHeight: '120px',
                     }}
-                    onFocus={(e) => (e.target.style.borderColor = '#F59E0B')}
-                    onBlur={(e) => (e.target.style.borderColor = 'rgba(113,131,85,0.2)')}
+                    onFocus={(e) => (e.target.style.borderColor = '#0891B2')}
+                    onBlur={(e) => (e.target.style.borderColor = 'rgba(8,145,178,0.2)')}
                     disabled={isLoading}
                 />
                 <button
@@ -106,7 +106,7 @@ export function ChatInput({ onSend, isLoading, userRole }: ChatInputProps) {
                     onClick={submit}
                     disabled={isLoading || !value.trim()}
                     className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-40 hover:opacity-90"
-                    style={{ background: value.trim() ? '#F59E0B' : 'rgba(245,158,11,0.3)' }}
+                    style={{ background: value.trim() ? '#0891B2' : 'rgba(8,145,178,0.3)' }}
                     aria-label="Send message"
                 >
                     <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

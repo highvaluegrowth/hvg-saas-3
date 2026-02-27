@@ -246,7 +246,7 @@ export default function StaffDetailPage({ params }: StaffDetailPageProps) {
                 <li key={houseId}>
                   <Link
                     href={`/${tenantId}/houses/${houseId}`}
-                    className="text-sm text-indigo-600 hover:text-indigo-800 hover:underline font-mono"
+                    className="text-sm text-cyan-600 hover:text-cyan-800 hover:underline font-mono"
                   >
                     {houseId}
                   </Link>

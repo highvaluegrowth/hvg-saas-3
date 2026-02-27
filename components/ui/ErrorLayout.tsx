@@ -22,7 +22,7 @@ export function ErrorLayout({
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="max-w-md w-full text-center space-y-6">
         {statusCode && (
-          <div className="text-6xl font-bold text-indigo-600">{statusCode}</div>
+          <div className="text-6xl font-bold text-cyan-600">{statusCode}</div>
         )}
 
         {icon && <div className="flex justify-center">{icon}</div>}

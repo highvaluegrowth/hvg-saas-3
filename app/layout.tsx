@@ -1,8 +1,17 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
+import { Figtree, Noto_Sans } from 'next/font/google';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+const figtree = Figtree({
+  subsets: ['latin'],
+  variable: '--font-figtree'
+});
+
+const notoSans = Noto_Sans({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-noto'
+});
 
 export const metadata: Metadata = {
   title: 'High Value Growth',
@@ -16,7 +25,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={`${notoSans.variable} ${figtree.variable} font-sans`}>{children}</body>
     </html>
   );
 }

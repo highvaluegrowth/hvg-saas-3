@@ -52,15 +52,15 @@ const TYPE_BADGE_CLASSES: Record<ProgramEventType, string> = {
   group_meeting: '',
   house_meeting: '',
   class: '',
-  course: 'bg-indigo-100 text-indigo-800',
+  course: 'bg-cyan-100 text-cyan-800',
   na_meeting: 'bg-blue-100 text-blue-800',
   aa_meeting: 'bg-blue-100 text-blue-800',
-  church: 'bg-purple-100 text-purple-800',
-  bible_study: 'bg-purple-100 text-purple-800',
+  church: 'bg-cyan-100 text-cyan-800',
+  bible_study: 'bg-emerald-100 text-emerald-800',
   therapy_session: '',
   job_training: 'bg-teal-100 text-teal-800',
   community_service: 'bg-teal-100 text-teal-800',
-  outing: 'bg-orange-100 text-orange-800',
+  outing: 'bg-cyan-100 text-cyan-800',
   other: '',
 };
 
@@ -166,7 +166,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
     return (
       <div className="flex items-center justify-center py-16">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent"></div>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-cyan-600 border-t-transparent"></div>
           <p className="mt-4 text-gray-600">Loading event...</p>
         </div>
       </div>

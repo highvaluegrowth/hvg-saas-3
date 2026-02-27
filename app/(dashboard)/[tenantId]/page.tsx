@@ -23,7 +23,7 @@ interface StatCardProps {
 function StatCard({ label, value, icon, href, color }: StatCardProps) {
   return (
     <Link href={href} className="block group">
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:border-indigo-300 hover:shadow-md transition-all">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:border-cyan-300 hover:shadow-md transition-all">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-gray-600">{label}</p>
@@ -102,7 +102,7 @@ export default function DashboardPage({ params }: DashboardPageProps) {
           value={statsLoading ? '—' : stats.houseCount}
           icon={<HouseIcon />}
           href={`/${tenantId}/houses`}
-          color="bg-indigo-50 text-indigo-600"
+          color="bg-cyan-50 text-cyan-600"
         />
         <StatCard
           label="Active Residents"
@@ -123,7 +123,7 @@ export default function DashboardPage({ params }: DashboardPageProps) {
           value={statsLoading ? '—' : stats.upcomingEventCount}
           icon={<EventsIcon />}
           href={`/${tenantId}/events`}
-          color="bg-purple-50 text-purple-600"
+          color="bg-cyan-50 text-cyan-600"
         />
       </div>
 
@@ -134,7 +134,7 @@ export default function DashboardPage({ params }: DashboardPageProps) {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Upcoming Events</CardTitle>
               <Link href={`/${tenantId}/events`}>
-                <Button variant="ghost" size="sm" className="text-indigo-600">
+                <Button variant="ghost" size="sm" className="text-cyan-600">
                   View all
                 </Button>
               </Link>
@@ -168,7 +168,7 @@ export default function DashboardPage({ params }: DashboardPageProps) {
                       className="flex items-center justify-between py-3 hover:bg-gray-50 -mx-4 px-4 rounded transition-colors"
                     >
                       <div className="flex items-center space-x-3">
-                        <div className="w-2 h-2 rounded-full bg-indigo-500 flex-shrink-0" />
+                        <div className="w-2 h-2 rounded-full bg-cyan-500 flex-shrink-0" />
                         <div>
                           <p className="text-sm font-medium text-gray-900">{event.title}</p>
                           <p className="text-xs text-gray-500">{event.type.replace('_', ' ')}</p>
@@ -194,7 +194,7 @@ export default function DashboardPage({ params }: DashboardPageProps) {
             <CardContent className="space-y-3">
               <Link href={`/${tenantId}/houses/new`} className="block">
                 <Button variant="outline" className="w-full justify-start space-x-2">
-                  <svg className="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                   <span>Add House</span>
@@ -218,7 +218,7 @@ export default function DashboardPage({ params }: DashboardPageProps) {
               </Link>
               <Link href={`/${tenantId}/events/new`} className="block">
                 <Button variant="outline" className="w-full justify-start space-x-2">
-                  <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
                   <span>Schedule Event</span>
@@ -229,12 +229,12 @@ export default function DashboardPage({ params }: DashboardPageProps) {
 
           {/* Getting started / onboarding hint */}
           {!statsLoading && stats.houseCount === 0 && (
-            <Card className="mt-4 border-indigo-200 bg-indigo-50">
+            <Card className="mt-4 border-cyan-200 bg-cyan-50">
               <CardHeader>
-                <CardTitle className="text-indigo-900 text-sm">Getting Started</CardTitle>
+                <CardTitle className="text-cyan-900 text-sm">Getting Started</CardTitle>
               </CardHeader>
               <CardContent>
-                <ol className="list-decimal list-inside space-y-1 text-sm text-indigo-800">
+                <ol className="list-decimal list-inside space-y-1 text-sm text-cyan-800">
                   <li>Add a house</li>
                   <li>Invite staff members</li>
                   <li>Enroll residents</li>

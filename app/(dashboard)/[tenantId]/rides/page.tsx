@@ -12,7 +12,7 @@ import type { UserRole } from '@/features/auth/types/auth.types';
 const STATUS_COLORS: Record<RideStatus, string> = {
   requested: 'bg-blue-100 text-blue-800',
   approved: 'bg-green-100 text-green-800',
-  assigned: 'bg-purple-100 text-purple-800',
+  assigned: 'bg-cyan-100 text-cyan-800',
   in_progress: 'bg-yellow-100 text-yellow-800',
   completed: 'bg-gray-100 text-gray-800',
   cancelled: 'bg-red-100 text-red-800',
@@ -84,11 +84,10 @@ export default function RidesPage({
           <button
             key={f.value}
             onClick={() => setFilter(f.value)}
-            className={`px-3 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
-              filter === f.value
+            className={`px-3 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${filter === f.value
                 ? 'border-blue-600 text-blue-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
+              }`}
           >
             {f.label}
             {f.value !== 'all' && (

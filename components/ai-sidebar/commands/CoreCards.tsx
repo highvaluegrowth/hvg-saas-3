@@ -9,8 +9,8 @@ type RideData = { id: string; destination: string; status: string; scheduledAt?:
 export function EventsMiniCard({ events }: { events: EventData[] }) {
     if (!events || events.length === 0) return <NoData message="No upcoming events." />;
     return (
-        <div className="flex flex-col gap-2 p-3 bg-white rounded-xl border border-amber-200/50 shadow-sm w-full">
-            <div className="flex items-center gap-2 text-amber-600 font-semibold text-xs uppercase tracking-wider mb-1">
+        <div className="flex flex-col gap-2 p-3 bg-white rounded-xl border border-emerald-200/50 shadow-sm w-full">
+            <div className="flex items-center gap-2 text-emerald-600 font-semibold text-xs uppercase tracking-wider mb-1">
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
                 </svg>
@@ -45,7 +45,7 @@ export function ChoresMiniCard({ chores }: { chores: ChoreData[] }) {
             </div>
             {chores.map(c => (
                 <label key={c.id} className="flex flex-start gap-2 text-sm items-start cursor-pointer hover:bg-stone-50 p-1 -mx-1 rounded">
-                    <input type="checkbox" className="mt-1 rounded text-amber-500 focus:ring-amber-500 border-stone-300 w-3.5 h-3.5" />
+                    <input type="checkbox" className="mt-1 rounded text-emerald-500 focus:ring-emerald-500 border-stone-300 w-3.5 h-3.5" />
                     <span className="font-medium text-stone-800 pt-0.5">{c.title}</span>
                     {c.priority === 'high' && <span className="ml-auto mt-0.5 text-[10px] bg-red-100 text-red-700 px-1.5 py-0.5 rounded-full font-bold">HIGH</span>}
                 </label>
@@ -59,7 +59,7 @@ export function SobrietyStreakCard({ days, years, months }: { days: number; year
     if (days === undefined) return null;
 
     return (
-        <div className="flex items-center gap-4 p-4 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl shadow-md text-white w-full">
+        <div className="flex items-center gap-4 p-4 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-md text-white w-full">
             <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center shrink-0">
                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.362 5.214A8.252 8.252 0 0 1 12 21 8.25 8.25 0 0 1 6.038 7.048 8.287 8.287 0 0 0 9 9.6a8.983 8.983 0 0 1 3.361-6.867 8.21 8.21 0 0 0 3 2.48Z" />

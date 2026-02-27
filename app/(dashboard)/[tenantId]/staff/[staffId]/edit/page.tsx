@@ -347,7 +347,7 @@ export default function EditStaffPage({ params }: EditStaffPageProps) {
                       size="sm"
                       onClick={() => enableDay(key)}
                       disabled={submitting}
-                      className="text-indigo-600 border-indigo-300 hover:bg-indigo-50"
+                      className="text-cyan-600 border-cyan-300 hover:bg-cyan-50"
                     >
                       + Add shift
                     </Button>
@@ -358,7 +358,7 @@ export default function EditStaffPage({ params }: EditStaffPageProps) {
                         value={shift.start}
                         onChange={(e) => setShiftField(key, 'start', e.target.value)}
                         disabled={submitting}
-                        className="block px-3 py-1.5 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="block px-3 py-1.5 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
                       />
                       <span className="text-gray-500 text-sm">to</span>
                       <input
@@ -366,7 +366,7 @@ export default function EditStaffPage({ params }: EditStaffPageProps) {
                         value={shift.end}
                         onChange={(e) => setShiftField(key, 'end', e.target.value)}
                         disabled={submitting}
-                        className="block px-3 py-1.5 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        className="block px-3 py-1.5 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
                       />
                       <button
                         type="button"
@@ -400,7 +400,7 @@ export default function EditStaffPage({ params }: EditStaffPageProps) {
           <Button
             type="submit"
             disabled={submitting}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="bg-cyan-600 hover:bg-cyan-700 text-white"
           >
             {submitting ? 'Saving...' : 'Save Changes'}
           </Button>

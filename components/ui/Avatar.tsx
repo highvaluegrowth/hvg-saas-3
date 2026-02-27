@@ -29,7 +29,7 @@ export function Avatar({ src, alt, fallback, size = 'md', className }: AvatarPro
   return (
     <div
       className={cn(
-        'relative inline-flex items-center justify-center rounded-full overflow-hidden bg-indigo-100',
+        'relative inline-flex items-center justify-center rounded-full overflow-hidden bg-cyan-100',
         sizeStyles[size],
         className
       )}
@@ -41,7 +41,7 @@ export function Avatar({ src, alt, fallback, size = 'md', className }: AvatarPro
           className="w-full h-full object-cover"
         />
       ) : (
-        <span className="font-medium text-indigo-600">
+        <span className="font-medium text-cyan-600">
           {getInitials(fallback || alt)}
         </span>
       )}

@@ -79,18 +79,18 @@ export default function NewIncidentPage({ params }: { params: Promise<{ tenantId
           <CardContent className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
-              <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="Brief description of the incident" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="Brief description of the incident" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500" />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} required placeholder="Detailed description of what happened..." className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+              <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} required placeholder="Detailed description of what happened..." className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500" />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                <select value={type} onChange={(e) => setType(e.target.value)} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <select value={type} onChange={(e) => setType(e.target.value)} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500">
                   <option value="medical">Medical</option>
                   <option value="behavioral">Behavioral</option>
                   <option value="property">Property</option>
@@ -100,7 +100,7 @@ export default function NewIncidentPage({ params }: { params: Promise<{ tenantId
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Severity</label>
-                <select value={severity} onChange={(e) => setSeverity(e.target.value)} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <select value={severity} onChange={(e) => setSeverity(e.target.value)} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500">
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
@@ -112,14 +112,14 @@ export default function NewIncidentPage({ params }: { params: Promise<{ tenantId
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">House (optional)</label>
-                <select value={houseId} onChange={(e) => setHouseId(e.target.value)} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <select value={houseId} onChange={(e) => setHouseId(e.target.value)} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500">
                   <option value="">— Select house —</option>
                   {houses.map((h) => <option key={h.id} value={h.id}>{h.name}</option>)}
                 </select>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Date &amp; Time</label>
-                <input type="datetime-local" value={reportedAt} onChange={(e) => setReportedAt(e.target.value)} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <input type="datetime-local" value={reportedAt} onChange={(e) => setReportedAt(e.target.value)} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500" />
               </div>
             </div>
           </CardContent>

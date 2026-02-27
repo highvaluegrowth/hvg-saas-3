@@ -106,7 +106,7 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ tenan
     }
   }
 
-  if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent" /></div>;
+  if (loading) return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-4 border-cyan-600 border-t-transparent" /></div>;
   if (error || !incident) return <div className="p-4 bg-red-50 text-red-800 rounded-lg">{error || 'Incident not found'}</div>;
 
   return (
@@ -116,7 +116,7 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ tenan
           <button onClick={() => router.push(`/${tenantId}/incidents`)} className="text-sm text-gray-500 hover:text-gray-700 mb-2">← Incidents</button>
           <h1 className="text-2xl font-bold text-gray-900">{incident.title}</h1>
           <div className="flex items-center flex-wrap gap-2 mt-2">
-            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">{TYPE_LABELS[incident.type]}</span>
+            <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800">{TYPE_LABELS[incident.type]}</span>
             <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${severityClass(incident.severity)}`}>{SEVERITY_LABELS[incident.severity]}</span>
             <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusClass(incident.status)}`}>{STATUS_LABELS[incident.status]}</span>
           </div>
@@ -141,7 +141,7 @@ export default function IncidentDetailPage({ params }: { params: Promise<{ tenan
           <CardContent className="space-y-3">
             {resolvingStatus === 'resolved' ? (
               <div className="space-y-3">
-                <textarea value={resolution} onChange={(e) => setResolution(e.target.value)} rows={3} placeholder="Describe how this was resolved..." className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
+                <textarea value={resolution} onChange={(e) => setResolution(e.target.value)} rows={3} placeholder="Describe how this was resolved..." className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500" />
                 <div className="flex gap-2">
                   <Button onClick={() => updateStatus('resolved', resolution)} className="bg-green-600 hover:bg-green-700 text-white">Confirm Resolved</Button>
                   <Button variant="outline" onClick={() => setResolvingStatus(null)}>Cancel</Button>

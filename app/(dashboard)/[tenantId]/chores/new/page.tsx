@@ -76,7 +76,7 @@ export default function NewChorePage({ params }: { params: Promise<{ tenantId: s
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Clean kitchen, Mow lawn"
                 required
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
               />
             </div>
 
@@ -87,7 +87,7 @@ export default function NewChorePage({ params }: { params: Promise<{ tenantId: s
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
                 placeholder="Optional details..."
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
               />
             </div>
 
@@ -97,7 +97,7 @@ export default function NewChorePage({ params }: { params: Promise<{ tenantId: s
                 <select
                   value={priority}
                   onChange={(e) => setPriority(e.target.value as 'low' | 'medium' | 'high')}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 >
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
@@ -110,7 +110,7 @@ export default function NewChorePage({ params }: { params: Promise<{ tenantId: s
                   type="date"
                   value={dueDate}
                   onChange={(e) => setDueDate(e.target.value)}
-                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
               </div>
             </div>
@@ -134,7 +134,7 @@ export default function NewChorePage({ params }: { params: Promise<{ tenantId: s
           <Button type="button" variant="outline" onClick={() => router.push(`/${tenantId}/chores`)}>
             Cancel
           </Button>
-          <Button type="submit" disabled={submitting} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+          <Button type="submit" disabled={submitting} className="bg-cyan-600 hover:bg-cyan-700 text-white">
             {submitting ? 'Creating...' : 'Create Chore'}
           </Button>
         </div>

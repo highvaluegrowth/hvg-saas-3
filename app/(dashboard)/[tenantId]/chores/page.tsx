@@ -125,7 +125,7 @@ export default function ChoresPage({ params }: { params: Promise<{ tenantId: str
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent" />
+        <div className="animate-spin rounded-full h-8 w-8 border-4 border-cyan-600 border-t-transparent" />
       </div>
     );
   }
@@ -146,20 +146,20 @@ export default function ChoresPage({ params }: { params: Promise<{ tenantId: str
           <div className="flex rounded-md border border-gray-300 overflow-hidden">
             <button
               onClick={() => setView('list')}
-              className={`px-3 py-1.5 text-sm font-medium ${view === 'list' ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-50'}`}
+              className={`px-3 py-1.5 text-sm font-medium ${view === 'list' ? 'bg-cyan-600 text-white' : 'text-gray-700 hover:bg-gray-50'}`}
             >
               List
             </button>
             <button
               onClick={() => setView('kanban')}
-              className={`px-3 py-1.5 text-sm font-medium ${view === 'kanban' ? 'bg-indigo-600 text-white' : 'text-gray-700 hover:bg-gray-50'}`}
+              className={`px-3 py-1.5 text-sm font-medium ${view === 'kanban' ? 'bg-cyan-600 text-white' : 'text-gray-700 hover:bg-gray-50'}`}
             >
               Board
             </button>
           </div>
           {userCanWrite && (
             <Link href={`/${tenantId}/chores/new`}>
-              <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">Add Chore</Button>
+              <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">Add Chore</Button>
             </Link>
           )}
         </div>
@@ -194,7 +194,7 @@ export default function ChoresPage({ params }: { params: Promise<{ tenantId: str
                 {chores.map((chore) => (
                   <tr key={chore.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4">
-                      <Link href={`/${tenantId}/chores/${chore.id}`} className="text-sm font-medium text-gray-900 hover:text-indigo-600">
+                      <Link href={`/${tenantId}/chores/${chore.id}`} className="text-sm font-medium text-gray-900 hover:text-cyan-600">
                         {chore.title}
                       </Link>
                     </td>

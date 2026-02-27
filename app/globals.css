@@ -3,28 +3,56 @@
 @source "../components";
 @source "../features";
 
+@theme {
+  --color-primary: #0891B2;
+  /* Cyan-600 */
+  --color-secondary: #059669;
+  /* Emerald-600 */
+  --color-background: #F8FAFC;
+  /* Cool Background */
+
+  --font-sans: var(--font-noto), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-heading: var(--font-figtree), ui-sans-serif, system-ui, sans-serif;
+}
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --background: 210 40% 98%;
+    /* #F8FAFC */
+    --foreground: 196 64% 24%;
+    /* #164E63 Cyan-900 */
+
+    --primary: 192 90% 36%;
+    /* #0891B2 */
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 161 94% 30%;
+    /* #059669 */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 193 82% 96%;
+    /* #CFFAFE */
+    --muted-foreground: 194 58% 39%;
+    /* #155E75 */
+
+    --accent: 192 90% 36%;
+    --accent-foreground: 0 0% 100%;
+
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
+
+    --border: 193 82% 90%;
+    /* #A5F3FC */
+    --input: 193 82% 90%;
+    --ring: 192 90% 36%;
+
+    --radius: 0.75rem;
+
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 196 64% 24%;
+
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 196 64% 24%;
   }
 }
 
@@ -32,8 +60,23 @@
   * {
     border-color: hsl(var(--border));
   }
+
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
+  }
+}
+
+/* Glass panel utility for UI alignment */
+@layer utilities {
+  .glass-panel {
+    background: rgba(8, 145, 178, 0.08);
+    /* Cyan-600 with 8% opacity */
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(8, 145, 178, 0.2);
+    /* Cyan-600 with 20% opacity */
+    box-shadow: 0 8px 24px rgba(5, 150, 105, 0.05);
+    /* Soft emerald shadow */
+    border-radius: 12px;
   }
 }

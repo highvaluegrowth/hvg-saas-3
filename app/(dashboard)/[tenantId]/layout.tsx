@@ -20,7 +20,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
   const { user, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [tenantName, setTenantName] = useState<string>('');
-  const { isOpen } = useAISidebarStore();
+  const { isOpen, sidebarWidth } = useAISidebarStore();
 
   useEffect(() => {
     if (!loading) {
@@ -69,7 +69,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-indigo-600 border-t-transparent"></div>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-cyan-600 border-t-transparent"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
@@ -90,7 +90,12 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
       />
 
       <div
-        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 lg:pl-64 ${isOpen ? 'lg:pr-80' : ''}`}
+        className={`flex-1 flex flex-col min-h-screen lg:pl-64`}
+        style={
+          isOpen && typeof window !== 'undefined' && window.innerWidth >= 1024
+            ? { paddingRight: `${sidebarWidth}px`, transition: 'padding-right 0.3s ease' }
+            : { transition: 'padding-right 0.3s ease' }
+        }
       >
         <Header
           tenantName={tenantName}

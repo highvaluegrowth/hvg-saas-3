@@ -225,7 +225,7 @@ export default function EditHousePage({ params }: EditHousePageProps) {
     return (
       <div className="rounded-md bg-red-50 border border-red-200 p-4">
         <p className="text-sm text-red-700">{loadError}</p>
-        <Link href={`/${tenantId}/houses`} className="mt-2 inline-block text-sm text-indigo-600 hover:underline">
+        <Link href={`/${tenantId}/houses`} className="mt-2 inline-block text-sm text-cyan-600 hover:underline">
           Back to houses
         </Link>
       </div>
@@ -237,11 +237,11 @@ export default function EditHousePage({ params }: EditHousePageProps) {
       {/* Page header */}
       <div>
         <div className="flex items-center gap-2 mb-1">
-          <Link href={`/${tenantId}/houses`} className="text-sm text-gray-500 hover:text-indigo-600">
+          <Link href={`/${tenantId}/houses`} className="text-sm text-gray-500 hover:text-cyan-600">
             Houses
           </Link>
           <span className="text-gray-400">/</span>
-          <Link href={`/${tenantId}/houses/${houseId}`} className="text-sm text-gray-500 hover:text-indigo-600">
+          <Link href={`/${tenantId}/houses/${houseId}`} className="text-sm text-gray-500 hover:text-cyan-600">
             {name}
           </Link>
           <span className="text-gray-400">/</span>
@@ -381,7 +381,7 @@ export default function EditHousePage({ params }: EditHousePageProps) {
               <Button
                 type="submit"
                 disabled={submitting}
-                className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                className="bg-cyan-600 hover:bg-cyan-700 text-white"
               >
                 {submitting ? 'Saving...' : 'Save Changes'}
               </Button>

@@ -14,6 +14,7 @@ export interface ChatMessage {
 
 interface AISidebarState {
     isOpen: boolean;
+    sidebarWidth: number;
     persona: AgentPersona;
     messages: ChatMessage[];
     conversationId: string | null;
@@ -22,6 +23,7 @@ interface AISidebarState {
     // Actions
     setOpen: (open: boolean) => void;
     toggleOpen: () => void;
+    setSidebarWidth: (width: number) => void;
     setPersona: (persona: AgentPersona) => void;
     addMessage: (msg: Omit<ChatMessage, 'id' | 'createdAt'>) => ChatMessage;
     setLoading: (loading: boolean) => void;
@@ -34,6 +36,7 @@ export const useAISidebarStore = create<AISidebarState>()(
     persist(
         (set, get) => ({
             isOpen: false,
+            sidebarWidth: 320,
             persona: 'recovery',
             messages: [],
             conversationId: null,
@@ -41,6 +44,7 @@ export const useAISidebarStore = create<AISidebarState>()(
 
             setOpen: (open) => set({ isOpen: open }),
             toggleOpen: () => set((s) => ({ isOpen: !s.isOpen })),
+            setSidebarWidth: (width) => set({ sidebarWidth: width }),
 
             setPersona: (persona) => set({ persona }),
 
@@ -64,10 +68,11 @@ export const useAISidebarStore = create<AISidebarState>()(
         }),
         {
             name: 'hvg-ai-sidebar',
-            // Only persist conversationId + isOpen — messages rehydrate from Firestore
+            // Only persist conversationId + isOpen + sidebarWidth
             partialize: (state) => ({
                 conversationId: state.conversationId,
                 isOpen: state.isOpen,
+                sidebarWidth: state.sidebarWidth,
             }),
         }
     )

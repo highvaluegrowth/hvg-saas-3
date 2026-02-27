@@ -73,7 +73,7 @@ function Field({
   rows?: number;
   options?: { value: string; label: string }[];
 }) {
-  const cls = 'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500';
+  const cls = 'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500';
   return (
     <div>
       <label className="block text-sm font-medium text-gray-700">
@@ -116,15 +116,15 @@ function StepIndicator({ steps, current }: { steps: typeof STEPS; current: Step 
         return (
           <React.Fragment key={step.id}>
             {idx > 0 && (
-              <div className={`flex-1 h-0.5 ${done ? 'bg-indigo-600' : 'bg-gray-200'}`} />
+              <div className={`flex-1 h-0.5 ${done ? 'bg-cyan-600' : 'bg-gray-200'}`} />
             )}
             <div className="flex items-center space-x-2 shrink-0">
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                   active
-                    ? 'bg-indigo-600 text-white'
+                    ? 'bg-cyan-600 text-white'
                     : done
-                    ? 'bg-indigo-600 text-white'
+                    ? 'bg-cyan-600 text-white'
                     : 'bg-gray-200 text-gray-600'
                 }`}
               >
@@ -136,7 +136,7 @@ function StepIndicator({ steps, current }: { steps: typeof STEPS; current: Step 
                   idx + 1
                 )}
               </div>
-              <span className={`text-sm font-medium ${active ? 'text-indigo-600' : done ? 'text-gray-700' : 'text-gray-400'}`}>
+              <span className={`text-sm font-medium ${active ? 'text-cyan-600' : done ? 'text-gray-700' : 'text-gray-400'}`}>
                 {step.label}
               </span>
             </div>
@@ -322,14 +322,14 @@ export default function NewResidentPage({ params }: NewResidentPageProps) {
           {step === 'identity' ? 'Cancel' : 'Back'}
         </Button>
         {step !== 'emergency' ? (
-          <Button onClick={next} className="bg-indigo-600 hover:bg-indigo-700 text-white">
+          <Button onClick={next} className="bg-cyan-600 hover:bg-cyan-700 text-white">
             Next
           </Button>
         ) : (
           <Button
             onClick={submit}
             disabled={submitting}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="bg-cyan-600 hover:bg-cyan-700 text-white"
           >
             {submitting ? 'Enrolling...' : 'Enroll Resident'}
           </Button>
