@@ -87,7 +87,7 @@ export function Sidebar({ tenantId, isOpen = true, onClose }: SidebarProps) {
                 >
                   {user.tenantIds.map((tid) => (
                     <option key={tid} value={tid}>
-                      Tenant: {tid}
+                      {tid}
                     </option>
                   ))}
                 </select>

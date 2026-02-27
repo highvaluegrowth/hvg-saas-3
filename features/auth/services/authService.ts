@@ -1,6 +1,8 @@
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signInWithPopup,
+  GoogleAuthProvider,
   signOut as firebaseSignOut,
   UserCredential,
 } from 'firebase/auth';
@@ -36,6 +38,21 @@ export const authService = {
     } catch (error: any) {
       throw new AuthError(
         error.message || 'Login failed',
+        error.code
+      );
+    }
+  },
+
+  async loginWithGoogle(): Promise<UserCredential> {
+    try {
+      const provider = new GoogleAuthProvider();
+      // Optional: provider.addScope('profile');
+      // Optional: provider.addScope('email');
+      const userCredential = await signInWithPopup(auth, provider);
+      return userCredential;
+    } catch (error: any) {
+      throw new AuthError(
+        error.message || 'Google login failed',
         error.code
       );
     }

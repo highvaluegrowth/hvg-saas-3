@@ -110,7 +110,7 @@ export default function OnboardingDetailPage({ params }: { params: Promise<{ ten
                     <h2 className="text-2xl font-bold text-slate-900">Application Review</h2>
                 </div>
                 <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${application.status === 'pending' ? 'bg-amber-100 text-amber-800' :
-                        application.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
+                    application.status === 'approved' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'
                     }`}>
                     {application.status.toUpperCase()}
                 </span>
@@ -198,7 +198,7 @@ export default function OnboardingDetailPage({ params }: { params: Promise<{ ten
                     </Button>
                     <Button
                         type="button"
-                        variant="primary"
+                        variant="default"
                         disabled={processing}
                         onClick={() => handleStatusUpdate('approved')}
                     >

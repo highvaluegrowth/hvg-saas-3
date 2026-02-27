@@ -54,13 +54,24 @@ export function MarketingNavbar() {
                 </div>
 
                 {/* CTA */}
-                <a
-                    href="#demo"
-                    className="hidden md:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200 cursor-pointer hover:opacity-90 hover:-translate-y-px"
-                    style={{ background: '#059669' }}
-                >
-                    Schedule a Demo
-                </a>
+                <div className="hidden md:flex items-center gap-4">
+                    <Link
+                        href="/login"
+                        className="text-sm font-semibold transition-colors duration-200 cursor-pointer"
+                        style={{ color: '#164E63' }}
+                        onMouseEnter={(e) => ((e.target as HTMLElement).style.color = '#0891B2')}
+                        onMouseLeave={(e) => ((e.target as HTMLElement).style.color = '#164E63')}
+                    >
+                        Sign In
+                    </Link>
+                    <a
+                        href="#demo"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200 cursor-pointer hover:opacity-90 hover:-translate-y-px"
+                        style={{ background: '#059669' }}
+                    >
+                        Schedule a Demo
+                    </a>
+                </div>
 
                 {/* Mobile hamburger placeholder */}
                 <button className="md:hidden p-2 rounded-lg cursor-pointer" style={{ color: '#0891B2' }}>

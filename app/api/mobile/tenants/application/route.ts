@@ -17,12 +17,17 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Must have manage_house preference' }, { status: 403 });
         }
 
+        const body = await request.json().catch(() => ({}));
+        const reqName = body.name || 'Draft Application';
+        const rawSlug = reqName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+        const slug = `${rawSlug}-${Math.random().toString(36).substring(2, 7)}`;
+
         const newDoc = adminDb.collection('tenants').doc();
         const applicationId = newDoc.id;
 
         await newDoc.set({
-            name: 'Draft Application',
-            slug: applicationId,
+            name: reqName,
+            slug: slug,
             status: 'pending', // Use pending to trigger the banner or use 'draft' if we want them to finish the wizard. Let's start with draft.
             ownerId: uid,
             createdAt: new Date(),

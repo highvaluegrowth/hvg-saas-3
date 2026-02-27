@@ -60,13 +60,14 @@ export default function CreateTenantPage() {
         throw new Error(data.error || 'Failed to create tenant');
       }
 
-      // Get tenantId directly from API response - don't wait for claim propagation
+      // Get tenantId directly from API response
       const newTenantId = data.tenant.id;
 
-      // Attempt token refresh in background (best-effort, don't block navigation)
-      refreshToken().catch(() => {});
+      // Wait for the token to be refreshed so useAuth has the updated claims
+      // This prevents the dashboard layout from redirecting back to /create-tenant
+      await refreshToken();
 
-      // Navigate immediately using the known tenant ID
+      // Navigate using the known tenant ID
       router.push(`/${newTenantId}`);
     } catch (err: any) {
       console.error('Error creating tenant:', err);

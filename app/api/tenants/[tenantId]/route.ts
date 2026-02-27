@@ -14,7 +14,13 @@ export async function GET(
 
     const { tenantId } = await params;
 
-    const tenant = await tenantService.getById(tenantId);
+    let tenant = await tenantService.getById(tenantId);
+
+    // If not found by ID, try looking up by slug for vanity URLs
+    if (!tenant) {
+      tenant = await tenantService.getBySlug(tenantId);
+    }
+
     if (!tenant) {
       return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
     }
@@ -44,7 +50,11 @@ export async function PATCH(
     const { tenantId } = await params;
     const updates = await request.json();
 
-    const tenant = await tenantService.getById(tenantId);
+    let tenant = await tenantService.getById(tenantId);
+    if (!tenant) {
+      tenant = await tenantService.getBySlug(tenantId);
+    }
+
     if (!tenant) {
       return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
     }
