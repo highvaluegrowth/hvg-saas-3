@@ -10,7 +10,7 @@ export interface Tenant {
   updatedAt: Date;
 }
 
-export type TenantStatus = 'active' | 'suspended' | 'trial' | 'inactive';
+export type TenantStatus = 'active' | 'suspended' | 'trial' | 'inactive' | 'pending' | 'approved' | 'rejected';
 
 export interface TenantSettings {
   allowMultipleHouses: boolean;

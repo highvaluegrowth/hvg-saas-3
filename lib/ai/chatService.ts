@@ -1,6 +1,7 @@
 import { ChatMessage } from '@/lib/stores/aiSidebarStore';
 import { slashCommandToPrompt } from '@/lib/ai/commandParser';
 import { getRouteContext } from '@/lib/ai/routeContextMap';
+import { authService } from '@/features/auth/services/authService';
 
 interface SendChatParams {
     message: string;
@@ -32,10 +33,15 @@ export async function sendChatMessage({ message, conversationId, pathname, userR
     }
 
     const routeContext = getRouteContext(pathname);
+    const token = await authService.getIdToken();
+    const endpoint = isOperator ? '/api/ai/saas/chat' : '/api/ai/mobile/chat';
 
-    const res = await fetch('/api/ai/chat', {
+    const res = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
         body: JSON.stringify({
             message: processedMessage,
             conversationId: conversationId || undefined,

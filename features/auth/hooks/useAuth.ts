@@ -27,6 +27,7 @@ export function useAuth(): UseAuthReturn {
         email: fbUser.email!,
         displayName: fbUser.displayName,
         tenantId: idTokenResult.claims.tenant_id as string | undefined,
+        tenantIds: (idTokenResult.claims.tenant_ids as string[]) || [], // For multi-tenant operators
         role: idTokenResult.claims.role as UserRole | undefined,
       };
 

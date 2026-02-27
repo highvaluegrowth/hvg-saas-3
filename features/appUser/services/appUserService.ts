@@ -1,6 +1,7 @@
 import { adminDb } from '@/lib/firebase/admin';
 import type { AppUser } from '@/shared/types';
 import type { CreateAppUserInput, UpdateAppUserInput } from '../schemas/appUser.schemas';
+import type { DecodedIdToken } from 'firebase-admin/auth';
 
 const usersCol = () => adminDb.collection('users');
 
@@ -11,14 +12,20 @@ export const appUserService = {
       uid,
       email: input.email,
       displayName: input.displayName,
-      photoURL: input.photoURL,
       residentId: null,
+      tenantIds: input.tenantIds || [],
+      preferences: input.preferences || [],
       sobrietyDate: null,
       recoveryGoals: [],
       notificationPreferences: { events: true, chores: true, rides: true, messages: true },
       createdAt: now,
       updatedAt: now,
     };
+
+    if (input.photoURL) {
+      user.photoURL = input.photoURL;
+    }
+
     await usersCol().doc(uid).set(user);
     return user;
   },
@@ -54,4 +61,30 @@ export const appUserService = {
       sobrietyDate: data.sobrietyDate?.toDate?.() ?? data.sobrietyDate ?? null,
     } as AppUser;
   },
+
+  /**
+   * JIT Provisioning: Finds an existing AppUser or creates one automatically 
+   * using the Firebase Auth metadata from the decoded token.
+   * Crucial for SaaS Operators (Admins, Staff) who log in via Google/Email 
+   * but may not have a native /users/{uid} document yet.
+   */
+  async findOrCreate(decodedToken: DecodedIdToken): Promise<AppUser> {
+    const existingUser = await this.getByUid(decodedToken.uid);
+    if (existingUser) {
+      return existingUser;
+    }
+
+    // Default to email prefix if name is missing from custom claims/auth token
+    const fallbackName = decodedToken.email ? decodedToken.email.split('@')[0] : 'SaaS Operator';
+
+    // Create new profile mapped to the Operator
+    return this.create(decodedToken.uid, {
+      email: decodedToken.email || '',
+      displayName: decodedToken.name || fallbackName,
+      photoURL: decodedToken.picture || undefined,
+      // If the token claims a specific tenantId, array-wrap it to start their multi-tenant tracking
+      tenantIds: decodedToken.tenantId ? [decodedToken.tenantId] : [],
+    });
+  }
 };
+

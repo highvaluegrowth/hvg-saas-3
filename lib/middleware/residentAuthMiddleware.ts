@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import { adminAuth, adminDb } from '@/lib/firebase/admin';
 import { appUserService } from '@/features/appUser/services/appUserService';
+import type { DecodedIdToken } from 'firebase-admin/auth';
 import type { AppUser } from '@/shared/types';
 
 export interface ResidentContext {
@@ -117,4 +118,36 @@ export async function verifyResidentToken(
   }
 
   return { uid: decodedToken.uid, appUser };
+}
+
+/**
+ * Verifies any valid app user token (resident, admin, staff, etc.)
+ * For SaaS Operators without a native profile, JIT provisions one.
+ */
+export async function verifyAppUserToken(
+  request: NextRequest
+): Promise<{ uid: string; appUser: AppUser; decodedToken: DecodedIdToken }> {
+  const authHeader = request.headers.get('authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    throw new ResidentAuthError('Missing authorization token', 401);
+  }
+  const idToken = authHeader.slice(7);
+
+  let decodedToken: DecodedIdToken;
+  try {
+    decodedToken = await adminAuth.verifyIdToken(idToken);
+  } catch {
+    throw new ResidentAuthError('Invalid or expired token', 401);
+  }
+
+  // Attempt to find or JIT provision the AppUser profile
+  let appUser: AppUser;
+  try {
+    appUser = await appUserService.findOrCreate(decodedToken);
+  } catch (error) {
+    console.error('Failed to find or create AppUser profile:', error);
+    throw new ResidentAuthError('Failed to initialize user profile', 500);
+  }
+
+  return { uid: decodedToken.uid, appUser, decodedToken };
 }

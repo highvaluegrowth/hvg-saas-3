@@ -12,12 +12,22 @@ export default function LandingPage() {
         <main>
             <MarketingNavbar />
             <HeroSection />
-            <ProblemSection />
-            <PlatformSection />
-            <AIRecoverySection />
-            <SocialProofSection />
-            <DemoCTASection />
-            <MarketingFooter />
+            <Link href="/pricing" className="text-sm font-semibold leading-6 text-slate-900 border-b-2 border-transparent hover:border-emerald-600 transition-colors">
+                Pricing
+            </Link>
+            <Link href="/transparency" className="text-sm font-semibold leading-6 text-slate-900 border-b-2 border-transparent hover:emerald-cyan-600 transition-colors">
+                Transparency
+            </Link>
+            <Link href="/donate" className="text-sm font-semibold leading-6 text-slate-900 border-b-2 border-transparent hover:border-emerald-600 transition-colors">
+                Donate
+            </Link>
+            <div className="hidden lg:flex lg:flex-1 lg:justify-end lg:gap-x-4">
+                <ProblemSection />
+                <PlatformSection />
+                <AIRecoverySection />
+                <SocialProofSection />
+                <DemoCTASection />
+                <MarketingFooter />
         </main>
     );
 }

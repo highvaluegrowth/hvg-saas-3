@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyResidentToken } from '@/lib/middleware/residentAuthMiddleware';
+import { verifyAppUserToken } from '@/lib/middleware/residentAuthMiddleware';
 import { adminDb } from '@/lib/firebase/admin';
 
 export async function GET(request: NextRequest) {
   try {
-    const { uid } = await verifyResidentToken(request);
+    const { uid } = await verifyAppUserToken(request);
 
     const url = new URL(request.url);
     const conversationId = url.searchParams.get('conversationId');

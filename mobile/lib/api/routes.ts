@@ -39,11 +39,11 @@ export const tenantApi = {
 // --- AI Chat ---
 export const chatApi = {
   send: (body: { message: string; conversationId?: string }) =>
-    api.post<{ reply: string; conversationId: string }>('/api/ai/chat', body),
+    api.post<{ reply: string; conversationId: string }>('/api/ai/mobile/chat', body),
   getHistory: (conversationId?: string) => {
     const qs = conversationId ? `?conversationId=${conversationId}` : '';
     return api.get<{ messages?: ChatMessage[]; conversations?: { id: string; updatedAt: string }[] }>(
-      `/api/ai/chat/history${qs}`
+      `/api/ai/mobile/chat/history${qs}`
     );
   },
 };

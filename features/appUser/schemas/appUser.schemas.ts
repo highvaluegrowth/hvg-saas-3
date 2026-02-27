@@ -4,11 +4,15 @@ export const CreateAppUserSchema = z.object({
   email: z.string().email(),
   displayName: z.string().min(1),
   photoURL: z.string().url().optional(),
+  tenantIds: z.array(z.string()).optional(),
+  preferences: z.array(z.string()).optional(),
 });
 
 export const UpdateAppUserSchema = z.object({
   displayName: z.string().min(1).optional(),
   photoURL: z.string().url().optional(),
+  tenantIds: z.array(z.string()).optional(),
+  preferences: z.array(z.string()).optional(),
   sobrietyDate: z.coerce.date().nullable().optional(),
   recoveryGoals: z.array(z.string()).optional(),
   notificationPreferences: z

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
-import { verifyResidentToken } from '@/lib/middleware/residentAuthMiddleware';
+import { verifyAppUserToken } from '@/lib/middleware/residentAuthMiddleware';
 import { adminDb } from '@/lib/firebase/admin';
 import { genai, GEMINI_MODEL } from '@/lib/ai/gemini';
 import { Type } from '@google/genai';
@@ -351,7 +351,7 @@ function buildOperatorSystemPrompt(appUser: { displayName?: string; role?: strin
 
 export async function POST(request: NextRequest) {
   try {
-    const { uid, appUser } = await verifyResidentToken(request);
+    const { uid, appUser, decodedToken } = await verifyAppUserToken(request);
 
     const body = await request.json();
     const parsed = ChatSchema.safeParse(body);
@@ -361,15 +361,16 @@ export async function POST(request: NextRequest) {
 
     const { message, conversationId, routeContext } = parsed.data;
 
-    const isOperator = (appUser as any).role && ['admin', 'house_manager', 'staff', 'super_admin'].includes((appUser as any).role);
+    const isOperator = decodedToken.role && ['admin', 'house_manager', 'staff', 'super_admin'].includes(decodedToken.role);
     const persona = isOperator ? 'operator' : 'recovery';
 
-    const tenantId = (appUser as any).tenantId ?? '';
+    // If Operator, prioritize decodedToken.tenantId, otherwise check their JIT profile's first tenantId
+    const tenantId = isOperator ? (decodedToken.tenantId as string) || appUser.tenantIds?.[0] : undefined;
     const convId = conversationId ?? adminDb.collection('conversations').doc().id;
 
     // Build system prompt based on role
     const systemPrompt = isOperator
-      ? buildOperatorSystemPrompt(appUser, tenantId, routeContext)
+      ? buildOperatorSystemPrompt({ displayName: appUser.displayName, role: decodedToken.role as string }, tenantId || 'none', routeContext)
       : buildResidentSystemPrompt(appUser, routeContext);
 
     const tools = isOperator ? operatorTools : residentTools;
@@ -409,7 +410,7 @@ export async function POST(request: NextRequest) {
         functionCalls.map(async (fc: FunctionCall) => {
           const toolArgs = (fc.args ?? {}) as Record<string, unknown>;
           const result = isOperator
-            ? await executeOperatorTool(fc.name!, toolArgs, tenantId, uid)
+            ? await executeOperatorTool(fc.name!, toolArgs, tenantId || '', uid)
             : await executeResidentTool(fc.name!, toolArgs, appUser.residentId ?? uid, appUser.sobrietyDate);
 
           if (fc.name === primaryFc.name) {
@@ -440,7 +441,10 @@ export async function POST(request: NextRequest) {
     // Persist to Firestore
     const batch = adminDb.batch();
     const convRef = adminDb.collection('conversations').doc(convId);
-    batch.set(convRef, { userId: uid, tenantId, persona, updatedAt: new Date() }, { merge: true });
+
+    const convData: any = { userId: uid, persona, updatedAt: new Date() };
+    if (tenantId) convData.tenantId = tenantId;
+    batch.set(convRef, convData, { merge: true });
 
     const userMsgRef = convRef.collection('messages').doc();
     batch.set(userMsgRef, { role: 'user', content: message, createdAt: new Date() });

@@ -4,18 +4,22 @@ import { useAuth } from '@/lib/auth/AuthContext';
 import { View, ActivityIndicator } from 'react-native';
 
 export default function IndexPage() {
-  const { firebaseUser, loading } = useAuth();
+  const { firebaseUser, appUser, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
     if (!loading) {
       if (firebaseUser) {
-        router.replace('/(tabs)');
+        if (appUser && (!appUser.preferences || appUser.preferences.length === 0)) {
+          router.replace('/(onboarding)/personalization');
+        } else {
+          router.replace('/(tabs)');
+        }
       } else {
         router.replace('/(auth)/login');
       }
     }
-  }, [firebaseUser, loading]);
+  }, [firebaseUser, appUser, loading, router]);
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#0f172a' }}>

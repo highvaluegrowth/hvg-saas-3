@@ -67,6 +67,34 @@ export function Sidebar({ tenantId, isOpen = true, onClose }: SidebarProps) {
             </button>
           </div>
 
+// ... inside Sidebar ...
+          {/* Organization Switcher (Only for multi-tenant operators) */}
+          {user?.tenantIds && user.tenantIds.length > 1 && (
+            <div className="px-4 py-3 border-b border-gray-200 bg-gray-50/50">
+              <label className="block text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+                Organization
+              </label>
+              <div className="relative">
+                <select
+                  value={tenantId}
+                  onChange={(e) => {
+                    const newTenantId = e.target.value;
+                    // Keep the user on the same sub-path, just change the tenant
+                    const currentPathWithoutTenant = pathname.replace(`/${tenantId}`, '');
+                    window.location.href = `/${newTenantId}${currentPathWithoutTenant}`;
+                  }}
+                  className="block w-full pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-cyan-500 focus:border-cyan-500 rounded-md shadow-sm bg-white"
+                >
+                  {user.tenantIds.map((tid) => (
+                    <option key={tid} value={tid}>
+                      Tenant: {tid}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
+
           {/* Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
             {navigationItems.map((item) => {
@@ -129,3 +157,4 @@ export function Sidebar({ tenantId, isOpen = true, onClose }: SidebarProps) {
     </>
   );
 }
+

@@ -10,6 +10,7 @@ export interface User {
   email: string;
   displayName?: string | null;
   tenantId?: string;
+  tenantIds?: string[];
   role?: UserRole;
 }
 
