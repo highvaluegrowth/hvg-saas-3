@@ -48,7 +48,7 @@ export default function ChatScreen() {
       keyboardVerticalOffset={90}
     >
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Recovery Guide</Text>
+        <Text style={styles.headerTitle}>HVG Guide</Text>
         <Text style={styles.headerSub}>Powered by Gemini 2.5</Text>
       </View>
 
@@ -57,7 +57,7 @@ export default function ChatScreen() {
           <Text style={styles.welcomeEmoji}>🌱</Text>
           <Text style={styles.welcomeTitle}>Hi, {firstName}!</Text>
           <Text style={styles.welcomeText}>
-            I'm your recovery guide. Ask me about your schedule, chores,
+            I'm your HVG Guide. Ask me about your schedule, chores,
             sobriety stats, or how you're feeling today.
           </Text>
           <View style={styles.suggestions}>
@@ -102,7 +102,7 @@ export default function ChatScreen() {
       {isSending && (
         <View style={styles.typing}>
           <ActivityIndicator size="small" color="#6366f1" />
-          <Text style={styles.typingText}>Guide is thinking…</Text>
+          <Text style={styles.typingText}>HVG Guide is thinking…</Text>
         </View>
       )}
 
@@ -111,7 +111,7 @@ export default function ChatScreen() {
           style={styles.input}
           value={input}
           onChangeText={setInput}
-          placeholder="Ask your recovery guide…"
+          placeholder="Ask your HVG Guide…"
           placeholderTextColor="#475569"
           multiline
           maxLength={500}

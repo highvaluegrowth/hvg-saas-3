@@ -20,7 +20,7 @@ import {
 } from 'date-fns';
 
 export default function ProfileScreen() {
-  const { appUser, signOut, refreshAppUser } = useAuth();
+  const { appUser, signOut, refreshAppUser, firebaseUser } = useAuth();
   const [editing, setEditing] = useState(false);
   const [displayName, setDisplayName] = useState(appUser?.displayName ?? '');
   const [sobrietyDateStr, setSobrietyDateStr] = useState(
@@ -37,6 +37,10 @@ export default function ProfileScreen() {
   const [notifChores, setNotifChores] = useState(
     appUser?.notificationPreferences?.chores ?? true
   );
+  const [apiKey, setApiKey] = useState('');
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [apiKeySaving, setApiKeySaving] = useState(false);
+  const [apiKeySaved, setApiKeySaved] = useState(false);
 
   const updateMutation = useMutation({
     mutationFn: () =>
@@ -81,6 +85,31 @@ export default function ProfileScreen() {
       { text: 'Cancel', style: 'cancel' },
       { text: 'Sign Out', style: 'destructive', onPress: signOut },
     ]);
+  }
+
+  async function handleSaveApiKey() {
+    if (!apiKey.trim()) return;
+    setApiKeySaving(true);
+    try {
+      const token = await firebaseUser?.getIdToken();
+      const tenantId = appUser?.tenantIds?.[0];
+      if (!token || !tenantId) throw new Error('Not authenticated');
+      await fetch(`/api/tenants/${tenantId}/settings`, {
+        method: 'PATCH',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ aiApiKey: apiKey.trim() }),
+      });
+      setApiKeySaved(true);
+      setApiKey('');
+      Alert.alert('Saved', 'Your AI API key has been saved.');
+    } catch {
+      Alert.alert('Error', 'Failed to save API key.');
+    } finally {
+      setApiKeySaving(false);
+    }
   }
 
   return (
@@ -195,6 +224,44 @@ export default function ProfileScreen() {
           </Text>
         </TouchableOpacity>
       )}
+
+      {/* AI Settings */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>HVG Guide — AI Settings</Text>
+        <View style={styles.field}>
+          <Text style={styles.fieldLabel}>Gemini API Key (optional)</Text>
+          <Text style={[styles.fieldValue, { fontSize: 12, color: '#64748b', marginBottom: 8 }]}>
+            Use your own Google AI key for higher rate limits
+          </Text>
+          <View style={{ flexDirection: 'row', gap: 8, alignItems: 'center' }}>
+            <TextInput
+              style={[styles.fieldInput, { flex: 1, borderWidth: 1, borderColor: '#334155', borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8 }]}
+              value={apiKey}
+              onChangeText={setApiKey}
+              placeholder="AIza..."
+              placeholderTextColor="#475569"
+              secureTextEntry={!showApiKey}
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <TouchableOpacity onPress={() => setShowApiKey(!showApiKey)}>
+              <Text style={{ color: '#6366f1', fontSize: 13 }}>{showApiKey ? 'Hide' : 'Show'}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+        {apiKeySaved && (
+          <Text style={{ color: '#22c55e', fontSize: 13, marginBottom: 8, paddingHorizontal: 4 }}>
+            ✓ API key saved
+          </Text>
+        )}
+        <TouchableOpacity
+          style={[styles.saveBtn, { marginTop: 4, opacity: apiKeySaving || !apiKey.trim() ? 0.5 : 1 }]}
+          onPress={handleSaveApiKey}
+          disabled={apiKeySaving || !apiKey.trim()}
+        >
+          <Text style={styles.saveBtnText}>{apiKeySaving ? 'Saving…' : 'Save API Key'}</Text>
+        </TouchableOpacity>
+      </View>
 
       {/* Sign Out */}
       <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut}>
