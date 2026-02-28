@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.hvg_saas_3.mobile",
+      "bundleIdentifier": "com.hvgsaas3.mobile",
       "googleServicesFile": "./GoogleService-Info.plist"
     },
     "android": {
