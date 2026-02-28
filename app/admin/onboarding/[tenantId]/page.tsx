@@ -63,13 +63,14 @@ export default function OnboardingDetailPage({ params }: { params: Promise<{ ten
         setProcessing(true);
         try {
             const token = await authService.getIdToken();
-            const res = await fetch(`/api/tenants/${tenantId}`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({ status: newStatus })
+            // Use dedicated endpoints so approval also sets Firebase Auth custom claims
+            const endpoint = newStatus === 'approved'
+                ? `/api/admin/tenants/${tenantId}/approve`
+                : `/api/admin/tenants/${tenantId}/reject`;
+
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
             });
 
             if (res.ok) {
