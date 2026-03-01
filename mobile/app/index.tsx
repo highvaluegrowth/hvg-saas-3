@@ -10,9 +10,17 @@ export default function IndexPage() {
   useEffect(() => {
     if (!loading) {
       if (firebaseUser) {
-        if (appUser && (!appUser.preferences || appUser.preferences.length === 0)) {
+        const hasPreferences = appUser?.preferences && appUser.preferences.length > 0;
+        const profileDone = appUser?.profileComplete === true;
+
+        if (!hasPreferences) {
+          // Step 1: no preferences yet → go to personalization
           router.replace('/(onboarding)/personalization');
+        } else if (!profileDone) {
+          // Step 2: has preferences but profile not yet built → profile builder
+          router.replace('/(profile-builder)/faith' as any);
         } else {
+          // Step 3: fully onboarded → main app
           router.replace('/(tabs)');
         }
       } else {
@@ -27,3 +35,4 @@ export default function IndexPage() {
     </View>
   );
 }
+
