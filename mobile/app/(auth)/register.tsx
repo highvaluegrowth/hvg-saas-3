@@ -32,7 +32,8 @@ export default function RegisterScreen() {
       await authApi.register({ email: email.trim(), displayName, password });
       // Then sign in with Firebase Auth client SDK
       await auth().signInWithEmailAndPassword(email.trim(), password);
-      router.replace('/(tabs)');
+      // Route through auth gate → sends new users to onboarding
+      router.replace('/');
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Registration failed';
       Alert.alert('Registration failed', msg);

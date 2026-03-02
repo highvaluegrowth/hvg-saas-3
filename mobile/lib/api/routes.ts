@@ -5,6 +5,9 @@ import type { AppUser } from '@shared/types/appUser';
 export const authApi = {
   register: (body: { email: string; password: string; displayName: string }) =>
     api.post<{ uid: string; appUser: AppUser }>('/api/mobile/auth/register', body, false),
+  /** Call after Google Sign-In to JIT-provision AppUser + resident claim */
+  loginWithGoogle: () =>
+    api.post<{ uid: string; appUser: AppUser }>('/api/mobile/auth/google', {}),
 };
 
 // --- User profile ---
