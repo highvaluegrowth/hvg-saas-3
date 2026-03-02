@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "749140510309",
+    "project_id": "hvg-saas-3",
+    "storage_bucket": "hvg-saas-3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:749140510309:android:48f32df0c2bd8459f6e88c",
+        "android_client_info": {
+          "package_name": "com.hvg_saas_3.mobile"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "749140510309-4p7jfdv7jefdn9l00ali3bb5s3l3hden.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRGvOa3l8Kmg8JGi8nhaQtkXN9Vg5oCO8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "749140510309-4p7jfdv7jefdn9l00ali3bb5s3l3hden.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

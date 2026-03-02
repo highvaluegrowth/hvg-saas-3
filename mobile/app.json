@@ -23,7 +23,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0f172a"
-      }
+      },
+      "versionCode": 5
     },
     "plugins": [
       "expo-router",
@@ -33,6 +34,19 @@
     "scheme": "hvg",
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "ac8fee05-2155-4f28-854c-2abf9ec334f0"
+      }
+    },
+    "owner": "petergaiennie",
+    "runtimeVersion": "1.0.0",
+    "updates": {
+      "url": "https://u.expo.dev/ac8fee05-2155-4f28-854c-2abf9ec334f0"
     }
   }
 }

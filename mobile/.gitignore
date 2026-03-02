@@ -11,8 +11,9 @@ web-build/
 web-build/
 .env.local
 .env.*.local
-GoogleService-Info.plist
-google-services.json
+# Note: GoogleService-Info.plist and google-services.json are intentionally NOT
+# gitignored — they are client configs embedded in the compiled app binary,
+# and EAS cloud builds need them committed to git.
 .agent/
 .claude/
 
