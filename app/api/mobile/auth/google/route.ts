@@ -28,8 +28,10 @@ export async function POST(request: NextRequest) {
 
         const { uid, email, name, picture } = decodedToken;
 
-        // Ensure resident role claim is set (idempotent)
-        if (decodedToken.role !== 'resident') {
+        // Only set resident claim if account has no role at all
+        // (preserves existing admin/tenant_admin/super_admin claims)
+        const existingRole = decodedToken.role as string | undefined;
+        if (!existingRole) {
             await adminAuth.setCustomUserClaims(uid, { role: 'resident' });
         }
 

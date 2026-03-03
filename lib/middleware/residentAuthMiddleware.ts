@@ -88,9 +88,13 @@ export async function verifyResidentTenantAccess(
   };
 }
 
+/** Roles that can access the resident-facing mobile API */
+const MOBILE_ALLOWED_ROLES = ['resident', 'super_admin', 'admin', 'tenant_admin', 'house_manager', 'staff'];
+
 /**
  * Lighter version: verifies resident token exists + /users doc exists.
  * Does NOT check tenant enrollment — for routes like /me, /tenants (discovery).
+ * Accepts resident role AND all staff/admin roles (so operators can test the app).
  */
 export async function verifyResidentToken(
   request: NextRequest
@@ -108,13 +112,19 @@ export async function verifyResidentToken(
     throw new ResidentAuthError('Invalid or expired token', 401);
   }
 
-  if (decodedToken.role !== 'resident') {
+  const role = decodedToken.role as string | undefined;
+  if (!role || !MOBILE_ALLOWED_ROLES.includes(role)) {
     throw new ResidentAuthError('Access restricted to residents');
   }
 
-  const appUser = await appUserService.getByUid(decodedToken.uid);
+  // JIT-provision AppUser for admin accounts that haven't registered via mobile
+  let appUser = await appUserService.getByUid(decodedToken.uid);
   if (!appUser) {
-    throw new ResidentAuthError('App user profile not found');
+    try {
+      appUser = await appUserService.findOrCreate(decodedToken);
+    } catch {
+      throw new ResidentAuthError('App user profile not found', 404);
+    }
   }
 
   return { uid: decodedToken.uid, appUser };
