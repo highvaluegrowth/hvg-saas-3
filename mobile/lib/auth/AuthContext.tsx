@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = auth().onAuthStateChanged(async (user) => {
       setFirebaseUser(user);
       if (user) {
-        const token = await user.getIdToken();
+        const token = await user.getIdToken(true); // force-refresh to pick up custom claims (e.g. resident role)
         await saveAuthToken(token);
         // Refresh token every 55 minutes
         const refreshInterval = setInterval(async () => {

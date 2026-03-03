@@ -12,6 +12,7 @@ import {
 import { useMutation } from '@tanstack/react-query';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { userApi } from '@/lib/api/routes';
+import { API_BASE_URL } from '@/lib/config';
 import {
   format,
   differenceInDays,
@@ -89,12 +90,22 @@ export default function ProfileScreen() {
 
   async function handleSaveApiKey() {
     if (!apiKey.trim()) return;
+
+    const tenantId = appUser?.tenantIds?.[0];
+    if (!tenantId) {
+      Alert.alert(
+        'No organization linked',
+        'You need to be enrolled in a sober living house to save an API key. Complete onboarding first.'
+      );
+      return;
+    }
+
     setApiKeySaving(true);
     try {
-      const token = await firebaseUser?.getIdToken();
-      const tenantId = appUser?.tenantIds?.[0];
-      if (!token || !tenantId) throw new Error('Not authenticated');
-      await fetch(`/api/tenants/${tenantId}/settings`, {
+      const token = await firebaseUser?.getIdToken(true); // force-refresh for latest claims
+      if (!token) throw new Error('Not authenticated');
+
+      await fetch(`${API_BASE_URL}/api/tenants/${tenantId}/settings`, {
         method: 'PATCH',
         headers: {
           Authorization: `Bearer ${token}`,
