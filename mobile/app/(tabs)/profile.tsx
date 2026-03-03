@@ -10,6 +10,7 @@ import {
   Switch,
 } from 'react-native';
 import { useMutation } from '@tanstack/react-query';
+import { useRouter } from 'expo-router';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { userApi } from '@/lib/api/routes';
 import { API_BASE_URL } from '@/lib/config';
@@ -21,6 +22,7 @@ import {
 } from 'date-fns';
 
 export default function ProfileScreen() {
+  const router = useRouter();
   const { appUser, signOut, refreshAppUser, firebaseUser } = useAuth();
   const [editing, setEditing] = useState(false);
   const [displayName, setDisplayName] = useState(appUser?.displayName ?? '');
@@ -84,7 +86,14 @@ export default function ProfileScreen() {
   function handleSignOut() {
     Alert.alert('Sign Out', 'Are you sure?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Sign Out', style: 'destructive', onPress: signOut },
+      {
+        text: 'Sign Out',
+        style: 'destructive',
+        onPress: async () => {
+          await signOut();
+          router.replace('/');
+        },
+      },
     ]);
   }
 
