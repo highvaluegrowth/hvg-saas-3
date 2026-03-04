@@ -65,7 +65,7 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
     } finally {
       setLoading(false);
     }
-  }, [user, tenantId, statusFilter, typeFilter]);
+  }, [tenantId, statusFilter, typeFilter]);
 
   useEffect(() => {
     fetchApplications();
