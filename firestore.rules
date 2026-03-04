@@ -62,6 +62,17 @@ service cloud.firestore {
         allow delete: if isSuperAdmin();
       }
 
+      // ─── Social posts — tenant staff and above can read/write; SuperAdmin can read all
+      match /socialPosts/{postId} {
+        allow read, write: if isSuperAdmin() || isTenantStaff(tenantId);
+      }
+
+      // ─── Social accounts — only tenant_admin+ can manage OAuth tokens
+      match /socialAccounts/{accountId} {
+        allow read: if isSuperAdmin() || isTenantStaff(tenantId);
+        allow write: if isSuperAdmin() || isTenantAdmin(tenantId);
+      }
+
       // ─── All other tenant subcollections (houses, staff, events, vehicles, enrollments)
       match /{document=**} {
         allow read: if isSuperAdmin() || isTenantMember(tenantId);
@@ -175,6 +186,12 @@ service cloud.firestore {
       // Only SuperAdmin can update (assign, accept, reject)
       allow update: if isSuperAdmin();
       allow delete: if isSuperAdmin();
+    }
+
+    // ─── Marketing templates (global, SuperAdmin-managed) ────────────────────
+    match /marketingTemplates/{templateId} {
+      allow read: if isAuthenticated();
+      allow write: if isSuperAdmin();
     }
 
     // ─── Deny all other access by default ───────────────────────────────────
