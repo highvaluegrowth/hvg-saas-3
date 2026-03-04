@@ -1,30 +1,79 @@
 // app/(dashboard)/[tenantId]/marketing/accounts/page.tsx
 'use client';
-import { use } from 'react';
+import { use, useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { useAccounts } from '@/features/marketing/hooks/useAccounts';
-import type { SocialPlatform } from '@/features/marketing/types';
+import type { SocialAccount, SocialPlatform } from '@/features/marketing/types';
 
-const PLATFORM_CONFIG: Record<SocialPlatform, { label: string; color: string; icon: string }> = {
-    facebook: { label: 'Facebook', color: 'bg-blue-600', icon: 'f' },
-    instagram: { label: 'Instagram', color: 'bg-pink-500', icon: '📷' },
-    tiktok: { label: 'TikTok', color: 'bg-gray-900', icon: '♪' },
-    x: { label: 'X / Twitter', color: 'bg-gray-800', icon: '𝕏' },
-    linkedin: { label: 'LinkedIn', color: 'bg-blue-700', icon: 'in' },
+const PLATFORM_CONFIG: Record<SocialPlatform, { label: string; color: string; icon: string; metaSupported: boolean }> = {
+    facebook:  { label: 'Facebook',   color: 'bg-blue-600',  icon: 'f',  metaSupported: true },
+    instagram: { label: 'Instagram',  color: 'bg-pink-500',  icon: '📷', metaSupported: true },
+    tiktok:    { label: 'TikTok',     color: 'bg-gray-900',  icon: '♪',  metaSupported: false },
+    x:         { label: 'X / Twitter',color: 'bg-gray-800',  icon: '𝕏',  metaSupported: false },
+    linkedin:  { label: 'LinkedIn',   color: 'bg-blue-700',  icon: 'in', metaSupported: false },
 };
 
 const AVAILABLE_PLATFORMS: SocialPlatform[] = ['facebook', 'instagram', 'tiktok', 'x', 'linkedin'];
 
-async function handleConnect(tenantId: string) {
-    const res = await fetch(`/api/oauth/meta/authorize?tenantId=${tenantId}`);
-    const data = await res.json();
-    alert(data.message ?? 'Coming soon!');
-}
-
 export default function AccountsPage({ params }: { params: Promise<{ tenantId: string }> }) {
     const { tenantId } = use(params);
     const { accounts, loading } = useAccounts(tenantId);
+    const searchParams = useSearchParams();
+    const router = useRouter();
 
-    const connectedPlatforms = new Set(accounts.filter(a => a.status === 'active').map(a => a.platform));
+    const connected = searchParams.get('connected');
+    const error = searchParams.get('error');
+
+    const [banner, setBanner] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+    const [disconnecting, setDisconnecting] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (connected === 'meta') {
+            setBanner({ type: 'success', message: 'Meta accounts connected successfully.' });
+            // Remove query params without full navigation
+            router.replace(`/${tenantId}/marketing/accounts`);
+        } else if (error === 'meta_failed') {
+            setBanner({ type: 'error', message: 'Meta connection failed. Please try again.' });
+            router.replace(`/${tenantId}/marketing/accounts`);
+        } else if (error === 'not_configured') {
+            setBanner({ type: 'error', message: 'Meta credentials are not configured. Contact HVG support.' });
+            router.replace(`/${tenantId}/marketing/accounts`);
+        } else if (error === 'meta_invalid') {
+            setBanner({ type: 'error', message: 'Invalid OAuth response from Meta. Please try again.' });
+            router.replace(`/${tenantId}/marketing/accounts`);
+        }
+    }, [connected, error, tenantId, router]);
+
+    function handleConnect(platform: SocialPlatform) {
+        const config = PLATFORM_CONFIG[platform];
+        if (!config.metaSupported) {
+            // Non-Meta platforms: show alert
+            alert(`${config.label} integration coming soon.`);
+            return;
+        }
+        window.location.href = `/api/oauth/meta/authorize?tenantId=${tenantId}&platform=${platform}`;
+    }
+
+    async function handleDisconnect(account: SocialAccount) {
+        setDisconnecting(account.id);
+        try {
+            const res = await fetch(`/api/tenants/${tenantId}/marketing/accounts`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ accountId: account.id }),
+            });
+            if (!res.ok) {
+                const data = await res.json() as { error?: string };
+                setBanner({ type: 'error', message: data.error ?? 'Failed to disconnect account.' });
+            } else {
+                setBanner({ type: 'success', message: `${PLATFORM_CONFIG[account.platform].label} disconnected.` });
+            }
+        } catch {
+            setBanner({ type: 'error', message: 'Network error. Please try again.' });
+        } finally {
+            setDisconnecting(null);
+        }
+    }
 
     return (
         <div className="max-w-3xl mx-auto p-6 space-y-6">
@@ -32,6 +81,18 @@ export default function AccountsPage({ params }: { params: Promise<{ tenantId: s
                 <h1 className="text-2xl font-bold text-gray-900">Connected Accounts</h1>
                 <p className="text-gray-500 mt-1">Link your social platforms to publish posts directly</p>
             </div>
+
+            {banner && (
+                <div className={`rounded-xl px-4 py-3 text-sm font-medium flex items-center justify-between ${
+                    banner.type === 'success'
+                        ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+                        : 'bg-red-50 border border-red-200 text-red-800'
+                }`}>
+                    <span>{banner.message}</span>
+                    <button onClick={() => setBanner(null)} className="ml-4 text-current opacity-60 hover:opacity-100">✕</button>
+                </div>
+            )}
+
             {loading ? (
                 <div className="text-gray-400 text-sm">Loading...</div>
             ) : (
@@ -40,6 +101,7 @@ export default function AccountsPage({ params }: { params: Promise<{ tenantId: s
                         const config = PLATFORM_CONFIG[platform];
                         const account = accounts.find(a => a.platform === platform && a.status === 'active');
                         const isConnected = !!account;
+
                         return (
                             <div key={platform} className="flex items-center justify-between bg-white border border-gray-200 rounded-xl p-4">
                                 <div className="flex items-center gap-3">
@@ -47,7 +109,12 @@ export default function AccountsPage({ params }: { params: Promise<{ tenantId: s
                                         {config.icon}
                                     </div>
                                     <div>
-                                        <p className="font-semibold text-gray-900">{config.label}</p>
+                                        <div className="flex items-center gap-2">
+                                            <p className="font-semibold text-gray-900">{config.label}</p>
+                                            {!config.metaSupported && (
+                                                <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Coming Soon</span>
+                                            )}
+                                        </div>
                                         {isConnected ? (
                                             <p className="text-xs text-emerald-600">Connected as {account?.accountName}</p>
                                         ) : (
@@ -55,22 +122,34 @@ export default function AccountsPage({ params }: { params: Promise<{ tenantId: s
                                         )}
                                     </div>
                                 </div>
-                                {isConnected ? (
-                                    <span className="text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-medium">Active</span>
-                                ) : (
-                                    <button onClick={() => handleConnect(tenantId)}
-                                        className="text-sm px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors">
-                                        Connect
-                                    </button>
-                                )}
+
+                                <div className="flex items-center gap-2">
+                                    {isConnected ? (
+                                        <>
+                                            <span className="text-xs bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-medium">Active</span>
+                                            <button
+                                                onClick={() => account && handleDisconnect(account)}
+                                                disabled={disconnecting === account?.id}
+                                                className="text-sm px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition-colors disabled:opacity-50"
+                                            >
+                                                {disconnecting === account?.id ? 'Disconnecting...' : 'Disconnect'}
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <button
+                                            onClick={() => handleConnect(platform)}
+                                            disabled={!config.metaSupported}
+                                            className="text-sm px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                        >
+                                            Connect
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         );
                     })}
                 </div>
             )}
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
-                <strong>Coming Soon:</strong> Direct publishing to Facebook and Instagram is in progress. For now, use the composer to create and save posts to your library, then copy them manually to your social accounts.
-            </div>
         </div>
     );
 }

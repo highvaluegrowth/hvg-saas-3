@@ -19,4 +19,16 @@ export const accountsService = {
             accessToken: FieldValue.delete(),
         });
     },
+
+    /**
+     * Upsert a social account using platform+accountId as a composite key.
+     * Doc id: `${platform}_${accountId}`
+     */
+    async upsert(tenantId: string, account: Omit<SocialAccount, 'id'>): Promise<SocialAccount> {
+        const docId = `${account.platform}_${account.accountId}`;
+        const ref = accountsRef(tenantId).doc(docId);
+        const data: SocialAccount = { ...account, id: docId };
+        await ref.set(data, { merge: true });
+        return data;
+    },
 };
