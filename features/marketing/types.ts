@@ -1,4 +1,6 @@
 // features/marketing/types.ts
+// Date fields: ISO 8601 strings (not Firestore Timestamps or Date objects).
+// Services are responsible for serializing with new Date().toISOString().
 
 export type SocialPlatform = 'facebook' | 'instagram' | 'tiktok' | 'x' | 'linkedin';
 export type PostType = 'bed_availability' | 'success_story' | 'event_promo' | 'job_listing' | 'general';
