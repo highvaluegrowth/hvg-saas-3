@@ -163,7 +163,21 @@ service cloud.firestore {
       }
     }
 
-    // Deny all other access by default
+    // ─── Applications (global — all 5 types funnel through SuperAdmin) ──────────
+    match /applications/{applicationId} {
+      // Applicant can read their own; SuperAdmin can read all
+      allow read: if isAuthenticated() && (
+        resource.data.applicantId == request.auth.uid ||
+        isSuperAdmin()
+      );
+      // Anyone can submit an application (public forms)
+      allow create: if true;
+      // Only SuperAdmin can update (assign, accept, reject)
+      allow update: if isSuperAdmin();
+      allow delete: if isSuperAdmin();
+    }
+
+    // ─── Deny all other access by default ───────────────────────────────────
     match /{document=**} {
       allow read, write: if false;
     }
