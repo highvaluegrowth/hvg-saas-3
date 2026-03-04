@@ -3,6 +3,9 @@ import { z } from 'zod';
 import { verifyResidentToken } from '@/lib/middleware/residentAuthMiddleware';
 import { adminDb } from '@/lib/firebase/admin';
 
+export const dynamic = 'force-dynamic';
+
+
 type Params = Promise<{ tenantId: string }>;
 
 const JoinRequestSchema = z.object({

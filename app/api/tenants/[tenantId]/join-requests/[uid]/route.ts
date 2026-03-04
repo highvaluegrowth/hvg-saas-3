@@ -6,6 +6,9 @@ import { createEnrollmentService } from '@/features/enrollments/services/enrollm
 import { canWrite } from '@/lib/utils/permissions';
 import type { UserRole } from '@/features/auth/types/auth.types';
 
+export const dynamic = 'force-dynamic';
+
+
 type Params = Promise<{ tenantId: string; uid: string }>;
 
 const ActionSchema = z.object({

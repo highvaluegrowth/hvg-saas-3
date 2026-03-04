@@ -2,6 +2,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 
+export const dynamic = 'force-dynamic';
+
+
 const META_SCOPES = 'pages_show_list,pages_manage_posts,instagram_basic,instagram_content_publish';
 
 export async function GET(request: NextRequest) {

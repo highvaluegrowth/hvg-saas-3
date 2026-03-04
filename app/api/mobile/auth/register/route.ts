@@ -4,6 +4,9 @@ import { adminAuth } from '@/lib/firebase/admin';
 import { appUserService } from '@/features/appUser/services/appUserService';
 import { CreateAppUserSchema } from '@/features/appUser/schemas/appUser.schemas';
 
+export const dynamic = 'force-dynamic';
+
+
 const RegisterSchema = CreateAppUserSchema.extend({
   password: z.string().min(8, 'Password must be at least 8 characters'),
 });

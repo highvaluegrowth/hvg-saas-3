@@ -2,6 +2,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function GET(request: NextRequest) {
     if (!process.env.TIKTOK_CLIENT_KEY) {
         return NextResponse.json(

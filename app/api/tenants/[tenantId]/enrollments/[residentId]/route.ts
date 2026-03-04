@@ -3,6 +3,9 @@ import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { createEnrollmentService } from '@/features/enrollments/services/enrollmentService';
 import { UpdateEnrollmentSchema } from '@/features/enrollments/schemas/enrollment.schemas';
 
+export const dynamic = 'force-dynamic';
+
+
 type Params = Promise<{ tenantId: string; residentId: string }>;
 
 export async function GET(request: NextRequest, { params }: { params: Params }) {

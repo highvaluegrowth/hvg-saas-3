@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { templatesService } from '@/features/marketing/services/templatesService';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function POST(request: NextRequest) {
     try {
         const token = await verifyAuthToken(request);

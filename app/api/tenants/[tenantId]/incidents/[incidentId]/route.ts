@@ -5,6 +5,9 @@ import { UpdateIncidentSchema } from '@/features/incidents/schemas/incident.sche
 import { canWrite } from '@/lib/utils/permissions';
 import { UserRole } from '@/features/auth/types/auth.types';
 
+export const dynamic = 'force-dynamic';
+
+
 type Params = Promise<{ tenantId: string; incidentId: string }>;
 
 export async function GET(request: NextRequest, { params }: { params: Params }) {

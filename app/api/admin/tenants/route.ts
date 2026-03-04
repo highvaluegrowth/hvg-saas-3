@@ -3,6 +3,9 @@ import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { tenantService } from '@/features/tenant/services/tenantService';
 import { AuthError } from '@/lib/utils/errors';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function GET(request: NextRequest) {
     try {
         const decodedToken = await verifyAuthToken(request);

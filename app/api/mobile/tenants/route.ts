@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase/admin';
 
+export const dynamic = 'force-dynamic';
+
+
 // Public route — no auth required. Residents browse tenants before joining.
 export async function GET() {
   try {

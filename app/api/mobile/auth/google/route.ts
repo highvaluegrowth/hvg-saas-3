@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth } from '@/lib/firebase/admin';
 import { appUserService } from '@/features/appUser/services/appUserService';
 
+export const dynamic = 'force-dynamic';
+
+
 /**
  * POST /api/mobile/auth/google
  *

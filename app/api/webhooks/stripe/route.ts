@@ -6,6 +6,9 @@ import Stripe from 'stripe';
 import { stripe } from '@/lib/stripe/server';
 import { adminDb } from '@/lib/firebase/admin';
 
+export const dynamic = 'force-dynamic';
+
+
 /**
  * Map Stripe subscription status to our internal status.
  */

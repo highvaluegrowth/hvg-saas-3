@@ -5,6 +5,9 @@ import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { adminDb } from '@/lib/firebase/admin';
 import type { SocialPost, SocialAccount, SocialPlatform, PostType, PostStatus } from '@/features/marketing/types';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ tenantId: string }> }

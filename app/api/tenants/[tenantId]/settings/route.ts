@@ -2,6 +2,9 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { adminDb } from '@/lib/firebase/admin';
 import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 
+export const dynamic = 'force-dynamic';
+
+
 interface RouteParams {
     params: Promise<{ tenantId: string }>;
 }

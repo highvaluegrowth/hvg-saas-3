@@ -3,6 +3,9 @@ import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { createRideService } from '@/features/rides/services/rideService';
 import { createRideSchema } from '@/features/rides/schemas/ride.schemas';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ tenantId: string }> }

@@ -3,6 +3,9 @@ import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { createHouseService } from '@/features/houses/services/houseService';
 import { UpdateRoomSchema } from '@/features/houses/schemas/house.schemas';
 
+export const dynamic = 'force-dynamic';
+
+
 type Params = Promise<{ tenantId: string; houseId: string; roomId: string }>;
 
 export async function PATCH(request: NextRequest, { params }: { params: Params }) {

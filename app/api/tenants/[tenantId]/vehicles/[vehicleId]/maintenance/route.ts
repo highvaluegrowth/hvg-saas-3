@@ -3,6 +3,9 @@ import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { createVehicleService } from '@/features/vehicles/services/vehicleService';
 import { CreateMaintenanceLogSchema } from '@/features/vehicles/schemas/vehicle.schemas';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ tenantId: string; vehicleId: string }> }

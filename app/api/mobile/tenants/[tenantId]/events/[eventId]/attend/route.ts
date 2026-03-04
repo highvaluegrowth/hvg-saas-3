@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyResidentTenantAccess } from '@/lib/middleware/residentAuthMiddleware';
 import { adminDb, FieldValue } from '@/lib/firebase/admin';
 
+export const dynamic = 'force-dynamic';
+
+
 type Params = Promise<{ tenantId: string; eventId: string }>;
 
 export async function POST(request: NextRequest, { params }: { params: Params }) {

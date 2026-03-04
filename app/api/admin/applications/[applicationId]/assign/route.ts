@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { adminDb as db } from '@/lib/firebase/admin';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function POST(
     request: NextRequest,
     { params }: { params: Promise<{ applicationId: string }> }

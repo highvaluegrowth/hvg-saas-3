@@ -5,6 +5,9 @@ import { CreateChoreSchema } from '@/features/chores/schemas/chore.schemas';
 import { canWrite } from '@/lib/utils/permissions';
 import { UserRole } from '@/features/auth/types/auth.types';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ tenantId: string }> }

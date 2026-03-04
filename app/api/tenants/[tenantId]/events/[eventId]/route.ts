@@ -5,6 +5,9 @@ import { UpdateProgramEventSchema } from '@/features/events/schemas/event.schema
 import { canWrite } from '@/lib/utils/permissions';
 import type { UserRole } from '@/features/auth/types/auth.types';
 
+export const dynamic = 'force-dynamic';
+
+
 type Params = Promise<{ tenantId: string; eventId: string }>;
 
 export async function PATCH(request: NextRequest, { params }: { params: Params }) {

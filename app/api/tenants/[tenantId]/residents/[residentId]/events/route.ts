@@ -3,6 +3,9 @@ import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { residentService } from '@/features/residents/services/residentService';
 import { CreateResidentEventSchema } from '@/features/residents/schemas/resident.schemas';
 
+export const dynamic = 'force-dynamic';
+
+
 type Params = Promise<{ tenantId: string; residentId: string }>;
 
 export async function GET(request: NextRequest, { params }: { params: Params }) {

@@ -5,6 +5,9 @@ import { CreateHouseSchema } from '@/features/houses/schemas/house.schemas';
 import { canManageStaff } from '@/lib/utils/permissions';
 import type { UserRole } from '@/features/auth/types/auth.types';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ tenantId: string }> }

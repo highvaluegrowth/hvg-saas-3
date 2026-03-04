@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { lessonService } from '@/features/lms/services/lessonService';
 
+export const dynamic = 'force-dynamic';
+
+
 type Params = Promise<{ tenantId: string; courseId: string; lessonId: string }>;
 
 export async function GET(request: NextRequest, { params }: { params: Params }) {

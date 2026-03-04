@@ -3,6 +3,9 @@ import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { residentService } from '@/features/residents/services/residentService';
 import { UpdateResidentEventSchema } from '@/features/residents/schemas/resident.schemas';
 
+export const dynamic = 'force-dynamic';
+
+
 type Params = Promise<{ tenantId: string; residentId: string; eventId: string }>;
 
 export async function PATCH(request: NextRequest, { params }: { params: Params }) {

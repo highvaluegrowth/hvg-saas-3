@@ -7,6 +7,9 @@ import type { Content, FunctionCall, Part } from '@google/genai';
 import { residentTools, executeResidentTool } from '@/lib/ai/tools/mobile-tools';
 import { buildResidentSystemPrompt } from '@/lib/ai/prompts/hvg-companion';
 
+export const dynamic = 'force-dynamic';
+
+
 const ChatSchema = z.object({
     message: z.string().min(1),
     conversationId: z.string().optional(),

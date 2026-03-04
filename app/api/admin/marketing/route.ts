@@ -4,6 +4,9 @@ import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { adminDb } from '@/lib/firebase/admin';
 import { templatesService } from '@/features/marketing/services/templatesService';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function GET(request: NextRequest) {
     try {
         const token = await verifyAuthToken(request);

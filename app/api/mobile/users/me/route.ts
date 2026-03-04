@@ -3,6 +3,9 @@ import { verifyResidentToken } from '@/lib/middleware/residentAuthMiddleware';
 import { appUserService } from '@/features/appUser/services/appUserService';
 import { UpdateAppUserSchema } from '@/features/appUser/schemas/appUser.schemas';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function GET(request: NextRequest) {
   try {
     const { appUser } = await verifyResidentToken(request);

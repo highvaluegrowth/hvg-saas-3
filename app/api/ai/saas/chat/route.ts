@@ -7,6 +7,9 @@ import type { Content, FunctionCall, Part } from '@google/genai';
 import { operatorTools, executeOperatorTool } from '@/lib/ai/tools/saas-tools';
 import { buildOperatorSystemPrompt } from '@/lib/ai/prompts/hvg-partner';
 
+export const dynamic = 'force-dynamic';
+
+
 const ChatSchema = z.object({
     message: z.string().min(1),
     conversationId: z.string().optional(),

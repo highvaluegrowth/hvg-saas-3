@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { courseService, CurriculumModule } from '@/features/lms/services/courseService';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function PUT(
     request: NextRequest,
     { params }: { params: Promise<{ tenantId: string; courseId: string }> }

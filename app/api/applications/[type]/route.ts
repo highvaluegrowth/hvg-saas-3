@@ -3,6 +3,9 @@ import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { adminDb as db } from '@/lib/firebase/admin';
 import type { ApplicationType } from '@/features/applications/types';
 
+export const dynamic = 'force-dynamic';
+
+
 const VALID_TYPES: ApplicationType[] = ['bed', 'staff', 'course', 'event'];
 
 export async function POST(

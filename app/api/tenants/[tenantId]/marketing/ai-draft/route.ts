@@ -5,6 +5,9 @@ import { GoogleGenAI } from '@google/genai';
 import { adminDb } from '@/lib/firebase/admin';
 import type { PostType, DraftPostResult } from '@/features/marketing/types';
 
+export const dynamic = 'force-dynamic';
+
+
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 
 const POST_TYPE_PROMPTS: Record<PostType, string> = {

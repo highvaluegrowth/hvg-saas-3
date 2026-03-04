@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyResidentTenantAccess } from '@/lib/middleware/residentAuthMiddleware';
 import { adminDb } from '@/lib/firebase/admin';
 
+export const dynamic = 'force-dynamic';
+
+
 type Params = Promise<{ tenantId: string }>;
 
 export async function GET(request: NextRequest, { params }: { params: Params }) {

@@ -3,6 +3,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { postsService } from '@/features/marketing/services/postsService';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function GET(
     request: NextRequest,
     { params }: { params: Promise<{ tenantId: string }> }

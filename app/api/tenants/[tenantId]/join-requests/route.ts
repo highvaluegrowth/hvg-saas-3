@@ -4,6 +4,9 @@ import { adminDb } from '@/lib/firebase/admin';
 import { canWrite } from '@/lib/utils/permissions';
 import type { UserRole } from '@/features/auth/types/auth.types';
 
+export const dynamic = 'force-dynamic';
+
+
 type Params = Promise<{ tenantId: string }>;
 
 export async function GET(request: NextRequest, { params }: { params: Params }) {

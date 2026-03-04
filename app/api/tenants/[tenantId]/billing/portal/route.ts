@@ -4,6 +4,9 @@ import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { adminDb } from '@/lib/firebase/admin';
 import { stripe } from '@/lib/stripe/server';
 
+export const dynamic = 'force-dynamic';
+
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ tenantId: string }> }
