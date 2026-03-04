@@ -19,7 +19,7 @@ interface ChatResponse {
 }
 
 export async function sendChatMessage({ message, conversationId, pathname, userRole }: SendChatParams): Promise<ChatResponse> {
-    const isOperator = ['admin', 'house_manager', 'staff', 'super_admin'].includes(userRole);
+    const isOperator = ['tenant_admin', 'staff_admin', 'admin', 'house_manager', 'staff', 'super_admin'].includes(userRole);
 
     // Transform the message if it's a known slash command
     let processedMessage = message;
@@ -34,13 +34,14 @@ export async function sendChatMessage({ message, conversationId, pathname, userR
 
     const routeContext = getRouteContext(pathname);
     const token = await authService.getIdToken();
+    if (!token) throw new Error('Not authenticated. Please log in and try again.');
     const endpoint = isOperator ? '/api/ai/saas/chat' : '/api/ai/mobile/chat';
 
     const res = await fetch(endpoint, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+            'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({
             message: processedMessage,

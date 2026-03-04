@@ -3,6 +3,7 @@
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { authService } from '@/features/auth/services/authService';
 import { FileUploader } from '@/components/ui/FileUploader';
 
 export default function ApplicationWizardPage() {
@@ -31,7 +32,10 @@ export default function ApplicationWizardPage() {
 
         async function fetchApplication() {
             try {
-                const res = await fetch(`/api/tenants/${applicationId}`);
+                const token = await authService.getIdToken();
+                const res = await fetch(`/api/tenants/${applicationId}`, {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                });
                 if (!res.ok) throw new Error('Failed to load application');
 
                 const data = await res.json();
@@ -53,17 +57,21 @@ export default function ApplicationWizardPage() {
     }, [user, authLoading, applicationId, router]);
 
     const handleSave = async () => {
-        // Save draft
         try {
+            const token = await authService.getIdToken();
             await fetch(`/api/tenants/${applicationId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
                 },
                 body: JSON.stringify({
                     name: formData.name || 'Draft Application',
-                    // we could add more fields to tenant model depending on needs
-                })
+                    contactEmail: formData.contactEmail,
+                    contactPhone: formData.contactPhone,
+                    governmentIdUrl: formData.governmentIdUrl,
+                    businessDocUrl: formData.businessDocUrl,
+                }),
             });
         } catch (err) {
             console.error('Failed to save draft:', err);
@@ -71,22 +79,29 @@ export default function ApplicationWizardPage() {
     };
 
     const handleSubmit = async () => {
-        // Change status from draft to pending
         try {
-            await fetch(`/api/tenants/${applicationId}`, {
+            const token = await authService.getIdToken();
+            const res = await fetch(`/api/tenants/${applicationId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
                 },
                 body: JSON.stringify({
                     name: formData.name,
-                    status: 'pending'
-                })
+                    contactEmail: formData.contactEmail,
+                    contactPhone: formData.contactPhone,
+                    governmentIdUrl: formData.governmentIdUrl,
+                    businessDocUrl: formData.businessDocUrl,
+                    status: 'pending',
+                }),
             });
-            alert('Application submitted successfully!');
-            router.push('/dashboard');
+            if (!res.ok) throw new Error('Submission failed');
+            alert('Application submitted! We\'ll review it and be in touch shortly.');
+            router.push(`/${applicationId}`);
         } catch (err) {
             console.error('Failed to submit application:', err);
+            alert('Submission failed. Please try again.');
         }
     };
 

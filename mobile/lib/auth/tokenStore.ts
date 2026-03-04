@@ -8,22 +8,26 @@ export async function saveAuthToken(token: string): Promise<void> {
 }
 
 /**
- * Returns the saved auth token.
- * If SecureStore is empty (e.g. fresh install, cleared storage),
- * falls back to asking Firebase for a fresh token and saves it.
+ * Returns a valid auth token, always preferring Firebase Auth as the source
+ * of truth (which handles token expiry and auto-refresh internally).
+ * SecureStore is updated on each successful Firebase fetch and used only
+ * as a last-resort fallback when Firebase is unavailable.
  */
 export async function getAuthToken(): Promise<string | null> {
-  let token = await SecureStore.getItemAsync(TOKEN_KEY);
-
-  if (!token) {
-    const currentUser = auth().currentUser;
-    if (currentUser) {
-      token = await currentUser.getIdToken(true);
+  const currentUser = auth().currentUser;
+  if (currentUser) {
+    try {
+      // getIdToken(false) returns cached token if still valid, auto-refreshes if expired
+      const token = await currentUser.getIdToken(false);
       await SecureStore.setItemAsync(TOKEN_KEY, token);
+      return token;
+    } catch (err) {
+      console.warn('[tokenStore] Firebase token refresh failed, falling back to store:', err);
     }
   }
 
-  return token;
+  // Fallback: use stored token (e.g. Firebase not yet initialized, or offline)
+  return SecureStore.getItemAsync(TOKEN_KEY);
 }
 
 export async function clearAuthToken(): Promise<void> {

@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
         await newDoc.set({
             name: reqName,
             slug: slug,
-            status: 'pending', // Use pending to trigger the banner or use 'draft' if we want them to finish the wizard. Let's start with draft.
+            status: 'draft',
             ownerId: uid,
             createdAt: new Date(),
             updatedAt: new Date(),

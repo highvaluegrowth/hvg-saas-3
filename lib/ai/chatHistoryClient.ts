@@ -7,7 +7,7 @@ export async function fetchChatHistory(conversationId: string): Promise<ChatMess
     const token = await auth.currentUser?.getIdToken();
     if (!token) throw new Error('Not authenticated');
 
-    const res = await fetch(`/api/ai/chat/history?conversationId=${conversationId}`, {
+    const res = await fetch(`/api/ai/saas/chat/history?conversationId=${conversationId}`, {
         headers: {
             Authorization: `Bearer ${token}`
         }

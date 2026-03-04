@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
         const { message, conversationId, routeContext } = parsed.data;
 
         // SaaS Route requires Operator role
-        const isOperator = decodedToken.role && ['admin', 'house_manager', 'staff', 'super_admin'].includes(decodedToken.role);
+        const isOperator = decodedToken.role && ['tenant_admin', 'staff_admin', 'admin', 'house_manager', 'staff', 'super_admin'].includes(decodedToken.role as string);
         if (!isOperator) {
             return NextResponse.json({ error: 'Access restricted to SaaS Operators' }, { status: 403 });
         }

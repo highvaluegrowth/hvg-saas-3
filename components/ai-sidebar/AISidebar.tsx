@@ -36,7 +36,7 @@ export function AISidebar() {
     // Auto-set persona based on role
     useEffect(() => {
         if (user?.role) {
-            const isOperator = ['admin', 'house_manager', 'staff', 'super_admin'].includes(user.role);
+            const isOperator = ['tenant_admin', 'staff_admin', 'admin', 'house_manager', 'staff', 'super_admin'].includes(user.role);
             setPersona(isOperator ? 'operator' : 'recovery');
         }
     }, [user?.role, setPersona]);
