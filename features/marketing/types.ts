@@ -7,6 +7,17 @@ export type PostType = 'bed_availability' | 'success_story' | 'event_promo' | 'j
 export type PostStatus = 'draft' | 'scheduled' | 'published' | 'failed';
 export type AccountStatus = 'active' | 'expired' | 'revoked';
 
+export interface PostEngagement {
+    likes?: number;
+    comments?: number;
+    shares?: number;
+    impressions?: number;
+    reach?: number;
+    clicks?: number;
+    engagementRate?: number;   // (likes+comments+shares)/impressions * 100
+    fetchedAt?: string;        // ISO string — last time we synced from the platform API
+}
+
 export interface SocialPost {
     id: string;
     tenantId: string;
@@ -22,6 +33,7 @@ export interface SocialPost {
     updatedAt: string;
     aiGenerated: boolean;
     sourceContext: Record<string, unknown>;
+    engagement?: PostEngagement;
 }
 
 export interface SocialAccount {

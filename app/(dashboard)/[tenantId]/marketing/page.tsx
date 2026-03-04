@@ -53,11 +53,12 @@ export default function MarketingHubPage({ params }: { params: Promise<{ tenantI
             </div>
 
             {/* Quick links */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 {[
-                    { label: 'All Posts', href: `/${tenantId}/marketing/posts`, icon: '📋', desc: 'View and manage all posts' },
-                    { label: 'Compose', href: `/${tenantId}/marketing/compose`, icon: '✍️', desc: 'AI-powered content creator' },
-                    { label: 'Connected Accounts', href: `/${tenantId}/marketing/accounts`, icon: '🔗', desc: 'Manage social platforms' },
+                    { label: 'All Posts',          href: `/${tenantId}/marketing/posts`,     icon: '📋', desc: 'View and manage all posts' },
+                    { label: 'Compose',            href: `/${tenantId}/marketing/compose`,   icon: '✍️', desc: 'AI-powered content creator' },
+                    { label: 'Connected Accounts', href: `/${tenantId}/marketing/accounts`,  icon: '🔗', desc: 'Manage social platforms' },
+                    { label: 'Analytics',          href: `/${tenantId}/marketing/analytics`, icon: '📊', desc: 'Performance and content insights' },
                 ].map(card => (
                     <Link key={card.href} href={card.href}
                         className="bg-white rounded-xl border border-gray-200 p-5 hover:border-emerald-300 hover:shadow-sm transition-all group">
