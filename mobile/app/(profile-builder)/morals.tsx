@@ -5,6 +5,7 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { userApi } from '@/lib/api/routes';
+import { useAuth } from '@/lib/auth/AuthContext';
 import type { MoralResponse, MoralQuestionType } from '@shared/types/profile';
 
 // ─── Question Data ────────────────────────────────────────────────────────────
@@ -117,6 +118,7 @@ const LikertQuestion = React.memo(({ q, value, onAnswer }: { q: Question; value:
 
 export default function MoralsScreen() {
     const router = useRouter();
+    const { refreshAppUser } = useAuth();
     const [answers, setAnswers] = useState<Record<string, string | number>>({});
     const [saving, setSaving] = useState(false);
 
@@ -135,6 +137,7 @@ export default function MoralsScreen() {
                 return { questionId, type: q.type, answer, answeredAt: new Date().toISOString() };
             });
             await userApi.updateMe({ morals: responses, profileComplete: true });
+            await refreshAppUser();
             router.replace('/(tabs)');
         } finally { setSaving(false); }
     };
@@ -143,6 +146,7 @@ export default function MoralsScreen() {
         setSaving(true);
         try {
             await userApi.updateMe({ profileComplete: true });
+            await refreshAppUser();
             router.replace('/(tabs)');
         } finally { setSaving(false); }
     };

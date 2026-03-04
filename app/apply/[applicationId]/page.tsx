@@ -14,6 +14,8 @@ export default function ApplicationWizardPage() {
     const [loading, setLoading] = useState(true);
     const [tenant, setTenant] = useState<any>(null);
     const [step, setStep] = useState(1);
+    const [submitted, setSubmitted] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
     const [formData, setFormData] = useState({
         name: '',
         address: '',
@@ -41,10 +43,15 @@ export default function ApplicationWizardPage() {
                 const data = await res.json();
                 setTenant(data.tenant);
 
-                // Populate initial form data from draft if it exists
+                // Hydrate all draft fields
+                const t = data.tenant;
                 setFormData(prev => ({
                     ...prev,
-                    name: data.tenant.name === 'Draft Application' ? '' : data.tenant.name,
+                    name: t.name === 'Draft Application' ? '' : (t.name ?? ''),
+                    contactEmail: t.contactEmail ?? '',
+                    contactPhone: t.contactPhone ?? '',
+                    governmentIdUrl: t.governmentIdUrl ?? '',
+                    businessDocUrl: t.businessDocUrl ?? '',
                 }));
             } catch (err) {
                 console.error(err);
@@ -57,9 +64,10 @@ export default function ApplicationWizardPage() {
     }, [user, authLoading, applicationId, router]);
 
     const handleSave = async () => {
+        setSaveError(null);
         try {
             const token = await authService.getIdToken();
-            await fetch(`/api/tenants/${applicationId}`, {
+            const res = await fetch(`/api/tenants/${applicationId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -73,8 +81,10 @@ export default function ApplicationWizardPage() {
                     businessDocUrl: formData.businessDocUrl,
                 }),
             });
+            if (!res.ok) throw new Error('Failed to save draft');
         } catch (err) {
             console.error('Failed to save draft:', err);
+            setSaveError('Failed to save your progress. Please check your connection and try again.');
         }
     };
 
@@ -97,8 +107,7 @@ export default function ApplicationWizardPage() {
                 }),
             });
             if (!res.ok) throw new Error('Submission failed');
-            alert('Application submitted! We\'ll review it and be in touch shortly.');
-            router.push(`/${applicationId}`);
+            setSubmitted(true);
         } catch (err) {
             console.error('Failed to submit application:', err);
             alert('Submission failed. Please try again.');
@@ -109,10 +118,31 @@ export default function ApplicationWizardPage() {
         return <div className="flex-1 flex items-center justify-center p-8">Loading...</div>;
     }
 
+    if (submitted) {
+        return (
+            <div className="flex-1 container mx-auto max-w-3xl py-12 px-4">
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 text-center">
+                    <div className="text-5xl mb-4">🎉</div>
+                    <h2 className="text-2xl font-bold text-slate-900 mb-2">Application Submitted!</h2>
+                    <p className="text-slate-500 mb-6">
+                        Thank you for applying to partner with HVG. Our team will review your application and reach out to you at <strong>{formData.contactEmail}</strong> shortly.
+                    </p>
+                    <p className="text-xs text-slate-400">Application ID: {applicationId}</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex-1 container mx-auto max-w-3xl py-12 px-4">
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
                 <h2 className="text-2xl font-bold text-slate-900 mb-6">Partner Application</h2>
+
+                {saveError && (
+                    <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                        {saveError}
+                    </div>
+                )}
 
                 <div className="mb-8">
                     <div className="flex items-center justify-between mb-2">
