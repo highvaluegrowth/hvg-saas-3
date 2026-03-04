@@ -31,7 +31,7 @@ export interface Lesson {
     title: string;
     description?: string;
     order: number;
-    type: 'VIDEO' | 'TEXT' | 'QUIZ';
+    type: 'VIDEO' | 'TEXT' | 'QUIZ' | 'SLIDES';
     requiredPhase?: number; // Phase required to access this lesson
     content?: string; // TipTap HTML or JSON for TEXT lessons
     muxPlaybackId?: string; // For VIDEO

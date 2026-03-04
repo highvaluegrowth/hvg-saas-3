@@ -2,12 +2,18 @@
 import { adminDb } from '@/lib/firebase/admin';
 import { QuizQuestion } from '@/types/lms/course';
 
+export interface SlideItem {
+  id: string;
+  imageUrl: string;
+  caption?: string;
+}
+
 export interface LessonDoc {
   id: string;
   courseId: string;
   tenantId: string;
   title: string;
-  type: 'VIDEO' | 'TEXT' | 'QUIZ';
+  type: 'VIDEO' | 'TEXT' | 'QUIZ' | 'SLIDES';
   order: number;
   // VIDEO fields
   videoUrl?: string;
@@ -16,6 +22,8 @@ export interface LessonDoc {
   content?: string; // TipTap HTML
   // QUIZ fields
   questions?: QuizQuestion[];
+  // SLIDES fields
+  slides?: SlideItem[];
   createdAt: string;
   updatedAt: string;
 }

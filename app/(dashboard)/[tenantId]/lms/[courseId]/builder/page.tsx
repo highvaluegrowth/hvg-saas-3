@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { auth } from '@/lib/firebase/client';
 
 // Mock types for the local state representation
-type LessonType = 'VIDEO' | 'TEXT' | 'QUIZ';
+type LessonType = 'VIDEO' | 'TEXT' | 'QUIZ' | 'SLIDES';
 
 interface LocalLesson {
     id: string;
@@ -46,13 +46,13 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ tenant
                 const curriculum = data.course?.curriculum;
                 if (!cancelled && Array.isArray(curriculum) && curriculum.length > 0) {
                     // Map CurriculumModule[] -> LocalModule[]
-                    const loaded: LocalModule[] = curriculum.map((m: { id: string; title: string; lessons: { id: string; title: string; type: LessonType }[] }) => ({
+                    const loaded: LocalModule[] = curriculum.map((m: { id: string; title: string; lessons: { id: string; title: string; type: string }[] }) => ({
                         id: m.id,
                         title: m.title,
-                        lessons: (m.lessons ?? []).map((l: { id: string; title: string; type: LessonType }) => ({
+                        lessons: (m.lessons ?? []).map((l: { id: string; title: string; type: string }) => ({
                             id: l.id,
                             title: l.title,
-                            type: l.type,
+                            type: (l.type as LessonType) || 'TEXT',
                         })),
                     }));
                     setModules(loaded);
@@ -202,13 +202,16 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ tenant
                 {/* Add Lesson Controls */}
                 <div className="pt-2 flex flex-wrap gap-2">
                     <button onClick={() => handleAddLesson(mod.id, 'VIDEO')} className="text-xs bg-muted hover:bg-secondary border border-border px-3 py-1.5 rounded font-medium transition-colors">
-                        + Video
+                        🎬 Video
                     </button>
                     <button onClick={() => handleAddLesson(mod.id, 'TEXT')} className="text-xs bg-muted hover:bg-secondary border border-border px-3 py-1.5 rounded font-medium transition-colors">
-                        + Text
+                        📝 Text
                     </button>
                     <button onClick={() => handleAddLesson(mod.id, 'QUIZ')} className="text-xs bg-muted hover:bg-secondary border border-border px-3 py-1.5 rounded font-medium transition-colors">
-                        + Quiz
+                        📋 Quiz
+                    </button>
+                    <button onClick={() => handleAddLesson(mod.id, 'SLIDES')} className="text-xs bg-muted hover:bg-secondary border border-border px-3 py-1.5 rounded font-medium transition-colors">
+                        🖼️ Slides
                     </button>
                 </div>
             </div>

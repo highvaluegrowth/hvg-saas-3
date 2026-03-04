@@ -365,6 +365,123 @@ function RandomizedPoolConfig({ question, onChange }: { question: QuizQuestion; 
     );
 }
 
+
+// ─── Multiple Choice with per-option feedback ─────────────────────────────────
+
+function MultipleChoiceConfig({ question, onChange }: { question: QuizQuestion; onChange: (q: QuizQuestion) => void }) {
+    type ChoiceOption = { text: string; isCorrect: boolean; feedback: string };
+
+    // Hydrate from metadata.choiceOptions; fall back to migrating old options[] format
+    const choices: ChoiceOption[] = (question.metadata?.choiceOptions as ChoiceOption[]) ||
+        (question.options && question.options.length > 0
+            ? question.options.map((opt: string) => ({
+                text: opt,
+                isCorrect: opt === (question.correctAnswer as string),
+                feedback: '',
+            }))
+            : [
+                { text: '', isCorrect: false, feedback: '' },
+                { text: '', isCorrect: false, feedback: '' },
+                { text: '', isCorrect: false, feedback: '' },
+                { text: '', isCorrect: false, feedback: '' },
+            ]);
+
+    const syncAndUpdate = (next: ChoiceOption[]) => {
+        const correct = next.find(c => c.isCorrect);
+        onChange({
+            ...question,
+            options: next.map(c => c.text),
+            correctAnswer: correct?.text || '',
+            metadata: { ...question.metadata, choiceOptions: next },
+        });
+    };
+
+    const updateChoice = (i: number, field: keyof ChoiceOption, value: string | boolean) => {
+        const next = choices.map((c, idx) => ({ ...c })); // clone
+        (next[i] as Record<string, unknown>)[field] = value;
+        // Single correct answer — unmark others when marking one
+        if (field === 'isCorrect' && value === true) {
+            next.forEach((c, idx) => { if (idx !== i) c.isCorrect = false; });
+        }
+        syncAndUpdate(next);
+    };
+
+    const addChoice = () => syncAndUpdate([...choices, { text: '', isCorrect: false, feedback: '' }]);
+    const removeChoice = (i: number) => syncAndUpdate(choices.filter((_, idx) => idx !== i));
+
+    return (
+        <div className="space-y-2">
+            <p className="text-xs text-muted-foreground mb-2">
+                Click the letter button to mark the correct answer. Add optional feedback shown after the student answers.
+            </p>
+            {choices.map((choice, i) => (
+                <div
+                    key={i}
+                    className={`border rounded-lg p-3 space-y-2 transition-colors ${
+                        choice.isCorrect
+                            ? 'border-emerald-300 bg-emerald-50/60 dark:bg-emerald-950/20'
+                            : 'border-border bg-background'
+                    }`}
+                >
+                    <div className="flex items-center gap-2">
+                        {/* Correct toggle — letter turns to checkmark when selected */}
+                        <button
+                            type="button"
+                            onClick={() => updateChoice(i, 'isCorrect', !choice.isCorrect)}
+                            className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+                                choice.isCorrect
+                                    ? 'bg-emerald-500 text-white'
+                                    : 'bg-muted text-muted-foreground hover:bg-secondary border border-border'
+                            }`}
+                            title={choice.isCorrect ? 'Correct answer (click to unmark)' : 'Mark as correct answer'}
+                        >
+                            {choice.isCorrect ? '✓' : String.fromCharCode(65 + i)}
+                        </button>
+                        <TextInput
+                            value={choice.text}
+                            onChange={v => updateChoice(i, 'text', v)}
+                            placeholder={`Option ${String.fromCharCode(65 + i)}`}
+                        />
+                        <button
+                            type="button"
+                            onClick={() => removeChoice(i)}
+                            className="text-destructive hover:text-destructive/80 shrink-0 px-1"
+                            title="Remove option"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                    {/* Per-option feedback */}
+                    <div className="pl-9">
+                        <input
+                            type="text"
+                            className={`w-full p-1.5 border rounded-md text-xs ${
+                                choice.isCorrect
+                                    ? 'border-emerald-200 bg-emerald-50 placeholder:text-emerald-400 focus:ring-emerald-300'
+                                    : 'border-rose-200 bg-rose-50 placeholder:text-rose-400 focus:ring-rose-300'
+                            } outline-none focus:ring-1`}
+                            placeholder={
+                                choice.isCorrect
+                                    ? 'Correct! Add feedback text (optional)...'
+                                    : 'Not quite. Add feedback text (optional)...'
+                            }
+                            value={choice.feedback}
+                            onChange={e => updateChoice(i, 'feedback', e.target.value)}
+                        />
+                    </div>
+                </div>
+            ))}
+            <button
+                type="button"
+                onClick={addChoice}
+                className="text-xs border border-border bg-muted hover:bg-secondary px-3 py-1.5 rounded font-medium"
+            >
+                + Add Option
+            </button>
+        </div>
+    );
+}
+
 // ─── Main Component ────────────────────────────────────────────────────────────
 
 export function QuizQuestionBuilder({ question, onChange, onDelete }: QuizQuestionBuilderProps) {
@@ -380,28 +497,7 @@ export function QuizQuestionBuilder({ question, onChange, onDelete }: QuizQuesti
     const renderSpecificOptions = () => {
         switch (question.type) {
             case 'MULTIPLE_CHOICE':
-                return (
-                    <div className="space-y-2">
-                        <Field label="Options (comma separated)">
-                            <input
-                                type="text"
-                                className="w-full p-2 border border-border bg-background rounded-md text-sm"
-                                placeholder="Option A, Option B, Option C, Option D"
-                                value={question.options?.join(', ') || ''}
-                                onChange={(e) => onChange({ ...question, options: e.target.value.split(',').map(s => s.trim()) })}
-                            />
-                        </Field>
-                        <Field label="Correct Answer">
-                            <input
-                                type="text"
-                                className="w-full p-2 border border-border bg-background rounded-md text-sm"
-                                placeholder="Option A"
-                                value={question.correctAnswer as string || ''}
-                                onChange={(e) => onChange({ ...question, correctAnswer: e.target.value })}
-                            />
-                        </Field>
-                    </div>
-                );
+                return <MultipleChoiceConfig question={question} onChange={onChange} />;
             case 'TRUE_FALSE':
                 return (
                     <Field label="Correct Answer">

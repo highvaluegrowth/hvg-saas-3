@@ -6,9 +6,91 @@ import { auth } from '@/lib/firebase/client';
 import { RichTextEditor } from '@/components/lms/RichTextEditor';
 import { QuizQuestionBuilder } from '@/components/lms/quiz/QuizQuestionBuilder';
 import { QuizQuestion } from '@/types/lms/course';
-import { LessonDoc } from '@/features/lms/services/lessonService';
+import { LessonDoc, SlideItem } from '@/features/lms/services/lessonService';
 
-type LessonType = 'VIDEO' | 'TEXT' | 'QUIZ';
+type LessonType = 'VIDEO' | 'TEXT' | 'QUIZ' | 'SLIDES';
+
+// ─── Slides Editor ────────────────────────────────────────────────────────────
+
+function SlidesEditor({ slides, onChange }: { slides: SlideItem[]; onChange: (s: SlideItem[]) => void }) {
+    const addSlide = () => {
+        onChange([...slides, { id: 's-' + Date.now(), imageUrl: '', caption: '' }]);
+    };
+    const removeSlide = (i: number) => onChange(slides.filter((_, idx) => idx !== i));
+    const moveSlide = (i: number, dir: -1 | 1) => {
+        const next = [...slides];
+        const j = i + dir;
+        if (j < 0 || j >= next.length) return;
+        [next[i], next[j]] = [next[j], next[i]];
+        onChange(next);
+    };
+    const updateSlide = (i: number, field: keyof SlideItem, value: string) => {
+        onChange(slides.map((s, idx) => idx === i ? { ...s, [field]: value } : s));
+    };
+
+    return (
+        <div className="space-y-4">
+            {slides.length === 0 && (
+                <div className="py-10 border-2 border-dashed border-border rounded-xl text-center">
+                    <p className="text-muted-foreground text-sm">No slides yet. Add your first slide below.</p>
+                </div>
+            )}
+            {slides.map((slide, i) => (
+                <div key={slide.id} className="border border-border rounded-xl p-4 bg-card space-y-3">
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Slide {i + 1}</span>
+                        <div className="flex items-center gap-1">
+                            <button type="button" onClick={() => moveSlide(i, -1)} disabled={i === 0}
+                                className="text-xs px-2 py-1 border border-border rounded disabled:opacity-30 hover:bg-secondary">up</button>
+                            <button type="button" onClick={() => moveSlide(i, 1)} disabled={i === slides.length - 1}
+                                className="text-xs px-2 py-1 border border-border rounded disabled:opacity-30 hover:bg-secondary">dn</button>
+                            <button type="button" onClick={() => removeSlide(i)}
+                                className="text-xs px-2 py-1 text-destructive border border-destructive/30 rounded hover:bg-destructive/10">Remove</button>
+                        </div>
+                    </div>
+                    <div className="space-y-1">
+                        <label className="text-sm font-medium">Image URL</label>
+                        <input
+                            type="url"
+                            value={slide.imageUrl}
+                            onChange={e => updateSlide(i, 'imageUrl', e.target.value)}
+                            className="w-full p-2 border border-border bg-background rounded-md text-sm"
+                            placeholder="https://example.com/image.jpg or Cloudinary/S3 URL"
+                        />
+                    </div>
+                    {slide.imageUrl && (
+                        <div className="rounded-lg overflow-hidden border border-border max-h-56 flex items-center justify-center bg-muted/30">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={slide.imageUrl} alt={slide.caption || `Slide ${i + 1}`}
+                                className="max-h-56 object-contain w-full"
+                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                            />
+                        </div>
+                    )}
+                    <div className="space-y-1">
+                        <label className="text-sm font-medium">Caption <span className="text-muted-foreground font-normal">(optional)</span></label>
+                        <input
+                            type="text"
+                            value={slide.caption || ''}
+                            onChange={e => updateSlide(i, 'caption', e.target.value)}
+                            className="w-full p-2 border border-border bg-background rounded-md text-sm"
+                            placeholder="Describe this slide for learners..."
+                        />
+                    </div>
+                </div>
+            ))}
+            <button
+                type="button"
+                onClick={addSlide}
+                className="w-full border-2 border-dashed border-border rounded-xl py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+            >
+                + Add Slide
+            </button>
+        </div>
+    );
+}
+
+// ─── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function LessonEditorPage({
     params,
@@ -24,22 +106,19 @@ export default function LessonEditorPage({
     const [thumbnailUrl, setThumbnailUrl] = useState('');
     const [content, setContent] = useState('');
     const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+    const [slides, setSlides] = useState<SlideItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [saveError, setSaveError] = useState<string | null>(null);
 
-    // Derive embed URL from various video hosting formats
     const getEmbedUrl = (url: string): string | null => {
         if (!url) return null;
-        // YouTube
         const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&?/]+)/);
         if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
-        // Vimeo
         const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
         if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
-        // Mux
         if (url.includes('mux.com') || url.startsWith('https://stream.mux.com')) return url;
         return null;
     };
@@ -66,6 +145,7 @@ export default function LessonEditorPage({
                     setThumbnailUrl(l.thumbnailUrl || '');
                     setContent(l.content || '');
                     setQuestions(l.questions || []);
+                    setSlides(l.slides || []);
                 }
             } catch (err) {
                 if (!cancelled) setError(err instanceof Error ? err.message : String(err));
@@ -89,6 +169,7 @@ export default function LessonEditorPage({
                 ...(lessonType === 'VIDEO' ? { videoUrl, thumbnailUrl } : {}),
                 ...(lessonType === 'TEXT' ? { content } : {}),
                 ...(lessonType === 'QUIZ' ? { questions } : {}),
+                ...(lessonType === 'SLIDES' ? { slides } : {}),
             };
             const res = await fetch(
                 `/api/tenants/${tenantId}/lms/courses/${courseId}/lessons/${lessonId}`,
@@ -131,6 +212,10 @@ export default function LessonEditorPage({
 
     const embedUrl = lessonType === 'VIDEO' ? getEmbedUrl(videoUrl) : null;
 
+    const TYPE_ICONS: Record<LessonType, string> = {
+        VIDEO: 'Video', TEXT: 'Text', QUIZ: 'Quiz', SLIDES: 'Slides',
+    };
+
     if (loading) {
         return (
             <div className="p-6 flex items-center justify-center h-64">
@@ -141,23 +226,24 @@ export default function LessonEditorPage({
 
     return (
         <div className="p-6 max-w-4xl mx-auto space-y-6">
-            {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
                     <Link
                         href={`/${tenantId}/lms/${courseId}/builder`}
                         className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 mb-2"
                     >
-                        ← Back to Course Builder
+                        back to Course Builder
                     </Link>
                     <h1 className="text-2xl font-bold tracking-tight">Lesson Editor</h1>
                     <p className="text-muted-foreground text-sm mt-1">
-                        <span className="capitalize bg-secondary text-secondary-foreground px-2 py-0.5 rounded text-xs font-medium mr-2">{lessonType}</span>
-                        Configure this lesson's content.
+                        <span className="capitalize bg-secondary text-secondary-foreground px-2 py-0.5 rounded text-xs font-medium mr-2">
+                            {TYPE_ICONS[lessonType]}
+                        </span>
+                        Configure this lesson content.
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
-                    {saved && <span className="text-sm text-emerald-600 font-medium">Saved ✓</span>}
+                    {saved && <span className="text-sm text-emerald-600 font-medium">Saved</span>}
                     {saveError && <span className="text-sm text-destructive">{saveError}</span>}
                     <button
                         onClick={handleSave}
@@ -175,7 +261,6 @@ export default function LessonEditorPage({
                 </div>
             )}
 
-            {/* Title */}
             <div className="bg-card border border-border rounded-xl p-5 shadow-sm space-y-3">
                 <label className="text-sm font-medium block">Lesson Title</label>
                 <input
@@ -187,7 +272,6 @@ export default function LessonEditorPage({
                 />
             </div>
 
-            {/* VIDEO */}
             {lessonType === 'VIDEO' && (
                 <div className="bg-card border border-border rounded-xl p-5 shadow-sm space-y-4">
                     <h2 className="font-semibold">Video Content</h2>
@@ -230,7 +314,6 @@ export default function LessonEditorPage({
                 </div>
             )}
 
-            {/* TEXT */}
             {lessonType === 'TEXT' && (
                 <div className="bg-card border border-border rounded-xl p-5 shadow-sm space-y-3">
                     <h2 className="font-semibold">Text Content</h2>
@@ -238,7 +321,19 @@ export default function LessonEditorPage({
                 </div>
             )}
 
-            {/* QUIZ */}
+            {lessonType === 'SLIDES' && (
+                <div className="bg-card border border-border rounded-xl p-5 shadow-sm space-y-4">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h2 className="font-semibold">Slide Deck</h2>
+                            <p className="text-xs text-muted-foreground mt-0.5">Add images with optional captions. Learners swipe through slides in order.</p>
+                        </div>
+                        <span className="text-sm text-muted-foreground">{slides.length} slide{slides.length !== 1 ? 's' : ''}</span>
+                    </div>
+                    <SlidesEditor slides={slides} onChange={setSlides} />
+                </div>
+            )}
+
             {lessonType === 'QUIZ' && (
                 <div className="bg-card border border-border rounded-xl p-5 shadow-sm space-y-4">
                     <div className="flex items-center justify-between">

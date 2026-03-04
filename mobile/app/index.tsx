@@ -24,7 +24,7 @@ export default function IndexPage() {
           router.replace('/(tabs)');
         }
       } else {
-        router.replace('/(auth)/login');
+        router.replace('/login');
       }
     }
   }, [firebaseUser, appUser, loading, router]);
