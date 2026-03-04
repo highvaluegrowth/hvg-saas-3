@@ -2,9 +2,10 @@
 
 ## Git Status
 Branch: `main`
-Latest commit: `315caf5` — feat: iOS App Store config — infoPlist, privacy manifest, EAS submit config
-Remote: push pending at session close
-Vercel: auto-deploys on push
+Latest commit: `4f42cd1` — feat: marketing analytics dashboard
+Remote: ✅ Pushed (`e22c1cf..4f42cd1`)
+Vercel: ✅ Auto-deployed
+Mobile OTA: ✅ Update group `4d8e1489-9929-4e66-a09f-1f84c700ffdf` (production branch, both platforms)
 
 ## GitHub Push
 - Remote: `https://github.com/highvaluegrowth/hvg-saas-3.git` (HTTPS)
@@ -92,16 +93,18 @@ Vercel: auto-deploys on push
 
 ## Still To Do (next session picks up here)
 
-1. **TikTok / X / LinkedIn OAuth stubs** — IN PROGRESS
-   - Create `app/api/oauth/tiktok/authorize/route.ts` + callback
-   - Create `app/api/oauth/x/authorize/route.ts` + callback
-   - Create `app/api/oauth/linkedin/authorize/route.ts` + callback
-   - Update accounts page: per-platform window.location.href routing (not alert)
-   - Update `.env.example` with their credential vars
+1. **TikTok / X / LinkedIn real OAuth** — stubs are live (501 when env vars unset); need developer app credentials for each platform to implement full token exchange
+   - TikTok: tiktok.com/tiktok-for-developers
+   - X/Twitter: developer.twitter.com
+   - LinkedIn: developer.linkedin.com
 
-2. **Marketing analytics dashboard** — TODO
+2. **Stripe webhook testing** — `stripe listen --forward-to localhost:3000/api/webhooks/stripe`
 
-3. **Closing: git push + eas update**
+3. **iOS App Store build** — waiting on Apple Developer account ($99/yr at developer.apple.com)
+
+4. **Quiz question types** — 2 of 12 implemented
+
+5. **Engagement data sync** — `PostEngagement` type added; wire up Meta Graph API `/{post-id}/insights` polling once App Review approved
 
 ---
 
