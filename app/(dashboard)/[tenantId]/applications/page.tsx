@@ -1,7 +1,7 @@
 'use client';
 
 import { use, useEffect, useState, useCallback } from 'react';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { authService } from '@/features/auth/services/authService';
 import type { Application, ApplicationStatus, ApplicationType } from '@/features/applications/types';
 
 const STATUS_CONFIG: Record<ApplicationStatus, { label: string; color: string }> = {
@@ -26,7 +26,6 @@ type FilterType = ApplicationType | 'all';
 
 export default function ApplicationsPage({ params }: { params: Promise<{ tenantId: string }> }) {
   const { tenantId } = use(params);
-  const { user } = useAuth();
 
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
@@ -44,11 +43,10 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
   const [actionLoading, setActionLoading] = useState(false);
 
   const fetchApplications = useCallback(async () => {
-    if (!user) return;
     setLoading(true);
     setError(null);
     try {
-      const token = await user.getIdToken();
+      const token = await authService.getIdToken();
       const qs = new URLSearchParams();
       if (statusFilter !== 'all') qs.set('status', statusFilter);
       if (typeFilter !== 'all') qs.set('type', typeFilter);
@@ -74,10 +72,10 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
   }, [fetchApplications]);
 
   const handleAction = async (action: 'accepted' | 'rejected') => {
-    if (!confirming || !user) return;
+    if (!confirming) return;
     setActionLoading(true);
     try {
-      const token = await user.getIdToken();
+      const token = await authService.getIdToken();
       const res = await fetch(`/api/tenants/${tenantId}/applications`, {
         method: 'PATCH',
         headers: {
