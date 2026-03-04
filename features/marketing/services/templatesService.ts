@@ -26,6 +26,7 @@ export const templatesService = {
         return template;
     },
 
+    // MarketingTemplate has no updatedAt field — state changes via 'active' boolean toggle only.
     async update(templateId: string, updates: Partial<MarketingTemplate>): Promise<void> {
         await adminDb.collection('marketingTemplates').doc(templateId).update(updates);
     },

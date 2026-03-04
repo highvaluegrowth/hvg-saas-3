@@ -1,5 +1,6 @@
 // features/marketing/services/accountsService.ts
 import { adminDb } from '@/lib/firebase/admin';
+import { FieldValue } from 'firebase-admin/firestore';
 import type { SocialAccount } from '../types';
 
 function accountsRef(tenantId: string) {
@@ -15,7 +16,7 @@ export const accountsService = {
     async disconnect(tenantId: string, accountId: string): Promise<void> {
         await accountsRef(tenantId).doc(accountId).update({
             status: 'revoked',
-            accessToken: '',
+            accessToken: FieldValue.delete(),
         });
     },
 };

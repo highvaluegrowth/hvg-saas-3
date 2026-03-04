@@ -1,9 +1,13 @@
+// features/marketing/services/postsService.ts
+// Timestamps: ISO 8601 strings throughout this module. Server timestamps are not used to keep types.ts as plain strings.
 import { adminDb } from '@/lib/firebase/admin';
 import type { SocialPost, CreatePostPayload } from '../types';
 
 function postsRef(tenantId: string) {
     return adminDb.collection('tenants').doc(tenantId).collection('socialPosts');
 }
+
+type PostUpdateFields = Omit<Partial<SocialPost>, 'id' | 'tenantId' | 'createdBy' | 'createdAt'>;
 
 export const postsService = {
     async create(tenantId: string, uid: string, payload: CreatePostPayload): Promise<SocialPost> {
@@ -30,13 +34,15 @@ export const postsService = {
     },
 
     async list(tenantId: string, status?: string, limit = 50): Promise<SocialPost[]> {
-        let q = postsRef(tenantId).orderBy('createdAt', 'desc').limit(limit);
-        if (status) q = postsRef(tenantId).where('status', '==', status).orderBy('createdAt', 'desc').limit(limit) as typeof q;
+        const base = postsRef(tenantId);
+        const q = status
+            ? base.where('status', '==', status).orderBy('createdAt', 'desc').limit(limit)
+            : base.orderBy('createdAt', 'desc').limit(limit);
         const snap = await q.get();
         return snap.docs.map(d => d.data() as SocialPost);
     },
 
-    async update(tenantId: string, postId: string, updates: Partial<SocialPost>): Promise<void> {
+    async update(tenantId: string, postId: string, updates: PostUpdateFields): Promise<void> {
         await postsRef(tenantId).doc(postId).update({
             ...updates,
             updatedAt: new Date().toISOString(),
