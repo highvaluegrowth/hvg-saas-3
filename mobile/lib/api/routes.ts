@@ -51,6 +51,14 @@ export const chatApi = {
   },
 };
 
+// --- Applications ---
+export const applicationApi = {
+  submitBed: (body: Record<string, unknown>) =>
+    api.post<{ id: string; success: boolean }>('/api/applications/bed', body),
+  submitStaff: (body: Record<string, unknown>) =>
+    api.post<{ id: string; success: boolean }>('/api/applications/staff', body),
+};
+
 // --- Local types (mobile-specific response shapes) ---
 export interface PublicTenant {
   id: string;

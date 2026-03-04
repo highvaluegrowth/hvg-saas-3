@@ -47,6 +47,7 @@ export async function sendChatMessage({ message, conversationId, pathname, userR
             message: processedMessage,
             conversationId: conversationId || undefined,
             routeContext,
+            view: pathname,
         }),
     });
 

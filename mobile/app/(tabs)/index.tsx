@@ -84,6 +84,34 @@ export default function HomeScreen() {
         )}
       </Section>
 
+      <Section title="Get Started">
+        <TouchableOpacity
+          style={styles.applyCard}
+          onPress={() => router.push('/apply/bed')}
+          activeOpacity={0.75}
+        >
+          <Text style={styles.applyCardIcon}>🛏️</Text>
+          <View style={styles.applyCardBody}>
+            <Text style={styles.applyCardTitle}>Find a Bed</Text>
+            <Text style={styles.applyCardSub}>Apply for sober living placement</Text>
+          </View>
+          <Text style={styles.applyCardArrow}>→</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.applyCard}
+          onPress={() => router.push('/apply/staff')}
+          activeOpacity={0.75}
+        >
+          <Text style={styles.applyCardIcon}>💼</Text>
+          <View style={styles.applyCardBody}>
+            <Text style={styles.applyCardTitle}>Staff Positions</Text>
+            <Text style={styles.applyCardSub}>Apply to work at a sober living house</Text>
+          </View>
+          <Text style={styles.applyCardArrow}>→</Text>
+        </TouchableOpacity>
+      </Section>
+
       <TouchableOpacity
         style={styles.discoverBtn}
         onPress={() => router.push('/tenants')}
@@ -147,6 +175,21 @@ const styles = StyleSheet.create({
   badgeText: { color: '#fff', fontSize: 11, fontWeight: '600' },
   loadingText: { color: '#64748b', padding: 8 },
   emptyText: { color: '#475569', fontStyle: 'italic', padding: 8 },
+  applyCard: {
+    backgroundColor: '#1e293b',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#334155',
+  },
+  applyCardIcon: { fontSize: 22, marginRight: 12 },
+  applyCardBody: { flex: 1 },
+  applyCardTitle: { color: '#f8fafc', fontSize: 15, fontWeight: '600' },
+  applyCardSub: { color: '#94a3b8', fontSize: 13, marginTop: 2 },
+  applyCardArrow: { color: '#10b981', fontSize: 18, fontWeight: '700', marginLeft: 8 },
   discoverBtn: {
     margin: 16,
     backgroundColor: '#1e293b',

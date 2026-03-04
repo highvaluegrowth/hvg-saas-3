@@ -11,6 +11,7 @@ const ChatSchema = z.object({
     message: z.string().min(1),
     conversationId: z.string().optional(),
     routeContext: z.string().optional(),
+    view: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
         }
 
-        const { message, conversationId, routeContext } = parsed.data;
+        const { message, conversationId, routeContext, view } = parsed.data;
 
         // SaaS Route requires Operator role
         const isOperator = decodedToken.role && ['tenant_admin', 'staff_admin', 'admin', 'house_manager', 'staff', 'super_admin'].includes(decodedToken.role as string);
@@ -48,7 +49,7 @@ export async function POST(request: NextRequest) {
         }
 
         const contents: Content[] = [...history, { role: 'user', parts: [{ text: message }] }];
-        const systemInstruction = buildOperatorSystemPrompt({ displayName: appUser.displayName, role: decodedToken.role as string }, tenantId, routeContext);
+        const systemInstruction = buildOperatorSystemPrompt({ displayName: appUser.displayName, role: decodedToken.role as string }, tenantId, routeContext, view);
 
         const response = await genai.models.generateContent({
             model: GEMINI_MODEL,

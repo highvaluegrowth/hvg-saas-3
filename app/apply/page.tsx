@@ -43,21 +43,17 @@ const APPLICATION_TYPES: ApplicationCard[] = [
         icon: '📚',
         title: 'Course Enrollment',
         description:
-            'Residents and staff can enroll in recovery education courses directly through the HVG platform. Courses are available from within your resident or staff dashboard.',
-        href: null,
-        cta: 'Available In-App',
-        disabled: true,
-        note: 'Log in to your resident or staff account to browse and enroll in courses.',
+            'Residents and staff can enroll in recovery education courses directly through the HVG platform. Browse available courses and submit your enrollment application.',
+        href: '/apply/course/general',
+        cta: 'Start Enrollment',
     },
     {
         icon: '📅',
         title: 'Event Registration',
         description:
-            'Community events, group meetings, and recovery workshops are posted by partner operators. Register through the events section of the HVG mobile or web app.',
-        href: null,
-        cta: 'Available In-App',
-        disabled: true,
-        note: 'Log in to your account to view and register for upcoming events.',
+            'Community events, group meetings, and recovery workshops are posted by partner operators. Register for upcoming events through this application form.',
+        href: '/apply/event/general',
+        cta: 'Register Now',
     },
 ];
 
