@@ -5,15 +5,29 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { useAccounts } from '@/features/marketing/hooks/useAccounts';
 import type { SocialAccount, SocialPlatform } from '@/features/marketing/types';
 
-const PLATFORM_CONFIG: Record<SocialPlatform, { label: string; color: string; icon: string; metaSupported: boolean }> = {
-    facebook:  { label: 'Facebook',   color: 'bg-blue-600',  icon: 'f',  metaSupported: true },
-    instagram: { label: 'Instagram',  color: 'bg-pink-500',  icon: '📷', metaSupported: true },
-    tiktok:    { label: 'TikTok',     color: 'bg-gray-900',  icon: '♪',  metaSupported: false },
-    x:         { label: 'X / Twitter',color: 'bg-gray-800',  icon: '𝕏',  metaSupported: false },
-    linkedin:  { label: 'LinkedIn',   color: 'bg-blue-700',  icon: 'in', metaSupported: false },
+const PLATFORM_CONFIG: Record<SocialPlatform, { label: string; color: string; icon: string; comingSoon: boolean }> = {
+    facebook:  { label: 'Facebook',    color: 'bg-blue-600', icon: 'f',  comingSoon: false },
+    instagram: { label: 'Instagram',   color: 'bg-pink-500', icon: '📷', comingSoon: false },
+    tiktok:    { label: 'TikTok',      color: 'bg-gray-900', icon: '♪',  comingSoon: true  },
+    x:         { label: 'X / Twitter', color: 'bg-gray-800', icon: '𝕏',  comingSoon: true  },
+    linkedin:  { label: 'LinkedIn',    color: 'bg-blue-700', icon: 'in', comingSoon: true  },
 };
 
 const AVAILABLE_PLATFORMS: SocialPlatform[] = ['facebook', 'instagram', 'tiktok', 'x', 'linkedin'];
+
+function getOAuthUrl(tenantId: string, platform: SocialPlatform): string {
+    switch (platform) {
+        case 'facebook':
+        case 'instagram':
+            return `/api/oauth/meta/authorize?tenantId=${tenantId}&platform=${platform}`;
+        case 'tiktok':
+            return `/api/oauth/tiktok/authorize?tenantId=${tenantId}`;
+        case 'x':
+            return `/api/oauth/x/authorize?tenantId=${tenantId}`;
+        case 'linkedin':
+            return `/api/oauth/linkedin/authorize?tenantId=${tenantId}`;
+    }
+}
 
 export default function AccountsPage({ params }: { params: Promise<{ tenantId: string }> }) {
     const { tenantId } = use(params);
@@ -30,7 +44,6 @@ export default function AccountsPage({ params }: { params: Promise<{ tenantId: s
     useEffect(() => {
         if (connected === 'meta') {
             setBanner({ type: 'success', message: 'Meta accounts connected successfully.' });
-            // Remove query params without full navigation
             router.replace(`/${tenantId}/marketing/accounts`);
         } else if (error === 'meta_failed') {
             setBanner({ type: 'error', message: 'Meta connection failed. Please try again.' });
@@ -43,16 +56,6 @@ export default function AccountsPage({ params }: { params: Promise<{ tenantId: s
             router.replace(`/${tenantId}/marketing/accounts`);
         }
     }, [connected, error, tenantId, router]);
-
-    function handleConnect(platform: SocialPlatform) {
-        const config = PLATFORM_CONFIG[platform];
-        if (!config.metaSupported) {
-            // Non-Meta platforms: show alert
-            alert(`${config.label} integration coming soon.`);
-            return;
-        }
-        window.location.href = `/api/oauth/meta/authorize?tenantId=${tenantId}&platform=${platform}`;
-    }
 
     async function handleDisconnect(account: SocialAccount) {
         setDisconnecting(account.id);
@@ -109,12 +112,7 @@ export default function AccountsPage({ params }: { params: Promise<{ tenantId: s
                                         {config.icon}
                                     </div>
                                     <div>
-                                        <div className="flex items-center gap-2">
-                                            <p className="font-semibold text-gray-900">{config.label}</p>
-                                            {!config.metaSupported && (
-                                                <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">Coming Soon</span>
-                                            )}
-                                        </div>
+                                        <p className="font-semibold text-gray-900">{config.label}</p>
                                         {isConnected ? (
                                             <p className="text-xs text-emerald-600">Connected as {account?.accountName}</p>
                                         ) : (
@@ -136,13 +134,17 @@ export default function AccountsPage({ params }: { params: Promise<{ tenantId: s
                                             </button>
                                         </>
                                     ) : (
-                                        <button
-                                            onClick={() => handleConnect(platform)}
-                                            disabled={!config.metaSupported}
-                                            className="text-sm px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                        >
-                                            Connect
-                                        </button>
+                                        <>
+                                            {config.comingSoon && (
+                                                <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-medium">Coming Soon</span>
+                                            )}
+                                            <button
+                                                onClick={() => { window.location.href = getOAuthUrl(tenantId, platform); }}
+                                                className="text-sm px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                                            >
+                                                Connect
+                                            </button>
+                                        </>
                                     )}
                                 </div>
                             </div>
