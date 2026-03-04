@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SortableList, SortableItemType } from '@/components/lms/SortableList';
 import Link from 'next/link';
+import { auth } from '@/lib/firebase/client';
 
 // Mock types for the local state representation
 type LessonType = 'VIDEO' | 'TEXT' | 'QUIZ';
@@ -21,20 +22,48 @@ interface LocalModule {
 
 export default function CourseBuilderPage({ params }: { params: Promise<{ tenantId: string, courseId: string }> }) {
     const resolvedParams = React.use(params);
-    const [modules, setModules] = useState<LocalModule[]>([
-        {
-            id: 'm1',
-            title: 'Module 1: Introduction',
-            lessons: [{ id: 'l1', title: 'Welcome to the Program', type: 'VIDEO' }]
-        },
-        {
-            id: 'm2',
-            title: 'Module 2: Coping Strategies',
-            lessons: [{ id: 'l2', title: 'Understanding Triggers', type: 'TEXT' }, { id: 'l3', title: 'Triggers Quiz', type: 'QUIZ' }]
-        },
-    ]);
-
+    const [modules, setModules] = useState<LocalModule[]>([]);
     const [saving, setSaving] = useState(false);
+    const [saved, setSaved] = useState(false);
+    const [saveError, setSaveError] = useState<string | null>(null);
+    const [loadError, setLoadError] = useState<string | null>(null);
+
+    // Load course curriculum from Firestore on mount
+    useEffect(() => {
+        let cancelled = false;
+        async function loadCourse() {
+            try {
+                const token = await auth.currentUser?.getIdToken();
+                const res = await fetch(
+                    `/api/tenants/${resolvedParams.tenantId}/lms/courses/${resolvedParams.courseId}`,
+                    { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+                );
+                if (!res.ok) {
+                    const data = await res.json();
+                    throw new Error(data.error ?? `Request failed: ${res.status}`);
+                }
+                const data = await res.json();
+                const curriculum = data.course?.curriculum;
+                if (!cancelled && Array.isArray(curriculum) && curriculum.length > 0) {
+                    // Map CurriculumModule[] -> LocalModule[]
+                    const loaded: LocalModule[] = curriculum.map((m: { id: string; title: string; lessons: { id: string; title: string; type: LessonType }[] }) => ({
+                        id: m.id,
+                        title: m.title,
+                        lessons: (m.lessons ?? []).map((l: { id: string; title: string; type: LessonType }) => ({
+                            id: l.id,
+                            title: l.title,
+                            type: l.type,
+                        })),
+                    }));
+                    setModules(loaded);
+                }
+            } catch (err) {
+                if (!cancelled) setLoadError(err instanceof Error ? err.message : String(err));
+            }
+        }
+        loadCourse();
+        return () => { cancelled = true; };
+    }, [resolvedParams.tenantId, resolvedParams.courseId]);
 
     const handleAddModule = () => {
         const newMod = { id: 'm-' + Date.now(), title: 'New Module', lessons: [] };
@@ -70,13 +99,45 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ tenant
         setModules(modules.map(m => m.id === modId ? { ...m, title: newTitle } : m));
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
         setSaving(true);
-        // TODO: Write to Firestore
-        setTimeout(() => {
+        setSaveError(null);
+        setSaved(false);
+        try {
+            const token = await auth.currentUser?.getIdToken();
+            const curriculum = modules.map((m, i) => ({
+                id: m.id,
+                title: m.title,
+                order: i,
+                lessons: m.lessons.map((l, j) => ({
+                    id: l.id,
+                    title: l.title,
+                    type: l.type,
+                    order: j,
+                })),
+            }));
+            const res = await fetch(
+                `/api/tenants/${resolvedParams.tenantId}/lms/courses/${resolvedParams.courseId}/curriculum`,
+                {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                    },
+                    body: JSON.stringify({ curriculum }),
+                }
+            );
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error ?? `Request failed: ${res.status}`);
+            }
+            setSaved(true);
+            setTimeout(() => setSaved(false), 2000);
+        } catch (err) {
+            setSaveError(err instanceof Error ? err.message : String(err));
+        } finally {
             setSaving(false);
-            alert('Course Curriculum Saved!');
-        }, 1000);
+        }
     };
 
     // Convert our nested state to the generic format the SortableList expects
@@ -168,14 +229,28 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ tenant
                     <h1 className="text-2xl font-bold tracking-tight">Curriculum Builder</h1>
                     <p className="text-muted-foreground mt-1 text-sm">Organize modules, add lessons, and configure your course.</p>
                 </div>
-                <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="bg-primary text-primary-foreground px-4 py-2 rounded-md font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
-                >
-                    {saving ? 'Saving...' : 'Save Curriculum'}
-                </button>
+                <div className="flex items-center gap-3">
+                    {saved && (
+                        <span className="text-sm text-emerald-600 font-medium">Saved</span>
+                    )}
+                    {saveError && (
+                        <span className="text-sm text-destructive">{saveError}</span>
+                    )}
+                    <button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="bg-primary text-primary-foreground px-4 py-2 rounded-md font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                    >
+                        {saving ? 'Saving...' : 'Save Curriculum'}
+                    </button>
+                </div>
             </div>
+
+            {loadError && (
+                <div className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md p-3">
+                    {loadError}
+                </div>
+            )}
 
             <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
                 <div className="flex justify-between items-center mb-6">

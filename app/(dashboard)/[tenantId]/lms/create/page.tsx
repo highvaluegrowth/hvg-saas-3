@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { auth } from '@/lib/firebase/client';
 
 export default function CreateCoursePage({ params }: { params: Promise<{ tenantId: string }> }) {
     const router = useRouter();
@@ -10,14 +11,32 @@ export default function CreateCoursePage({ params }: { params: Promise<{ tenantI
     const [description, setDescription] = useState('');
     const [isPublic, setIsPublic] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const handleCreate = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
-        // TODO: Create Firestore doc in 'courses' collection
-        // const newDocRef = await addDoc(collection(db, 'courses'), { title, description, isPublic, ownerTenantId: resolvedParams.tenantId });
-        const mockId = 'new-course-' + Date.now();
-        router.push(`/${resolvedParams.tenantId}/lms/${mockId}/builder`);
+        setError(null);
+        try {
+            const token = await auth.currentUser?.getIdToken();
+            const res = await fetch(`/api/tenants/${resolvedParams.tenantId}/lms/courses`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                },
+                body: JSON.stringify({ title, description, isPublic }),
+            });
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error ?? `Request failed: ${res.status}`);
+            }
+            const data = await res.json();
+            router.push(`/${resolvedParams.tenantId}/lms/${data.course.id}/builder`);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : String(err));
+            setLoading(false);
+        }
     };
 
     return (
@@ -28,6 +47,12 @@ export default function CreateCoursePage({ params }: { params: Promise<{ tenantI
             </div>
 
             <form onSubmit={handleCreate} className="space-y-6 bg-card border border-border p-6 rounded-xl shadow-sm">
+                {error && (
+                    <div className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md p-3">
+                        {error}
+                    </div>
+                )}
+
                 <div className="space-y-2">
                     <label htmlFor="title" className="text-sm font-medium">Course Title</label>
                     <input
