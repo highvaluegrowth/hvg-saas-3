@@ -2,6 +2,13 @@
 // All firebase-admin imports are done lazily inside getter functions so that
 // the firebase-admin packages are NEVER evaluated at Next.js build time
 // (which would fail because env vars / gRPC credentials aren't available).
+//
+// Private-key credential strategy (in priority order):
+//   1. FIREBASE_SERVICE_ACCOUNT_BASE64  — full service-account JSON, base64-encoded.
+//      Eliminates ALL newline / OpenSSL-3 key-parsing issues on Vercel.
+//      Generate with: base64 -i <service-account.json> | tr -d '\n'
+//   2. FIREBASE_ADMIN_PRIVATE_KEY + FIREBASE_ADMIN_CLIENT_EMAIL + FIREBASE_ADMIN_PROJECT_ID
+//      — three individual env vars (legacy fallback).
 
 /* eslint-disable @typescript-eslint/no-require-imports */
 import type { App } from 'firebase-admin/app';
@@ -24,22 +31,39 @@ function initializeAdminApp(): App {
     return _adminApp!;
   }
 
-  if (
-    !process.env.FIREBASE_ADMIN_PROJECT_ID ||
-    !process.env.FIREBASE_ADMIN_CLIENT_EMAIL ||
-    !process.env.FIREBASE_ADMIN_PRIVATE_KEY
-  ) {
-    throw new Error('Firebase Admin SDK environment variables are not configured');
-  }
+  let credential;
 
-  _adminApp = initializeApp({
-    credential: cert({
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+    // ✅ Preferred: full service-account JSON, base64-encoded.
+    // Zero newline or OpenSSL-3 key-format issues.
+    try {
+      const json = Buffer.from(
+        process.env.FIREBASE_SERVICE_ACCOUNT_BASE64,
+        'base64'
+      ).toString('utf8');
+      credential = cert(JSON.parse(json));
+    } catch (e) {
+      throw new Error(`Failed to parse FIREBASE_SERVICE_ACCOUNT_BASE64: ${e}`);
+    }
+  } else if (
+    process.env.FIREBASE_ADMIN_PROJECT_ID &&
+    process.env.FIREBASE_ADMIN_CLIENT_EMAIL &&
+    process.env.FIREBASE_ADMIN_PRIVATE_KEY
+  ) {
+    // Fallback: individual env vars
+    credential = cert({
       projectId: process.env.FIREBASE_ADMIN_PROJECT_ID,
       clientEmail: process.env.FIREBASE_ADMIN_CLIENT_EMAIL,
       privateKey: process.env.FIREBASE_ADMIN_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    }),
-  });
+    });
+  } else {
+    throw new Error(
+      'Firebase Admin SDK: set FIREBASE_SERVICE_ACCOUNT_BASE64 or the three ' +
+        'FIREBASE_ADMIN_PROJECT_ID / FIREBASE_ADMIN_CLIENT_EMAIL / FIREBASE_ADMIN_PRIVATE_KEY vars.'
+    );
+  }
 
+  _adminApp = initializeApp({ credential });
   return _adminApp!;
 }
 
