@@ -35,12 +35,12 @@ export function MarketingNavbar() {
                 <div className="hidden md:flex items-center gap-6">
                     {[
                         { label: 'For Operators', href: '#operators' },
-                        { label: 'For Residents', href: '#residents' },
+                        { label: 'Find a Bed', href: '/apply/bed' },
                         { label: 'AI Recovery', href: '#ai-recovery' },
-                        { label: 'Transparency', href: '/transparency' },
+                        { label: 'Pricing', href: '/pricing' },
                         { label: 'Donate', href: '/donate' },
                     ].map((link) => (
-                        <a
+                        <Link
                             key={link.href}
                             href={link.href}
                             className="text-sm font-medium transition-colors duration-200 cursor-pointer"
@@ -49,12 +49,12 @@ export function MarketingNavbar() {
                             onMouseLeave={(e) => ((e.target as HTMLElement).style.color = '#164E63')}
                         >
                             {link.label}
-                        </a>
+                        </Link>
                     ))}
                 </div>
 
                 {/* CTA */}
-                <div className="hidden md:flex items-center gap-4">
+                <div className="hidden md:flex items-center gap-3">
                     <Link
                         href="/login"
                         className="text-sm font-medium transition-colors duration-200 cursor-pointer"
@@ -64,16 +64,24 @@ export function MarketingNavbar() {
                     >
                         Sign In
                     </Link>
-                    <a
-                        href="#download"
+                    <Link
+                        href="/register"
+                        className="text-sm font-medium px-4 py-2 rounded-xl transition-all duration-200 hover:opacity-90"
+                        style={{ background: 'rgba(8,145,178,0.1)', color: '#0891B2', border: '1px solid rgba(8,145,178,0.2)' }}
+                    >
+                        For Operators
+                    </Link>
+                    <Link
+                        href="/apply/bed"
                         className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200 cursor-pointer hover:opacity-90 hover:-translate-y-px"
                         style={{ background: '#059669' }}
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.5l-7-7m7 7l7-7m-7 7V3" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                         </svg>
-                        Download App
-                    </a>
+                        Find a Bed
+                    </Link>
                 </div>
 
                 {/* Mobile hamburger placeholder */}
