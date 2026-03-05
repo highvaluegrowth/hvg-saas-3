@@ -6,15 +6,17 @@ import {
   onSnapshot,
   query,
   where,
-  getCountFromServer,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/client';
 
 export interface DashboardStats {
   houseCount: number;
   activeResidentCount: number;
+  totalCapacity: number;
   staffCount: number;
   upcomingEventCount: number;
+  openApplicationsCount: number;
+  pendingJoinRequestsCount: number;
 }
 
 interface UseDashboardStatsReturn {
@@ -26,8 +28,11 @@ interface UseDashboardStatsReturn {
 const DEFAULT_STATS: DashboardStats = {
   houseCount: 0,
   activeResidentCount: 0,
+  totalCapacity: 0,
   staffCount: 0,
   upcomingEventCount: 0,
+  openApplicationsCount: 0,
+  pendingJoinRequestsCount: 0,
 };
 
 export function useDashboardStats(tenantId: string | undefined): UseDashboardStatsReturn {
@@ -41,20 +46,28 @@ export function useDashboardStats(tenantId: string | undefined): UseDashboardSta
       return;
     }
 
-    // Real-time listener on houses collection for count
+    // Houses: count + sum total capacity
     const housesUnsub = onSnapshot(
       query(
         collection(db, `tenants/${tenantId}/houses`),
         where('status', '==', 'active')
       ),
       (snapshot) => {
-        setStats((prev) => ({ ...prev, houseCount: snapshot.size }));
+        const totalCapacity = snapshot.docs.reduce(
+          (sum, doc) => sum + (doc.data().capacity ?? 0),
+          0
+        );
+        setStats((prev) => ({
+          ...prev,
+          houseCount: snapshot.size,
+          totalCapacity,
+        }));
         setLoading(false);
       },
       (err) => setError(err.message)
     );
 
-    // Real-time listener on enrollments for active resident count
+    // Active resident enrollments
     const enrollmentsUnsub = onSnapshot(
       query(
         collection(db, `tenants/${tenantId}/enrollments`),
@@ -66,7 +79,7 @@ export function useDashboardStats(tenantId: string | undefined): UseDashboardSta
       (err) => setError(err.message)
     );
 
-    // Real-time listener on staff
+    // Active staff
     const staffUnsub = onSnapshot(
       query(
         collection(db, `tenants/${tenantId}/staff`),
@@ -78,7 +91,7 @@ export function useDashboardStats(tenantId: string | undefined): UseDashboardSta
       (err) => setError(err.message)
     );
 
-    // Real-time listener on upcoming events
+    // Upcoming events
     const now = new Date();
     const eventsUnsub = onSnapshot(
       query(
@@ -91,11 +104,38 @@ export function useDashboardStats(tenantId: string | undefined): UseDashboardSta
       (err) => setError(err.message)
     );
 
+    // Open bed/staff applications assigned to this tenant
+    const appsUnsub = onSnapshot(
+      query(
+        collection(db, 'applications'),
+        where('assignedTenantId', '==', tenantId),
+        where('status', '==', 'assigned')
+      ),
+      (snapshot) => {
+        setStats((prev) => ({ ...prev, openApplicationsCount: snapshot.size }));
+      },
+      (err) => setError(err.message)
+    );
+
+    // Pending join requests (mobile residents wanting to join)
+    const joinUnsub = onSnapshot(
+      query(
+        collection(db, `tenants/${tenantId}/joinRequests`),
+        where('status', '==', 'pending')
+      ),
+      (snapshot) => {
+        setStats((prev) => ({ ...prev, pendingJoinRequestsCount: snapshot.size }));
+      },
+      (err) => setError(err.message)
+    );
+
     return () => {
       housesUnsub();
       enrollmentsUnsub();
       staffUnsub();
       eventsUnsub();
+      appsUnsub();
+      joinUnsub();
     };
   }, [tenantId]);
 
