@@ -57,13 +57,15 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
             setTenantName(data.tenant?.name ?? 'Dashboard');
             setTenantStatus(data.tenant?.status ?? null);
 
-            // Gate new tenant_admins through onboarding (skip if already there or if super_admin)
+            // Gate new tenant_admins through onboarding
+            // Skip if: already on onboarding, super_admin, or localStorage bypass set
             const isOnboardingPath = pathname?.includes('/onboarding');
-            if (
-              !data.tenant?.onboardingComplete &&
-              !isOnboardingPath &&
-              user?.role === 'tenant_admin'
-            ) {
+            const localBypass = localStorage.getItem(`hvg_ob_${tenantId}`) === '1';
+
+            if (data.tenant?.onboardingComplete) {
+              // Firestore confirms complete — persist locally so future loads are instant
+              localStorage.setItem(`hvg_ob_${tenantId}`, '1');
+            } else if (!localBypass && !isOnboardingPath && user?.role === 'tenant_admin') {
               router.push(`/${tenantId}/onboarding`);
               return;
             }

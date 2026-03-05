@@ -6,6 +6,7 @@ export interface Tenant {
   status: TenantStatus;
   settings: TenantSettings;
   subscription?: SubscriptionInfo;
+  onboardingComplete?: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

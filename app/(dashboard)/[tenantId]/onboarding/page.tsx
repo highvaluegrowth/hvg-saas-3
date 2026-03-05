@@ -364,6 +364,9 @@ function Step5Done({ tenantId }: { tenantId: string }) {
 
     const handleFinish = async () => {
         setSaving(true);
+        // Set localStorage bypass BEFORE navigating so the layout gate never re-fires,
+        // even if the API call below fails for any reason.
+        localStorage.setItem(`hvg_ob_${tenantId}`, '1');
         try {
             const token = await authService.getIdToken();
             await fetch(`/api/tenants/${tenantId}`, {
@@ -375,7 +378,7 @@ function Step5Done({ tenantId }: { tenantId: string }) {
                 body: JSON.stringify({ onboardingComplete: true }),
             });
         } catch {
-            // Non-critical — proceed regardless
+            // Non-critical — localStorage bypass already set above
         } finally {
             router.push(`/${tenantId}`);
         }
