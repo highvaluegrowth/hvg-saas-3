@@ -3,16 +3,7 @@ import { Timestamp } from 'firebase/firestore';
 export type QuestionType =
     | 'MULTIPLE_CHOICE'
     | 'TRUE_FALSE'
-    | 'FILL_IN_BLANK'
-    | 'MATCHING'
-    | 'ESSAY'
-    | 'ORDERING'
-    | 'HOT_SPOT'
-    | 'NUMERICAL'
-    | 'CATEGORIZATION'
-    | 'MULTIPLE_DROPDOWN'
-    | 'RANDOMIZED_POOL'
-    | 'DESCRIPTION'; // Not a scored question, just info
+    | 'SHORT_ANSWER';
 
 export interface QuizQuestion {
     id: string;
