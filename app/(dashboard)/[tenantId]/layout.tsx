@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, use } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { authService } from '@/features/auth/services/authService';
 import { Sidebar } from '@/components/dashboard/Sidebar';
@@ -23,6 +23,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
   const [tenantName, setTenantName] = useState<string>('');
   const [tenantStatus, setTenantStatus] = useState<string | null>(null);
   const { isOpen, sidebarWidth } = useAISidebarStore();
+  const pathname = usePathname();
 
   useEffect(() => {
     if (!loading) {
@@ -55,6 +56,17 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
             const data = await res.json();
             setTenantName(data.tenant?.name ?? 'Dashboard');
             setTenantStatus(data.tenant?.status ?? null);
+
+            // Gate new tenant_admins through onboarding (skip if already there or if super_admin)
+            const isOnboardingPath = pathname?.includes('/onboarding');
+            if (
+              !data.tenant?.onboardingComplete &&
+              !isOnboardingPath &&
+              user?.role === 'tenant_admin'
+            ) {
+              router.push(`/${tenantId}/onboarding`);
+              return;
+            }
           } else {
             setTenantName('Dashboard');
           }
@@ -65,7 +77,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
 
       fetchTenantName();
     }
-  }, [user, loading, tenantId, router]);
+  }, [user, loading, tenantId, router, pathname]);
 
   // Show loading state
   if (loading) {
@@ -82,6 +94,11 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
   // Don't render if user is not authenticated or doesn't have access
   if (!user || (!user.tenantId && user.role !== 'super_admin')) {
     return null;
+  }
+
+  // Onboarding path renders full-page without sidebar chrome
+  if (pathname?.includes('/onboarding')) {
+    return <>{children}</>;
   }
 
   return (
