@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { authService } from '@/features/auth/services/authService';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 import type { CreateHouseInput } from '@/features/houses/types/house.types';
 
 interface NewHousePageProps {
@@ -63,6 +64,7 @@ export default function NewHousePage({ params }: NewHousePageProps) {
   const router = useRouter();
 
   const [name, setName] = useState('');
+  const [photoUrl, setPhotoUrl] = useState('');
   const [street, setStreet] = useState('');
   const [city, setCity] = useState('');
   const [state, setState] = useState('');
@@ -112,6 +114,9 @@ export default function NewHousePage({ params }: NewHousePageProps) {
       };
       if (phone.trim()) {
         body.phone = phone.trim();
+      }
+      if (photoUrl.trim()) {
+        body.photoUrl = photoUrl.trim();
       }
 
       const res = await fetch(`/api/tenants/${tenantId}/houses`, {
@@ -277,6 +282,18 @@ export default function NewHousePage({ params }: NewHousePageProps) {
                   options={STATUS_OPTIONS}
                 />
               </div>
+            </div>
+
+            {/* House Photo */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                House Photo <span className="text-gray-400 font-normal">(optional)</span>
+              </label>
+              <ImageUpload
+                storagePath={`tenants/${tenantId}/houses/new/photo`}
+                onUpload={(url) => setPhotoUrl(url)}
+                currentUrl={photoUrl || undefined}
+              />
             </div>
 
             {/* Actions */}

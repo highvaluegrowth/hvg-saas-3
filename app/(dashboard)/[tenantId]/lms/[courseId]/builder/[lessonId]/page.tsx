@@ -355,13 +355,11 @@ export default function LessonEditorPage({
                         </div>
                     )}
                     <div className="space-y-2">
-                        <label className="text-sm font-medium">Thumbnail URL (optional)</label>
-                        <input
-                            type="url"
-                            value={thumbnailUrl}
-                            onChange={e => setThumbnailUrl(e.target.value)}
-                            className="w-full p-2 border border-border bg-background rounded-md text-sm"
-                            placeholder="https://..."
+                        <label className="text-sm font-medium">Thumbnail (optional)</label>
+                        <ImageUpload
+                            storagePath={`tenants/${tenantId}/courses/${courseId}/lessons/${lessonId}/thumbnail`}
+                            onUpload={(url) => setThumbnailUrl(url)}
+                            currentUrl={thumbnailUrl || undefined}
                         />
                     </div>
                 </div>

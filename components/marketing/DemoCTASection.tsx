@@ -144,6 +144,16 @@ export function DemoCTASection() {
                                 <p className="text-xs text-center" style={{ color: '#164E63', opacity: 0.5, fontFamily: 'var(--font-noto), sans-serif' }}>
                                     We respect your privacy. No spam, ever.
                                 </p>
+
+                                <div className="mt-4 pt-4 text-center" style={{ borderTop: '1px solid rgba(8,145,178,0.12)' }}>
+                                    <p className="text-sm" style={{ color: '#164E63', opacity: 0.6, fontFamily: 'var(--font-noto), sans-serif' }}>
+                                        Starting at <span className="font-semibold" style={{ color: '#059669' }}>$99/mo</span>
+                                        {' — '}
+                                        <a href="/pricing" className="underline hover:opacity-80 transition-opacity" style={{ color: '#0891B2' }}>
+                                            See pricing →
+                                        </a>
+                                    </p>
+                                </div>
                             </form>
                         )}
                     </div>

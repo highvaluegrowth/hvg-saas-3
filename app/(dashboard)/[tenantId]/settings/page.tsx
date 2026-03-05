@@ -3,15 +3,26 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { authService } from '@/features/auth/services/authService';
+import { ImageUpload } from '@/components/ui/ImageUpload';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 
 export default function SettingsPage() {
     const { tenantId } = useParams<{ tenantId: string }>();
 
+    const { user } = useAuth();
     const [apiKey, setApiKey] = useState('');
     const [apiKeySaved, setApiKeySaved] = useState(false);
     const [apiKeyLoading, setApiKeyLoading] = useState(true);
     const [apiKeySaving, setApiKeySaving] = useState(false);
     const [showKey, setShowKey] = useState(false);
+
+    // Branding & profile photo
+    const [logoUrl, setLogoUrl] = useState('');
+    const [logoSaved, setLogoSaved] = useState(false);
+    const [coverUrl, setCoverUrl] = useState('');
+    const [coverSaved, setCoverSaved] = useState(false);
+    const [avatarUrl, setAvatarUrl] = useState('');
+    const [avatarSaved, setAvatarSaved] = useState(false);
 
     useEffect(() => {
         async function loadSettings() {
@@ -24,6 +35,8 @@ export default function SettingsPage() {
                     const data = await res.json();
                     setApiKey(data.settings?.aiApiKey ? '••••••••••••••••' : '');
                     setApiKeySaved(!!data.settings?.aiApiKey);
+                    if (data.settings?.logoUrl) setLogoUrl(data.settings.logoUrl);
+                    if (data.settings?.coverUrl) setCoverUrl(data.settings.coverUrl);
                 }
             } catch {
                 // fail silently
@@ -79,6 +92,49 @@ export default function SettingsPage() {
         }
     }
 
+    async function handleSaveLogo(url: string) {
+        setLogoUrl(url);
+        try {
+            const token = await authService.getIdToken();
+            await fetch(`/api/tenants/${tenantId}/settings`, {
+                method: 'PATCH',
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ logoUrl: url }),
+            });
+            setLogoSaved(true);
+            setTimeout(() => setLogoSaved(false), 3000);
+        } catch { /* fail silently */ }
+    }
+
+    async function handleSaveCover(url: string) {
+        setCoverUrl(url);
+        try {
+            const token = await authService.getIdToken();
+            await fetch(`/api/tenants/${tenantId}/settings`, {
+                method: 'PATCH',
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ coverUrl: url }),
+            });
+            setCoverSaved(true);
+            setTimeout(() => setCoverSaved(false), 3000);
+        } catch { /* fail silently */ }
+    }
+
+    async function handleSaveAvatar(url: string) {
+        setAvatarUrl(url);
+        try {
+            const token = await authService.getIdToken();
+            // Save to user profile via auth custom claims or a user doc
+            await fetch(`/api/auth/profile`, {
+                method: 'PATCH',
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ avatarUrl: url }),
+            });
+            setAvatarSaved(true);
+            setTimeout(() => setAvatarSaved(false), 3000);
+        } catch { /* fail silently */ }
+    }
+
     return (
         <div className="max-w-3xl mx-auto space-y-8">
             {/* Page header */}
@@ -87,6 +143,112 @@ export default function SettingsPage() {
                 <p className="mt-1 text-sm text-gray-500">
                     Manage your organization preferences and integrations.
                 </p>
+            </div>
+
+            {/* Branding */}
+            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-100">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-cyan-50 flex items-center justify-center">
+                            <svg className="w-4 h-4 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 0 0 1.5-1.5V6a1.5 1.5 0 0 0-1.5-1.5H3.75A1.5 1.5 0 0 0 2.25 6v12a1.5 1.5 0 0 0 1.5 1.5Zm10.5-11.25h.008v.008h-.008V8.25Zm.375 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 className="text-base font-semibold text-gray-900">Organisation Branding</h2>
+                            <p className="text-xs text-gray-500">Logo and cover image shown throughout the platform</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Organisation Logo
+                        </label>
+                        <ImageUpload
+                            storagePath={`tenants/${tenantId}/logo`}
+                            onUpload={handleSaveLogo}
+                            currentUrl={logoUrl || undefined}
+                        />
+                        {logoSaved && (
+                            <p className="mt-2 text-sm text-emerald-600 flex items-center gap-1">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                Logo saved
+                            </p>
+                        )}
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Cover / Banner Image
+                        </label>
+                        <ImageUpload
+                            storagePath={`tenants/${tenantId}/cover`}
+                            onUpload={handleSaveCover}
+                            currentUrl={coverUrl || undefined}
+                        />
+                        {coverSaved && (
+                            <p className="mt-2 text-sm text-emerald-600 flex items-center gap-1">
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                </svg>
+                                Cover saved
+                            </p>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* Profile Photo */}
+            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+                <div className="px-6 py-4 border-b border-gray-100">
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-cyan-50 flex items-center justify-center">
+                            <svg className="w-4 h-4 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 className="text-base font-semibold text-gray-900">Your Profile Photo</h2>
+                            <p className="text-xs text-gray-500">
+                                {user?.email ?? 'Shown next to your name across the platform'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div className="px-6 py-5">
+                    <div className="flex items-start gap-6">
+                        {avatarUrl ? (
+                            <img
+                                src={avatarUrl}
+                                alt="Your profile photo"
+                                className="w-20 h-20 rounded-full object-cover border-2 border-gray-200 flex-shrink-0"
+                            />
+                        ) : (
+                            <div className="w-20 h-20 rounded-full bg-cyan-100 flex items-center justify-center flex-shrink-0 border-2 border-gray-200">
+                                <span className="text-2xl font-bold text-cyan-700">
+                                    {user?.email?.[0]?.toUpperCase() ?? '?'}
+                                </span>
+                            </div>
+                        )}
+                        <div className="flex-1">
+                            <ImageUpload
+                                storagePath={`tenants/${tenantId}/users/${user?.uid ?? 'me'}/avatar`}
+                                onUpload={handleSaveAvatar}
+                                currentUrl={avatarUrl || undefined}
+                            />
+                            {avatarSaved && (
+                                <p className="mt-2 text-sm text-emerald-600 flex items-center gap-1">
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                                    </svg>
+                                    Profile photo saved
+                                </p>
+                            )}
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* AI Configuration */}

@@ -4,6 +4,7 @@ import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authService } from '@/features/auth/services/authService';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 import { ProgramEventType } from '@/features/events/types/event.types';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -41,6 +42,8 @@ interface FormData {
   facilitator: string;
 }
 
+// Separate state for cover image (not part of FormData to avoid input handling)
+
 const DEFAULT_FORM: FormData = {
   title: '',
   description: '',
@@ -55,6 +58,7 @@ export default function NewEventPage({ params }: NewEventPageProps) {
   const { tenantId } = use(params);
   const router = useRouter();
   const [formData, setFormData] = useState<FormData>(DEFAULT_FORM);
+  const [coverImageUrl, setCoverImageUrl] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -97,6 +101,7 @@ export default function NewEventPage({ params }: NewEventPageProps) {
           duration: durationNum,
           location: formData.location.trim() || undefined,
           facilitator: formData.facilitator.trim() || undefined,
+          coverImageUrl: coverImageUrl || undefined,
         }),
       });
 
@@ -226,6 +231,18 @@ export default function NewEventPage({ params }: NewEventPageProps) {
                   className="border-gray-300 focus:ring-cyan-500 focus:border-cyan-500"
                 />
               </div>
+            </div>
+
+            {/* Cover Image */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Cover Image <span className="text-gray-400 font-normal">(optional)</span>
+              </label>
+              <ImageUpload
+                storagePath={`tenants/${tenantId}/events/new/cover`}
+                onUpload={(url) => setCoverImageUrl(url)}
+                currentUrl={coverImageUrl || undefined}
+              />
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-2">

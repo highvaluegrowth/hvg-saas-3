@@ -11,6 +11,7 @@ export interface House extends BaseDocument {
   name: string;
   address: HouseAddress;
   phone?: string;
+  photoUrl?: string;
   capacity: number;
   managerId: string | null;
   status: 'active' | 'inactive';
@@ -36,6 +37,7 @@ export interface CreateHouseInput {
   name: string;
   address: HouseAddress;
   phone?: string;
+  photoUrl?: string;
   capacity: number;
   managerId?: string | null;
   status?: 'active' | 'inactive';

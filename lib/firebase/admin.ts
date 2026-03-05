@@ -14,10 +14,12 @@
 import type { App } from 'firebase-admin/app';
 import type { Auth } from 'firebase-admin/auth';
 import type { Firestore, FieldValue as FieldValueType } from 'firebase-admin/firestore';
+import type { Storage } from 'firebase-admin/storage';
 
 let _adminApp: App | null = null;
 let _adminAuth: Auth | null = null;
 let _adminDb: Firestore | null = null;
+let _adminStorage: Storage | null = null;
 
 function initializeAdminApp(): App {
   if (_adminApp) return _adminApp;
@@ -82,6 +84,20 @@ export function getAdminDb(): Firestore {
   }
   return _adminDb!;
 }
+
+export function getAdminStorage(): Storage {
+  if (!_adminStorage) {
+    const { getStorage } = require('firebase-admin/storage');
+    _adminStorage = getStorage(initializeAdminApp());
+  }
+  return _adminStorage!;
+}
+
+export const adminStorage: Storage = new Proxy({} as Storage, {
+  get: (_, prop) => {
+    return getAdminStorage()[prop as keyof Storage];
+  },
+});
 
 // FieldValue re-export as a Proxy so existing code using FieldValue.serverTimestamp() etc. still works
 export const FieldValue: typeof FieldValueType = new Proxy({} as typeof FieldValueType, {

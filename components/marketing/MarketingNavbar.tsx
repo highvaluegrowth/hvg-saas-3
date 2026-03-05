@@ -5,12 +5,23 @@ import Link from 'next/link';
 
 export function MarketingNavbar() {
     const [scrolled, setScrolled] = useState(false);
+    const [mobileOpen, setMobileOpen] = useState(false);
 
     useEffect(() => {
         const onScroll = () => setScrolled(window.scrollY > 20);
         window.addEventListener('scroll', onScroll);
         return () => window.removeEventListener('scroll', onScroll);
     }, []);
+
+    const navLinks = [
+        { label: 'For Operators', href: '#operators' },
+        { label: 'Find a Bed', href: '/apply/bed' },
+        { label: 'AI Recovery', href: '#ai-recovery' },
+        { label: 'Pricing', href: '/pricing' },
+        { label: 'Donate', href: '/donate' },
+        { label: 'Directory', href: '/directory' },
+        { label: 'Blog', href: '/blog' },
+    ];
 
     return (
         <nav
@@ -33,13 +44,7 @@ export function MarketingNavbar() {
 
                 {/* Nav Links — desktop */}
                 <div className="hidden md:flex items-center gap-6">
-                    {[
-                        { label: 'For Operators', href: '#operators' },
-                        { label: 'Find a Bed', href: '/apply/bed' },
-                        { label: 'AI Recovery', href: '#ai-recovery' },
-                        { label: 'Pricing', href: '/pricing' },
-                        { label: 'Donate', href: '/donate' },
-                    ].map((link) => (
+                    {navLinks.map((link) => (
                         <Link
                             key={link.href}
                             href={link.href}
@@ -84,13 +89,67 @@ export function MarketingNavbar() {
                     </Link>
                 </div>
 
-                {/* Mobile hamburger placeholder */}
-                <button className="md:hidden p-2 rounded-lg cursor-pointer" style={{ color: '#0891B2' }}>
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                    </svg>
+                {/* Mobile hamburger */}
+                <button
+                    className="md:hidden p-2 rounded-lg cursor-pointer"
+                    style={{ color: '#0891B2' }}
+                    onClick={() => setMobileOpen((v) => !v)}
+                    aria-label="Toggle menu"
+                >
+                    {mobileOpen ? (
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    ) : (
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                        </svg>
+                    )}
                 </button>
             </div>
+
+            {/* Mobile menu */}
+            {mobileOpen && (
+                <div className="md:hidden border-t border-white/40 px-6 py-4 space-y-1">
+                    {navLinks.map((link) => (
+                        <Link
+                            key={link.href}
+                            href={link.href}
+                            onClick={() => setMobileOpen(false)}
+                            className="block py-2 text-sm font-medium transition-colors duration-200"
+                            style={{ color: '#164E63' }}
+                        >
+                            {link.label}
+                        </Link>
+                    ))}
+                    <div className="pt-3 border-t border-white/40 space-y-2">
+                        <Link
+                            href="/login"
+                            onClick={() => setMobileOpen(false)}
+                            className="block py-2 text-sm font-medium"
+                            style={{ color: '#164E63', opacity: 0.7 }}
+                        >
+                            Sign In
+                        </Link>
+                        <Link
+                            href="/register"
+                            onClick={() => setMobileOpen(false)}
+                            className="block text-center py-2 text-sm font-medium rounded-xl"
+                            style={{ background: 'rgba(8,145,178,0.1)', color: '#0891B2', border: '1px solid rgba(8,145,178,0.2)' }}
+                        >
+                            For Operators
+                        </Link>
+                        <Link
+                            href="/apply/bed"
+                            onClick={() => setMobileOpen(false)}
+                            className="block text-center py-2.5 rounded-xl text-sm font-semibold text-white"
+                            style={{ background: '#059669' }}
+                        >
+                            Find a Bed
+                        </Link>
+                    </div>
+                </div>
+            )}
         </nav>
     );
 }
