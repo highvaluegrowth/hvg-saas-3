@@ -1,7 +1,7 @@
 'use client';
 
 import { use, useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/features/auth/hooks/useAuth';
+import { authService } from '@/features/auth/services/authService';
 import { Button } from '@/components/ui';
 import { Badge } from '@/components/ui/Badge';
 
@@ -20,16 +20,14 @@ interface JoinRequest {
 
 export default function JoinRequestsPage({ params }: { params: Params }) {
   const { tenantId } = use(params);
-  const { user } = useAuth();
   const [requests, setRequests] = useState<JoinRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   const fetchRequests = useCallback(async () => {
-    if (!user) return;
     try {
-      const token = await (user as { getIdToken?: () => Promise<string> }).getIdToken?.();
+      const token = await authService.getIdToken();
       const res = await fetch(`/api/tenants/${tenantId}/join-requests`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -41,7 +39,7 @@ export default function JoinRequestsPage({ params }: { params: Params }) {
     } finally {
       setLoading(false);
     }
-  }, [tenantId, user]);
+  }, [tenantId]);
 
   useEffect(() => {
     fetchRequests();
@@ -50,7 +48,7 @@ export default function JoinRequestsPage({ params }: { params: Params }) {
   async function handleAction(uid: string, action: 'approve' | 'deny') {
     setActionLoading(uid);
     try {
-      const token = await (user as { getIdToken?: () => Promise<string> }).getIdToken?.();
+      const token = await authService.getIdToken();
       const res = await fetch(`/api/tenants/${tenantId}/join-requests/${uid}`, {
         method: 'PATCH',
         headers: {
@@ -155,7 +153,7 @@ export default function JoinRequestsPage({ params }: { params: Params }) {
                 </div>
 
                 {!req.residentId && (
-                  <p className="mt-2 text-xs text-emerald-600">
+                  <p className="mt-2 text-xs text-amber-600">
                     ⚠ Link this app user to a resident record before approving.
                   </p>
                 )}

@@ -28,13 +28,6 @@
       "collectionGroup": "events",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "scheduledAt", "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "events",
-      "queryScope": "COLLECTION",
-      "fields": [
         { "fieldPath": "houseIds", "arrayConfig": "CONTAINS" },
         { "fieldPath": "scheduledAt", "order": "ASCENDING" }
       ]
@@ -48,13 +41,6 @@
       ]
     },
     {
-      "collectionGroup": "houses",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "status", "order": "ASCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "residents",
       "queryScope": "COLLECTION",
       "fields": [
@@ -63,10 +49,39 @@
       ]
     },
     {
-      "collectionGroup": "enrollments",
-      "queryScope": "COLLECTION_GROUP",
+      "collectionGroup": "applications",
+      "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "residentId", "order": "ASCENDING" }
+        { "fieldPath": "assignedTenantId", "order": "ASCENDING" },
+        { "fieldPath": "submittedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "applications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "assignedTenantId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "submittedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "applications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "assignedTenantId", "order": "ASCENDING" },
+        { "fieldPath": "type", "order": "ASCENDING" },
+        { "fieldPath": "submittedAt", "order": "DESCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "applications",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "assignedTenantId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" },
+        { "fieldPath": "type", "order": "ASCENDING" },
+        { "fieldPath": "submittedAt", "order": "DESCENDING" }
       ]
     }
   ],
