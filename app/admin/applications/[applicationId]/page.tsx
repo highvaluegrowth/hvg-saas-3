@@ -375,9 +375,36 @@ export default function ApplicationDetailPage({
     }
 
     // Build the data fields list — skip undefined/null/empty string values
+    // If fundingSources array is present, omit the legacy fundingSource string
+    const hasFundingSources = Array.isArray(application.data?.fundingSources) && (application.data.fundingSources as string[]).length > 0;
     const dataFields = Object.entries(application.data || {}).filter(
-        ([, v]) => v !== undefined && v !== null && v !== ''
+        ([key, v]) => {
+            if (v === undefined || v === null || v === '') return false;
+            if (Array.isArray(v) && (v as unknown[]).length === 0) return false;
+            if (key === 'fundingSource' && hasFundingSources) return false; // hide legacy when array present
+            return true;
+        }
     );
+
+    // Preferred display order for bed application fields
+    const BED_FIELD_ORDER = [
+        'phone', 'dateOfBirth', 'raceEthnicity',
+        'sobrietyDate', 'primarySubstance', 'daysUsedPast30', 'matStatus', 'matMedication', 'injectionDrugUse', 'substanceHistory', 'goals',
+        'fundingSources', 'fundingSource', 'insuranceDetails',
+        'currentHousing', 'criminalJusticeSupervision', 'supervisionType', 'employmentStatus', 'coOccurringDiagnosis',
+        'emergencyContactName', 'emergencyContactPhone', 'emergencyContactRelationship',
+        'gender', 'genderPreference', 'housePref', 'accessibilityNeeds',
+        'references', 'positionType', 'certifications', 'yearsExperience', 'experienceSummary', 'availability', 'resumeUrl',
+    ];
+
+    const sortedDataFields = [...dataFields].sort(([a], [b]) => {
+        const ai = BED_FIELD_ORDER.indexOf(a);
+        const bi = BED_FIELD_ORDER.indexOf(b);
+        if (ai === -1 && bi === -1) return 0;
+        if (ai === -1) return 1;
+        if (bi === -1) return -1;
+        return ai - bi;
+    });
 
     return (
         <>
@@ -418,13 +445,13 @@ export default function ApplicationDetailPage({
                         <h3 className="text-base font-semibold text-slate-900">Application Details</h3>
                         <p className="text-sm text-slate-500 mt-0.5">Information submitted with this application.</p>
                     </div>
-                    {dataFields.length === 0 ? (
+                    {sortedDataFields.length === 0 ? (
                         <div className="px-6 py-8 text-center text-slate-400 text-sm italic">
                             No additional fields submitted.
                         </div>
                     ) : (
                         <dl className="divide-y divide-slate-100">
-                            {dataFields.map(([key, value]) => (
+                            {sortedDataFields.map(([key, value]) => (
                                 <div
                                     key={key}
                                     className="py-4 sm:grid sm:grid-cols-3 sm:gap-4 px-6"
@@ -432,20 +459,47 @@ export default function ApplicationDetailPage({
                                     <dt className="text-sm font-medium text-slate-500">{labelify(key)}</dt>
                                     <dd className="mt-1 text-sm text-slate-900 sm:mt-0 sm:col-span-2">
                                         {Array.isArray(value) ? (
-                                            <div className="flex flex-wrap gap-1.5">
-                                                {(value as unknown[]).map((item, idx) => (
-                                                    <span
-                                                        key={idx}
-                                                        className="px-2 py-0.5 bg-slate-100 text-slate-700 text-xs rounded-md border border-slate-200"
-                                                    >
-                                                        {String(item).replace(/_/g, ' ')}
-                                                    </span>
-                                                ))}
-                                            </div>
+                                            typeof (value as unknown[])[0] === 'object' && (value as unknown[])[0] !== null ? (
+                                                // Array of objects (e.g. references)
+                                                <div className="space-y-2">
+                                                    {(value as Record<string, unknown>[]).map((item, idx) => (
+                                                        <div key={idx} className="bg-slate-50 rounded-lg p-3 border border-slate-200 text-xs space-y-1">
+                                                            {Object.entries(item).filter(([, v]) => v !== undefined && v !== null && v !== '').map(([k, v]) => (
+                                                                <div key={k} className="flex gap-2">
+                                                                    <span className="text-slate-400 min-w-[80px] shrink-0">{labelify(k)}:</span>
+                                                                    <span className="text-slate-700">{String(v)}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                // Array of primitives — pill badges
+                                                <div className="flex flex-wrap gap-1.5">
+                                                    {(value as unknown[]).map((item, idx) => (
+                                                        <span
+                                                            key={idx}
+                                                            className="px-2 py-0.5 bg-slate-100 text-slate-700 text-xs rounded-md border border-slate-200"
+                                                        >
+                                                            {String(item).replace(/_/g, ' ')}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            )
                                         ) : typeof value === 'boolean' ? (
                                             <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${value ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
                                                 {value ? 'Yes' : 'No'}
                                             </span>
+                                        ) : typeof value === 'object' && value !== null ? (
+                                            // Nested object (e.g. insuranceDetails)
+                                            <dl className="space-y-1.5">
+                                                {Object.entries(value as Record<string, unknown>).filter(([, v]) => v !== undefined && v !== null && v !== '').map(([k, v]) => (
+                                                    <div key={k} className="flex gap-2 text-xs">
+                                                        <dt className="text-slate-400 min-w-[100px] shrink-0">{labelify(k)}:</dt>
+                                                        <dd className="text-slate-700">{String(v)}</dd>
+                                                    </div>
+                                                ))}
+                                            </dl>
                                         ) : typeof value === 'string' && value.startsWith('http') ? (
                                             <a
                                                 href={value}

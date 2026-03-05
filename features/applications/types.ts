@@ -20,15 +20,43 @@ export interface BaseApplication {
 export interface BedApplication extends BaseApplication {
     type: 'bed';
     data: {
+        // Step 1 — Personal Info
         phone: string;
+        dateOfBirth?: string;
+        raceEthnicity?: string;
+        // Step 2 — Recovery Profile
         sobrietyDate?: string;
-        substanceHistory: string;
+        primarySubstance?: string;
+        daysUsedPast30?: number;
+        matStatus?: boolean;
+        matMedication?: string;
+        injectionDrugUse?: boolean;
+        substanceHistory?: string;
         goals: string;
-        fundingSource: string;
+        // Step 3 — Funding & Insurance
+        fundingSources?: string[];
+        fundingSource?: string;           // legacy single-value — kept for backward compat
+        insuranceDetails?: {
+            carrier: string;
+            memberId: string;
+            groupNumber?: string;
+            priorAuthStatus: 'Yes' | 'No' | 'In progress';
+        };
+        // Step 4 — Housing & Background
+        currentHousing?: string;
+        criminalJusticeSupervision?: boolean;
+        supervisionType?: string;
+        employmentStatus?: string;
+        coOccurringDiagnosis?: boolean;
+        emergencyContactName?: string;
+        emergencyContactPhone?: string;
+        emergencyContactRelationship?: string;
+        // Step 5 — Preferences & References
         gender: string;
         genderPreference?: string;
-        references: Array<{ name: string; phone: string; relationship: string }>;
+        housePref?: string;
         accessibilityNeeds?: string;
+        references: Array<{ name: string; phone: string; relationship: string }>;
     };
 }
 

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { adminDb as db } from '@/lib/firebase/admin';
 import { getMatchedTenants } from '@/features/applications/services/matchingService';
+import type { BedHints } from '@/features/applications/services/matchingService';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,9 +29,16 @@ export async function GET(
         const prefs: string[] = [];
         if (app.data?.gender) prefs.push(app.data.gender);
         if (app.data?.genderPreference) prefs.push(app.data.genderPreference);
+        if (app.data?.housePref) prefs.push(app.data.housePref);
         if (app.data?.positionType) prefs.push(app.data.positionType);
 
-        const matches = await getMatchedTenants(app.zipCode ?? '', prefs);
+        // Build BedHints for bed applications
+        const bedHints: BedHints | undefined = app.type === 'bed' ? {
+            matStatus: typeof app.data?.matStatus === 'boolean' ? app.data.matStatus : undefined,
+            genderPreference: (app.data?.housePref as string | undefined) ?? (app.data?.genderPreference as string | undefined),
+        } : undefined;
+
+        const matches = await getMatchedTenants(app.zipCode ?? '', prefs, 10, bedHints);
         return NextResponse.json({ matches });
     } catch (error) {
         console.error('GET /api/admin/applications/[applicationId]/matches:', error);
