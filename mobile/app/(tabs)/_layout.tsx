@@ -1,8 +1,9 @@
 import { Tabs } from 'expo-router';
 import { View, StyleSheet, Platform } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { TAB_BAR_BASE_HEIGHT } from '@/lib/constants/layout';
 
-const TAB_BAR_HEIGHT = Platform.OS === 'ios' ? 88 : 68;
 const ACTIVE = '#6366f1';
 const INACTIVE = '#475569';
 const BAR_BG = '#0a0f1e';
@@ -19,6 +20,10 @@ function ChatTabIcon({ focused }: { focused: boolean }) {
 }
 
 export default function TabsLayout() {
+  const insets = useSafeAreaInsets();
+  const tabBarHeight = TAB_BAR_BASE_HEIGHT + insets.bottom;
+  const tabBarPaddingBottom = (Platform.OS === 'ios' ? 24 : 10) + insets.bottom;
+
   return (
     <Tabs
       screenOptions={{
@@ -26,8 +31,8 @@ export default function TabsLayout() {
           backgroundColor: BAR_BG,
           borderTopColor: '#1e293b',
           borderTopWidth: 1,
-          height: TAB_BAR_HEIGHT,
-          paddingBottom: Platform.OS === 'ios' ? 24 : 10,
+          height: tabBarHeight,
+          paddingBottom: tabBarPaddingBottom,
           paddingTop: 6,
           // allow center FAB to overflow upward
           overflow: 'visible',

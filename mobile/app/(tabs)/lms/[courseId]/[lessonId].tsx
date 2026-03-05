@@ -247,7 +247,7 @@ function QuizLesson({ questions }: { questions?: QuizQuestion[] }) {
 export default function LessonViewerScreen() {
   const { courseId, lessonId } = useLocalSearchParams<{ courseId: string; lessonId: string }>();
   const { appUser } = useAuth();
-  const tenantId = appUser?.tenant_id;
+  const tenantId = appUser?.tenantIds?.[0];
 
   // Fetch the full course to find this lesson
   const { data, isLoading, error } = useQuery({

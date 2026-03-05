@@ -51,7 +51,12 @@ export const tenantApi = {
 // --- AI Chat ---
 export const chatApi = {
   send: (body: { message: string; conversationId?: string }) =>
-    api.post<{ reply: string; conversationId: string }>('/api/ai/mobile/chat', body),
+    api.post<{
+      reply: string;
+      conversationId: string;
+      component?: string;
+      componentData?: unknown;
+    }>('/api/ai/mobile/chat', body),
   getHistory: (conversationId?: string) => {
     const qs = conversationId ? `?conversationId=${conversationId}` : '';
     return api.get<{ messages?: ChatMessage[]; conversations?: { id: string; updatedAt: string }[] }>(
@@ -137,6 +142,10 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   createdAt: string;
+  /** Rich card type returned by AI tool calls (e.g. 'sobriety_stats', 'crisis_resources') */
+  component?: string;
+  /** Tool result data used to render the rich card */
+  componentData?: unknown;
 }
 
 export interface MobileCourse {

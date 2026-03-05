@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { chatApi, type ChatMessage } from '@/lib/api/routes';
 
@@ -8,6 +8,29 @@ export function useChatSession(initialConversationId?: string) {
   );
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+
+  // Load most recent conversation history on mount
+  useEffect(() => {
+    async function loadHistory() {
+      try {
+        const { conversations } = await chatApi.getHistory();
+        if (conversations && conversations.length > 0) {
+          const latestId = conversations[0].id;
+          setConversationId(latestId);
+          const { messages: history } = await chatApi.getHistory(latestId);
+          if (history && history.length > 0) {
+            setMessages(history);
+          }
+        }
+      } catch {
+        // No history or network error — start fresh
+      } finally {
+        setIsLoadingHistory(false);
+      }
+    }
+    loadHistory();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const mutation = useMutation({
     mutationFn: (text: string) =>
@@ -16,7 +39,7 @@ export function useChatSession(initialConversationId?: string) {
       if (data.conversationId) {
         setConversationId(data.conversationId);
       }
-      // Append AI reply — user message was already added optimistically
+      // Append AI reply with optional rich card data
       setMessages((prev) => [
         ...prev,
         {
@@ -24,6 +47,8 @@ export function useChatSession(initialConversationId?: string) {
           role: 'assistant',
           content: data.reply || '(No response)',
           createdAt: new Date().toISOString(),
+          component: data.component,
+          componentData: data.componentData,
         },
       ]);
       setErrorMessage(null);
@@ -64,6 +89,7 @@ export function useChatSession(initialConversationId?: string) {
     messages,
     sendMessage,
     isSending: mutation.isPending,
+    isLoadingHistory,
     conversationId,
     error: errorMessage,
   };

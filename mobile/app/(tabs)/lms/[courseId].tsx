@@ -90,7 +90,7 @@ export default function CourseDetailScreen() {
   const { courseId } = useLocalSearchParams<{ courseId: string }>();
   const router = useRouter();
   const { appUser } = useAuth();
-  const tenantId = appUser?.tenant_id;
+  const tenantId = appUser?.tenantIds?.[0];
 
   const { data, isLoading, error } = useQuery({
     queryKey: ['mobile-course', tenantId, courseId],

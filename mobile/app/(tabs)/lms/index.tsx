@@ -90,7 +90,7 @@ function CourseCard({ course, onPress }: { course: MobileCourse; onPress: () => 
 export default function LMSIndex() {
   const router = useRouter();
   const { appUser } = useAuth();
-  const tenantId = appUser?.tenant_id;
+  const tenantId = appUser?.tenantIds?.[0];
 
   const { data, isLoading, isRefetching, refetch, error } = useQuery({
     queryKey: ['mobile-courses', tenantId],
