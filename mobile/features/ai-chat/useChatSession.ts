@@ -7,36 +7,54 @@ export function useChatSession(initialConversationId?: string) {
     initialConversationId
   );
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const mutation = useMutation({
     mutationFn: (text: string) =>
       chatApi.send({ message: text, conversationId }),
-    onSuccess: (data, userMessage) => {
-      if (data.conversationId && !conversationId) {
+    onSuccess: (data) => {
+      if (data.conversationId) {
         setConversationId(data.conversationId);
       }
-      const now = new Date().toISOString();
+      // Append AI reply — user message was already added optimistically
       setMessages((prev) => [
         ...prev,
         {
-          id: Date.now().toString(),
-          role: 'user',
-          content: userMessage,
-          createdAt: now,
-        },
-        {
-          id: (Date.now() + 1).toString(),
+          id: `ai-${Date.now()}`,
           role: 'assistant',
-          content: data.reply,
-          createdAt: now,
+          content: data.reply || '(No response)',
+          createdAt: new Date().toISOString(),
         },
       ]);
+      setErrorMessage(null);
+    },
+    onError: (err: unknown) => {
+      const msg =
+        err instanceof Error
+          ? err.message
+          : 'Failed to reach HVG Guide. Check your connection and try again.';
+      setErrorMessage(msg);
+      // Roll back the optimistic user message so user can retry
+      setMessages((prev) => prev.slice(0, -1));
     },
   });
 
   const sendMessage = useCallback(
     (text: string) => {
-      mutation.mutate(text);
+      const trimmed = text.trim();
+      if (!trimmed) return;
+      setErrorMessage(null);
+      // Optimistic update: show user message immediately
+      setMessages((prev) => [
+        ...prev,
+        {
+          id: `user-${Date.now()}`,
+          role: 'user',
+          content: trimmed,
+          createdAt: new Date().toISOString(),
+        },
+      ]);
+      mutation.mutate(trimmed);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [conversationId]
@@ -47,6 +65,6 @@ export function useChatSession(initialConversationId?: string) {
     sendMessage,
     isSending: mutation.isPending,
     conversationId,
-    error: mutation.error,
+    error: errorMessage,
   };
 }

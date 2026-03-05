@@ -22,7 +22,7 @@ const SUGGESTIONS = [
 
 export default function ChatScreen() {
   const { appUser } = useAuth();
-  const { messages, sendMessage, isSending } = useChatSession();
+  const { messages, sendMessage, isSending, error } = useChatSession();
   const [input, setInput] = useState('');
   const listRef = useRef<FlatList<ChatMessage>>(null);
 
@@ -103,6 +103,12 @@ export default function ChatScreen() {
         <View style={styles.typing}>
           <ActivityIndicator size="small" color="#6366f1" />
           <Text style={styles.typingText}>HVG Guide is thinking…</Text>
+        </View>
+      )}
+
+      {!!error && (
+        <View style={styles.errorBar}>
+          <Text style={styles.errorText}>⚠️ {error}</Text>
         </View>
       )}
 
@@ -217,4 +223,12 @@ const styles = StyleSheet.create({
   },
   sendBtnDisabled: { opacity: 0.4 },
   sendText: { color: '#fff', fontSize: 20, fontWeight: '700' },
+  errorBar: {
+    backgroundColor: '#7f1d1d',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: '#991b1b',
+  },
+  errorText: { color: '#fca5a5', fontSize: 13 },
 });
