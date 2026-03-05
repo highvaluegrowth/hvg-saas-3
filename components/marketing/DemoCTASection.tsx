@@ -2,15 +2,21 @@
 
 import { useState } from 'react';
 
+const perks = [
+    { icon: '🎯', text: '30-minute live walkthrough' },
+    { icon: '💬', text: 'Live Q&A with our team' },
+    { icon: '📊', text: 'See your data in the platform' },
+    { icon: '🚫', text: 'No commitment, ever' },
+];
+
 export function DemoCTASection() {
     const [submitted, setSubmitted] = useState(false);
-    const [form, setForm] = useState({ name: '', email: '', company: '', message: '' });
+    const [form, setForm] = useState({ name: '', email: '', company: '', beds: '', message: '' });
     const [loading, setLoading] = useState(false);
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
         setLoading(true);
-        // Placeholder: replace with actual API call or Calendly redirect
         await new Promise((r) => setTimeout(r, 800));
         setSubmitted(true);
         setLoading(false);
@@ -19,141 +25,200 @@ export function DemoCTASection() {
     return (
         <section
             id="demo"
-            className="py-24 px-6"
-            style={{ background: '#fff', fontFamily: 'var(--font-figtree), sans-serif' }}
+            className="py-28 px-6 relative overflow-hidden"
+            style={{
+                background: 'linear-gradient(160deg, #0C1A2E 0%, #0C4A6E 50%, #064E3B 100%)',
+                fontFamily: 'var(--font-figtree), sans-serif',
+            }}
         >
-            <div className="max-w-6xl mx-auto">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                    {/* Left: Value prop */}
-                    <div>
-                        <div className="inline-block px-4 py-1.5 rounded-full text-sm font-medium mb-6"
-                            style={{ background: 'rgba(5,150,105,0.1)', color: '#059669' }}>
-                            For Operators
-                        </div>
-                        <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight" style={{ color: '#164E63' }}>
-                            See HVG in action.<br />Book a live demo.
-                        </h2>
-                        <p className="text-lg mb-8 leading-relaxed" style={{ color: '#164E63', opacity: 0.7, fontFamily: 'var(--font-noto), sans-serif' }}>
-                            We&apos;ll walk you through the full platform in 30 minutes — property setup, resident onboarding, LMS, and AI recovery tools.
-                        </p>
+            {/* Decorative elements */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-px pointer-events-none"
+                style={{ background: 'linear-gradient(to right, transparent, rgba(8,145,178,0.4), transparent)' }} />
+            <div className="absolute inset-0 pointer-events-none"
+                style={{
+                    backgroundImage: 'radial-gradient(circle, rgba(8,145,178,0.04) 1px, transparent 1px)',
+                    backgroundSize: '40px 40px',
+                }} />
+            <div className="absolute top-16 right-12 w-72 h-72 rounded-full pointer-events-none opacity-10"
+                style={{ background: 'radial-gradient(circle, #0891B2, transparent)' }} />
+            <div className="absolute bottom-16 left-12 w-56 h-56 rounded-full pointer-events-none opacity-10"
+                style={{ background: 'radial-gradient(circle, #059669, transparent)' }} />
 
+            <div className="max-w-6xl mx-auto relative">
+
+                {/* Top badge */}
+                <div className="text-center mb-4">
+                    <div
+                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest"
+                        style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)', border: '1px solid rgba(255,255,255,0.12)' }}
+                    >
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block" />
+                        For sober living operators
+                    </div>
+                </div>
+
+                {/* Headline */}
+                <div className="text-center mb-14">
+                    <h2 className="text-4xl md:text-6xl font-bold text-white mb-5 leading-tight">
+                        See HVG in action.<br />
+                        <span style={{ color: '#34D399' }}>Book your free demo.</span>
+                    </h2>
+                    <p
+                        className="text-lg max-w-xl mx-auto text-white/70 leading-relaxed"
+                        style={{ fontFamily: 'var(--font-noto), sans-serif' }}
+                    >
+                        30 minutes. No sales pressure. We&apos;ll walk you through property setup, resident
+                        onboarding, LMS, and AI recovery tools — live.
+                    </p>
+                </div>
+
+                {/* Main grid: perks + form */}
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
+
+                    {/* Left: perks + pricing (2 cols) */}
+                    <div className="lg:col-span-2 space-y-6">
                         <div className="space-y-4">
-                            {[
-                                { text: 'Free 30-minute walkthrough' },
-                                { text: 'Live Q&A with our team' },
-                                { text: 'See your house data in the platform' },
-                                { text: 'No commitment required' },
-                            ].map((item) => (
-                                <div key={item.text} className="flex items-center gap-3">
-                                    <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
-                                        style={{ background: 'rgba(5,150,105,0.15)', color: '#059669' }}>
-                                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                                            <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                                        </svg>
-                                    </div>
-                                    <span className="text-sm font-medium" style={{ color: '#164E63' }}>{item.text}</span>
+                            {perks.map((p) => (
+                                <div
+                                    key={p.text}
+                                    className="flex items-center gap-4 rounded-2xl px-5 py-4"
+                                    style={{
+                                        background: 'rgba(255,255,255,0.06)',
+                                        border: '1px solid rgba(255,255,255,0.08)',
+                                    }}
+                                >
+                                    <span className="text-2xl">{p.icon}</span>
+                                    <span className="text-sm font-medium text-white/90">{p.text}</span>
                                 </div>
                             ))}
                         </div>
+
+                        {/* Pricing callout */}
+                        <div
+                            className="rounded-2xl p-6"
+                            style={{
+                                background: 'rgba(52,211,153,0.08)',
+                                border: '1px solid rgba(52,211,153,0.2)',
+                            }}
+                        >
+                            <div className="text-white/60 text-xs font-semibold uppercase tracking-widest mb-2">Simple pricing</div>
+                            <div className="text-3xl font-bold text-white mb-1">
+                                From <span style={{ color: '#34D399' }}>$99</span>
+                                <span className="text-base font-normal text-white/50">/mo</span>
+                            </div>
+                            <div className="text-sm text-white/60 mb-3" style={{ fontFamily: 'var(--font-noto), sans-serif' }}>
+                                Per property. Includes LMS, AI, and all ops tools.
+                            </div>
+                            <a
+                                href="/pricing"
+                                className="text-sm font-semibold underline underline-offset-2 hover:opacity-80 transition-opacity"
+                                style={{ color: '#34D399' }}
+                            >
+                                View full pricing →
+                            </a>
+                        </div>
                     </div>
 
-                    {/* Right: Form */}
-                    <div className="rounded-2xl p-8"
+                    {/* Right: form (3 cols) */}
+                    <div
+                        className="lg:col-span-3 rounded-3xl p-8"
                         style={{
-                            background: '#ECFEFF',
-                            boxShadow: '0 8px 32px rgba(8,145,178,0.1)',
-                            border: '1px solid rgba(8,145,178,0.15)',
-                        }}>
+                            background: 'rgba(255,255,255,0.97)',
+                            boxShadow: '0 24px 80px rgba(0,0,0,0.3)',
+                            border: '1px solid rgba(255,255,255,0.2)',
+                        }}
+                    >
                         {submitted ? (
-                            <div className="text-center py-8">
-                                <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-                                    style={{ background: 'rgba(5,150,105,0.15)' }}>
-                                    <svg className="w-8 h-8" style={{ color: '#059669' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                                    </svg>
+                            <div className="text-center py-10">
+                                <div
+                                    className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5 text-3xl"
+                                    style={{ background: 'rgba(5,150,105,0.1)' }}
+                                >
+                                    🎉
                                 </div>
-                                <h3 className="text-xl font-bold mb-2" style={{ color: '#164E63' }}>You&apos;re on the list!</h3>
-                                <p className="text-sm" style={{ color: '#164E63', opacity: 0.65, fontFamily: 'var(--font-noto), sans-serif' }}>
-                                    We&apos;ll reach out within 1 business day to schedule your demo.
+                                <h3 className="text-2xl font-bold mb-3" style={{ color: '#0C1A2E' }}>You&apos;re on the list!</h3>
+                                <p className="text-sm leading-relaxed" style={{ color: '#64748B', fontFamily: 'var(--font-noto), sans-serif' }}>
+                                    We&apos;ll reach out within 1 business day to schedule your<br />personalized demo. Check your inbox.
                                 </p>
                             </div>
                         ) : (
                             <form onSubmit={handleSubmit} className="space-y-4" noValidate>
-                                <h3 className="text-xl font-bold mb-6" style={{ color: '#164E63' }}>Request a Demo</h3>
+                                <div className="mb-6">
+                                    <h3 className="text-xl font-bold" style={{ color: '#0C1A2E' }}>Request a Demo</h3>
+                                    <p className="text-sm mt-1" style={{ color: '#64748B', fontFamily: 'var(--font-noto), sans-serif' }}>
+                                        We respond within 1 business day.
+                                    </p>
+                                </div>
 
-                                {[
-                                    { id: 'name', label: 'Full Name', type: 'text', placeholder: 'Jane Smith' },
-                                    { id: 'email', label: 'Work Email', type: 'email', placeholder: 'jane@yourhouse.com' },
-                                    { id: 'company', label: 'House / Organization Name', type: 'text', placeholder: 'Sunrise Sober Living' },
-                                ].map((field) => (
-                                    <div key={field.id}>
-                                        <label htmlFor={field.id} className="block text-sm font-medium mb-1.5" style={{ color: '#164E63' }}>
-                                            {field.label}
-                                        </label>
-                                        <input
-                                            id={field.id}
-                                            type={field.type}
-                                            placeholder={field.placeholder}
-                                            required
-                                            value={form[field.id as keyof typeof form]}
-                                            onChange={(e) => setForm((f) => ({ ...f, [field.id]: e.target.value }))}
-                                            className="w-full px-4 py-3 rounded-xl text-sm transition-all duration-200 outline-none"
-                                            style={{
-                                                background: 'white',
-                                                border: '1px solid rgba(8,145,178,0.2)',
-                                                color: '#164E63',
-                                                fontFamily: 'var(--font-noto), sans-serif',
-                                            }}
-                                            onFocus={(e) => (e.target.style.borderColor = '#0891B2')}
-                                            onBlur={(e) => (e.target.style.borderColor = 'rgba(8,145,178,0.2)')}
-                                        />
-                                    </div>
-                                ))}
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    {[
+                                        { id: 'name', label: 'Full Name', type: 'text', placeholder: 'Jane Smith', full: false },
+                                        { id: 'email', label: 'Work Email', type: 'email', placeholder: 'jane@yourhouse.com', full: false },
+                                        { id: 'company', label: 'Organization Name', type: 'text', placeholder: 'Sunrise Sober Living', full: false },
+                                        { id: 'beds', label: 'Number of Beds', type: 'text', placeholder: '12', full: false },
+                                    ].map((field) => (
+                                        <div key={field.id}>
+                                            <label htmlFor={field.id} className="block text-xs font-semibold mb-1.5 uppercase tracking-wide" style={{ color: '#64748B' }}>
+                                                {field.label}
+                                            </label>
+                                            <input
+                                                id={field.id}
+                                                type={field.type}
+                                                placeholder={field.placeholder}
+                                                required={field.id !== 'beds'}
+                                                value={form[field.id as keyof typeof form]}
+                                                onChange={(e) => setForm((f) => ({ ...f, [field.id]: e.target.value }))}
+                                                className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all duration-200"
+                                                style={{
+                                                    background: '#F8FAFC',
+                                                    border: '1px solid #E2E8F0',
+                                                    color: '#0C1A2E',
+                                                    fontFamily: 'var(--font-noto), sans-serif',
+                                                }}
+                                                onFocus={(e) => { e.target.style.borderColor = '#0891B2'; e.target.style.background = '#fff'; }}
+                                                onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.background = '#F8FAFC'; }}
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
 
                                 <div>
-                                    <label htmlFor="message" className="block text-sm font-medium mb-1.5" style={{ color: '#164E63' }}>
-                                        Anything else? (optional)
+                                    <label htmlFor="message" className="block text-xs font-semibold mb-1.5 uppercase tracking-wide" style={{ color: '#64748B' }}>
+                                        Biggest challenge today? (optional)
                                     </label>
                                     <textarea
                                         id="message"
                                         rows={3}
-                                        placeholder="How many beds do you manage? What's your biggest challenge today?"
+                                        placeholder="Tell us what's keeping you up at night as an operator..."
                                         value={form.message}
                                         onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-                                        className="w-full px-4 py-3 rounded-xl text-sm resize-none transition-all duration-200 outline-none"
+                                        className="w-full px-4 py-3 rounded-xl text-sm resize-none outline-none transition-all duration-200"
                                         style={{
-                                            background: 'white',
-                                            border: '1px solid rgba(8,145,178,0.2)',
-                                            color: '#164E63',
+                                            background: '#F8FAFC',
+                                            border: '1px solid #E2E8F0',
+                                            color: '#0C1A2E',
                                             fontFamily: 'var(--font-noto), sans-serif',
                                         }}
-                                        onFocus={(e) => (e.target.style.borderColor = '#0891B2')}
-                                        onBlur={(e) => (e.target.style.borderColor = 'rgba(8,145,178,0.2)')}
+                                        onFocus={(e) => { e.target.style.borderColor = '#0891B2'; e.target.style.background = '#fff'; }}
+                                        onBlur={(e) => { e.target.style.borderColor = '#E2E8F0'; e.target.style.background = '#F8FAFC'; }}
                                     />
                                 </div>
 
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full py-3.5 rounded-xl text-white font-semibold text-sm transition-all duration-200 cursor-pointer hover:opacity-90 disabled:opacity-60"
-                                    style={{ background: '#059669' }}
+                                    className="w-full py-4 rounded-xl text-white font-bold text-sm transition-all duration-200 cursor-pointer hover:opacity-90 hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
+                                    style={{
+                                        background: loading ? '#059669' : 'linear-gradient(135deg, #0891B2, #059669)',
+                                        boxShadow: '0 8px 24px rgba(8,145,178,0.3)',
+                                    }}
                                 >
-                                    {loading ? 'Sending…' : 'Request Demo →'}
+                                    {loading ? 'Sending…' : 'Book My Free Demo →'}
                                 </button>
 
-                                <p className="text-xs text-center" style={{ color: '#164E63', opacity: 0.5, fontFamily: 'var(--font-noto), sans-serif' }}>
-                                    We respect your privacy. No spam, ever.
+                                <p className="text-xs text-center" style={{ color: '#94A3B8', fontFamily: 'var(--font-noto), sans-serif' }}>
+                                    No spam. No sales calls unless you want one. We respect your privacy.
                                 </p>
-
-                                <div className="mt-4 pt-4 text-center" style={{ borderTop: '1px solid rgba(8,145,178,0.12)' }}>
-                                    <p className="text-sm" style={{ color: '#164E63', opacity: 0.6, fontFamily: 'var(--font-noto), sans-serif' }}>
-                                        Starting at <span className="font-semibold" style={{ color: '#059669' }}>$99/mo</span>
-                                        {' — '}
-                                        <a href="/pricing" className="underline hover:opacity-80 transition-opacity" style={{ color: '#0891B2' }}>
-                                            See pricing →
-                                        </a>
-                                    </p>
-                                </div>
                             </form>
                         )}
                     </div>
