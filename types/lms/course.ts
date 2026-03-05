@@ -3,7 +3,10 @@ import { Timestamp } from 'firebase/firestore';
 export type QuestionType =
     | 'MULTIPLE_CHOICE'
     | 'TRUE_FALSE'
-    | 'SHORT_ANSWER';
+    | 'SHORT_ANSWER'
+    | 'LONG_ANSWER'
+    | 'FILL_BLANK'
+    | 'LIKERT_SCALE';
 
 export interface QuizQuestion {
     id: string;

@@ -6,7 +6,7 @@ import { adminDb } from '@/lib/firebase/admin';
 export interface CurriculumLesson {
   id: string;
   title: string;
-  type: 'VIDEO' | 'TEXT' | 'QUIZ';
+  type: 'VIDEO' | 'TEXT' | 'QUIZ' | 'SLIDES';
   order: number;
 }
 

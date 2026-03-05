@@ -230,11 +230,11 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ tenant
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Curriculum Builder</h1>
-                    <p className="text-muted-foreground mt-1 text-sm">Organize modules, add lessons, and configure your course.</p>
+                    <p className="text-muted-foreground mt-1 text-sm">Organize modules, add lessons, and configure your course structure.</p>
                 </div>
                 <div className="flex items-center gap-3">
                     {saved && (
-                        <span className="text-sm text-emerald-600 font-medium">Saved</span>
+                        <span className="text-sm text-emerald-600 font-medium">✓ Structure saved</span>
                     )}
                     {saveError && (
                         <span className="text-sm text-destructive">{saveError}</span>
@@ -244,8 +244,24 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ tenant
                         disabled={saving}
                         className="bg-primary text-primary-foreground px-4 py-2 rounded-md font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
                     >
-                        {saving ? 'Saving...' : 'Save Curriculum'}
+                        {saving ? 'Saving...' : 'Save Structure'}
                     </button>
+                </div>
+            </div>
+
+            {/* ── Info Banner: Two separate save actions ── */}
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-start gap-3">
+                <svg className="h-5 w-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div className="text-sm">
+                    <p className="font-semibold text-blue-800">Two separate save actions</p>
+                    <p className="text-blue-700 mt-0.5">
+                        <strong>&quot;Save Structure&quot;</strong> (this page) only saves module names and lesson order.
+                        {' '}To save slide images, video URLs, text content, or quiz questions — click the{' '}
+                        <strong>✏️ pencil icon</strong> next to any lesson to open the Lesson Editor, then click{' '}
+                        <strong>&quot;Save Lesson&quot;</strong> inside that editor.
+                    </p>
                 </div>
             </div>
 

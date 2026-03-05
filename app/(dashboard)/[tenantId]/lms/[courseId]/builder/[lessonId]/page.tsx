@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import Link from 'next/link';
 import { authService } from '@/features/auth/services/authService';
 import { RichTextEditor } from '@/components/lms/RichTextEditor';
 import { QuizQuestionBuilder } from '@/components/lms/quiz/QuizQuestionBuilder';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 import { QuizQuestion } from '@/types/lms/course';
 import { LessonDoc, SlideItem } from '@/features/lms/services/lessonService';
 
@@ -12,7 +13,19 @@ type LessonType = 'VIDEO' | 'TEXT' | 'QUIZ' | 'SLIDES';
 
 // ─── Slides Editor ────────────────────────────────────────────────────────────
 
-function SlidesEditor({ slides, onChange }: { slides: SlideItem[]; onChange: (s: SlideItem[]) => void }) {
+function SlidesEditor({
+    slides,
+    onChange,
+    tenantId,
+    courseId,
+    lessonId,
+}: {
+    slides: SlideItem[];
+    onChange: (s: SlideItem[]) => void;
+    tenantId: string;
+    courseId: string;
+    lessonId: string;
+}) {
     const addSlide = () => {
         onChange([...slides, { id: 's-' + Date.now(), imageUrl: '', caption: '' }]);
     };
@@ -41,32 +54,35 @@ function SlidesEditor({ slides, onChange }: { slides: SlideItem[]; onChange: (s:
                         <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Slide {i + 1}</span>
                         <div className="flex items-center gap-1">
                             <button type="button" onClick={() => moveSlide(i, -1)} disabled={i === 0}
-                                className="text-xs px-2 py-1 border border-border rounded disabled:opacity-30 hover:bg-secondary">up</button>
+                                className="text-xs px-2 py-1 border border-border rounded disabled:opacity-30 hover:bg-secondary">↑</button>
                             <button type="button" onClick={() => moveSlide(i, 1)} disabled={i === slides.length - 1}
-                                className="text-xs px-2 py-1 border border-border rounded disabled:opacity-30 hover:bg-secondary">dn</button>
+                                className="text-xs px-2 py-1 border border-border rounded disabled:opacity-30 hover:bg-secondary">↓</button>
                             <button type="button" onClick={() => removeSlide(i)}
                                 className="text-xs px-2 py-1 text-destructive border border-destructive/30 rounded hover:bg-destructive/10">Remove</button>
                         </div>
                     </div>
+
+                    {/* Image upload — replaces manual URL entry */}
                     <div className="space-y-1">
-                        <label className="text-sm font-medium">Image URL</label>
-                        <input
-                            type="url"
-                            value={slide.imageUrl}
-                            onChange={e => updateSlide(i, 'imageUrl', e.target.value)}
-                            className="w-full p-2 border border-border bg-background rounded-md text-sm"
-                            placeholder="https://example.com/image.jpg or Cloudinary/S3 URL"
+                        <label className="text-sm font-medium">Slide Image</label>
+                        <ImageUpload
+                            storagePath={`tenants/${tenantId}/courses/${courseId}/slides/${lessonId}_slide${i}_${slide.id}`}
+                            currentUrl={slide.imageUrl || undefined}
+                            onUpload={(url) => updateSlide(i, 'imageUrl', url)}
                         />
-                    </div>
-                    {slide.imageUrl && (
-                        <div className="rounded-lg overflow-hidden border border-border max-h-56 flex items-center justify-center bg-muted/30">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={slide.imageUrl} alt={slide.caption || `Slide ${i + 1}`}
-                                className="max-h-56 object-contain w-full"
-                                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        {/* Fallback URL input */}
+                        <div className="flex items-center gap-2 mt-1">
+                            <span className="text-xs text-muted-foreground">or paste URL:</span>
+                            <input
+                                type="url"
+                                value={slide.imageUrl}
+                                onChange={e => updateSlide(i, 'imageUrl', e.target.value)}
+                                className="flex-1 p-1.5 border border-border bg-background rounded-md text-xs"
+                                placeholder="https://..."
                             />
                         </div>
-                    )}
+                    </div>
+
                     <div className="space-y-1">
                         <label className="text-sm font-medium">Caption <span className="text-muted-foreground font-normal">(optional)</span></label>
                         <input
@@ -103,7 +119,6 @@ export default function LessonEditorPage({
     const resolvedSearch = React.use(searchParams);
     const { tenantId, courseId, lessonId } = resolvedParams;
 
-    // Use the ?type= query param as the correct type for brand-new lessons not yet saved to Firestore
     const validTypes: LessonType[] = ['VIDEO', 'TEXT', 'QUIZ', 'SLIDES'];
     const initialType: LessonType = validTypes.includes(resolvedSearch?.type as LessonType)
         ? (resolvedSearch.type as LessonType)
@@ -119,8 +134,14 @@ export default function LessonEditorPage({
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [saved, setSaved] = useState(false);
+    const [lastSaved, setLastSaved] = useState<Date | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [saveError, setSaveError] = useState<string | null>(null);
+
+    // Track whether content has been loaded and changed (for auto-save guard)
+    const hasLoadedRef = useRef(false);
+    const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const savingRef = useRef(false);
 
     const getEmbedUrl = (url: string): string | null => {
         if (!url) return null;
@@ -159,17 +180,26 @@ export default function LessonEditorPage({
             } catch (err) {
                 if (!cancelled) setError(err instanceof Error ? err.message : String(err));
             } finally {
-                if (!cancelled) setLoading(false);
+                if (!cancelled) {
+                    setLoading(false);
+                    // Allow auto-save after a brief delay so initial setState doesn't trigger it
+                    setTimeout(() => { hasLoadedRef.current = true; }, 500);
+                }
             }
         }
         load();
-        return () => { cancelled = true; };
+        return () => {
+            cancelled = true;
+            if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+        };
     }, [tenantId, courseId, lessonId]);
 
-    const handleSave = async () => {
+    const doSave = useCallback(async (isAutoSave = false) => {
+        if (savingRef.current) return;
+        savingRef.current = true;
         setSaving(true);
         setSaveError(null);
-        setSaved(false);
+        if (!isAutoSave) setSaved(false);
         try {
             const token = await authService.getIdToken();
             const body: Partial<LessonDoc> = {
@@ -196,13 +226,27 @@ export default function LessonEditorPage({
                 throw new Error(data.error ?? `Request failed: ${res.status}`);
             }
             setSaved(true);
-            setTimeout(() => setSaved(false), 2000);
+            setLastSaved(new Date());
+            setTimeout(() => setSaved(false), 3000);
         } catch (err) {
             setSaveError(err instanceof Error ? err.message : String(err));
         } finally {
             setSaving(false);
+            savingRef.current = false;
         }
-    };
+    }, [title, lessonType, videoUrl, thumbnailUrl, content, questions, slides, tenantId, courseId, lessonId]);
+
+    // Auto-save: debounce 3 seconds after any content change
+    useEffect(() => {
+        if (!hasLoadedRef.current) return;
+        if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+        autoSaveTimerRef.current = setTimeout(() => {
+            doSave(true);
+        }, 3000);
+        return () => {
+            if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+        };
+    }, [title, videoUrl, thumbnailUrl, content, questions, slides, doSave]);
 
     const addQuestion = useCallback(() => {
         setQuestions(prev => [
@@ -221,8 +265,8 @@ export default function LessonEditorPage({
 
     const embedUrl = lessonType === 'VIDEO' ? getEmbedUrl(videoUrl) : null;
 
-    const TYPE_ICONS: Record<LessonType, string> = {
-        VIDEO: 'Video', TEXT: 'Text', QUIZ: 'Quiz', SLIDES: 'Slides',
+    const TYPE_LABELS: Record<LessonType, string> = {
+        VIDEO: '🎬 Video', TEXT: '📝 Text', QUIZ: '📋 Quiz', SLIDES: '🖼️ Slides',
     };
 
     if (loading) {
@@ -234,33 +278,31 @@ export default function LessonEditorPage({
     }
 
     return (
-        <div className="p-6 max-w-4xl mx-auto space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <Link
-                        href={`/${tenantId}/lms/${courseId}/builder`}
-                        className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 mb-2"
-                    >
-                        back to Course Builder
-                    </Link>
-                    <h1 className="text-2xl font-bold tracking-tight">Lesson Editor</h1>
-                    <p className="text-muted-foreground text-sm mt-1">
-                        <span className="capitalize bg-secondary text-secondary-foreground px-2 py-0.5 rounded text-xs font-medium mr-2">
-                            {TYPE_ICONS[lessonType]}
+        <div className="p-6 max-w-4xl mx-auto pb-28 space-y-6">
+            {/* Header */}
+            <div>
+                <Link
+                    href={`/${tenantId}/lms/${courseId}/builder`}
+                    className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 mb-2"
+                >
+                    ← Back to Course Builder
+                </Link>
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-2xl font-bold tracking-tight">Lesson Editor</h1>
+                        <p className="text-muted-foreground text-sm mt-1">
+                            <span className="capitalize bg-secondary text-secondary-foreground px-2 py-0.5 rounded text-xs font-medium mr-2">
+                                {TYPE_LABELS[lessonType]}
+                            </span>
+                            Edit content and click <strong>Save Lesson</strong> when done.
+                        </p>
+                    </div>
+                    {/* Auto-save status indicator */}
+                    {lastSaved && !saving && (
+                        <span className="text-xs text-muted-foreground">
+                            Auto-saved {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
-                        Configure this lesson content.
-                    </p>
-                </div>
-                <div className="flex items-center gap-3">
-                    {saved && <span className="text-sm text-emerald-600 font-medium">Saved</span>}
-                    {saveError && <span className="text-sm text-destructive">{saveError}</span>}
-                    <button
-                        onClick={handleSave}
-                        disabled={saving}
-                        className="bg-primary text-primary-foreground px-4 py-2 rounded-md font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
-                    >
-                        {saving ? 'Saving...' : 'Save Lesson'}
-                    </button>
+                    )}
                 </div>
             </div>
 
@@ -270,6 +312,7 @@ export default function LessonEditorPage({
                 </div>
             )}
 
+            {/* Lesson Title */}
             <div className="bg-card border border-border rounded-xl p-5 shadow-sm space-y-3">
                 <label className="text-sm font-medium block">Lesson Title</label>
                 <input
@@ -281,6 +324,7 @@ export default function LessonEditorPage({
                 />
             </div>
 
+            {/* VIDEO */}
             {lessonType === 'VIDEO' && (
                 <div className="bg-card border border-border rounded-xl p-5 shadow-sm space-y-4">
                     <h2 className="font-semibold">Video Content</h2>
@@ -307,7 +351,7 @@ export default function LessonEditorPage({
                     )}
                     {videoUrl && !embedUrl && (
                         <div className="bg-amber-50 border border-amber-200 rounded-md p-3 text-sm text-amber-800">
-                            URL format not recognized. Preview unavailable. Direct links (mp4, m3u8) will still play in the mobile app.
+                            URL format not recognized for preview. Direct links (mp4, m3u8) will still play in the mobile app.
                         </div>
                     )}
                     <div className="space-y-2">
@@ -323,6 +367,7 @@ export default function LessonEditorPage({
                 </div>
             )}
 
+            {/* TEXT */}
             {lessonType === 'TEXT' && (
                 <div className="bg-card border border-border rounded-xl p-5 shadow-sm space-y-3">
                     <h2 className="font-semibold">Text Content</h2>
@@ -330,19 +375,29 @@ export default function LessonEditorPage({
                 </div>
             )}
 
+            {/* SLIDES */}
             {lessonType === 'SLIDES' && (
                 <div className="bg-card border border-border rounded-xl p-5 shadow-sm space-y-4">
                     <div className="flex items-center justify-between">
                         <div>
                             <h2 className="font-semibold">Slide Deck</h2>
-                            <p className="text-xs text-muted-foreground mt-0.5">Add images with optional captions. Learners swipe through slides in order.</p>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                                Upload images or paste URLs. Learners swipe through slides in order.
+                            </p>
                         </div>
                         <span className="text-sm text-muted-foreground">{slides.length} slide{slides.length !== 1 ? 's' : ''}</span>
                     </div>
-                    <SlidesEditor slides={slides} onChange={setSlides} />
+                    <SlidesEditor
+                        slides={slides}
+                        onChange={setSlides}
+                        tenantId={tenantId}
+                        courseId={courseId}
+                        lessonId={lessonId}
+                    />
                 </div>
             )}
 
+            {/* QUIZ */}
             {lessonType === 'QUIZ' && (
                 <div className="bg-card border border-border rounded-xl p-5 shadow-sm space-y-4">
                     <div className="flex items-center justify-between">
@@ -376,6 +431,52 @@ export default function LessonEditorPage({
                     </button>
                 </div>
             )}
+
+            {/* ── Sticky Save Footer ── */}
+            <div className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur border-t border-border px-6 py-4 flex items-center justify-between shadow-lg">
+                <div className="flex items-center gap-3">
+                    {saving && (
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                            <div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+                            Saving…
+                        </div>
+                    )}
+                    {saved && !saving && (
+                        <span className="text-sm text-emerald-600 font-medium flex items-center gap-1">
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Lesson saved
+                        </span>
+                    )}
+                    {saveError && !saving && (
+                        <span className="text-sm text-destructive">{saveError}</span>
+                    )}
+                    {!saving && !saved && !saveError && lastSaved && (
+                        <span className="text-xs text-muted-foreground">
+                            Last saved {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                    )}
+                    {!saving && !saved && !saveError && !lastSaved && (
+                        <span className="text-xs text-muted-foreground">Unsaved changes auto-save after 3 seconds of inactivity</span>
+                    )}
+                </div>
+                <div className="flex items-center gap-3">
+                    <Link
+                        href={`/${tenantId}/lms/${courseId}/builder`}
+                        className="text-sm text-muted-foreground hover:text-foreground px-4 py-2 rounded-md border border-border hover:bg-secondary transition-colors"
+                    >
+                        ← Back
+                    </Link>
+                    <button
+                        onClick={() => doSave(false)}
+                        disabled={saving}
+                        className="bg-primary text-primary-foreground px-6 py-2 rounded-md font-semibold hover:bg-primary/90 disabled:opacity-50 transition-colors text-sm"
+                    >
+                        {saving ? 'Saving…' : 'Save Lesson'}
+                    </button>
+                </div>
+            </div>
         </div>
     );
 }

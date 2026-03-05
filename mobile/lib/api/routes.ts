@@ -16,6 +16,7 @@ export const userApi = {
   updateMe: (body: Partial<AppUser>) => api.patch<{ success: boolean }>('/api/mobile/users/me', body),
   getEnrollments: () => api.get<{ enrollments: Enrollment[] }>('/api/mobile/users/me/enrollments'),
   getFeed: () => api.get<{ events: FeedEvent[]; chores: FeedChore[] }>('/api/mobile/users/me/feed'),
+  getProgress: () => api.get<ProgressData>('/api/mobile/users/me/progress'),
 };
 
 // --- Tenants ---
@@ -128,4 +129,38 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   createdAt: string;
+}
+
+export interface CourseProgress {
+  courseId: string;
+  title: string;
+  progress: number; // 0-100
+  status: 'ENROLLED' | 'IN_PROGRESS' | 'COMPLETED';
+  completedLessons: number;
+  totalLessons: number;
+}
+
+export interface MoodEntry {
+  date: string; // ISO date string (YYYY-MM-DD)
+  score: number; // 1-5
+}
+
+export interface ProgressData {
+  sobriety: {
+    days: number;
+    startDate: string | null;
+    nextMilestone: number; // days until next milestone
+    nextMilestoneDays: number; // what the milestone is (30, 60, 90, 180, 365...)
+  };
+  courses: {
+    enrolled: number;
+    completed: number;
+    inProgress: number;
+    items: CourseProgress[];
+  };
+  meetings: {
+    thisMonth: number;
+    streak: number; // consecutive weeks with at least 1 meeting
+  };
+  moods: MoodEntry[]; // last 7 entries
 }
