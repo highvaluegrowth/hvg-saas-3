@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { SortableList, SortableItemType } from '@/components/lms/SortableList';
 import Link from 'next/link';
-import { auth } from '@/lib/firebase/client';
+import { authService } from '@/features/auth/services/authService';
 
 // Mock types for the local state representation
 type LessonType = 'VIDEO' | 'TEXT' | 'QUIZ' | 'SLIDES';
@@ -33,10 +33,10 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ tenant
         let cancelled = false;
         async function loadCourse() {
             try {
-                const token = await auth.currentUser?.getIdToken();
+                const token = await authService.getIdToken();
                 const res = await fetch(
                     `/api/tenants/${resolvedParams.tenantId}/lms/courses/${resolvedParams.courseId}`,
-                    { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+                    { headers: { Authorization: `Bearer ${token}` } }
                 );
                 if (!res.ok) {
                     const data = await res.json();
@@ -104,7 +104,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ tenant
         setSaveError(null);
         setSaved(false);
         try {
-            const token = await auth.currentUser?.getIdToken();
+            const token = await authService.getIdToken();
             const curriculum = modules.map((m, i) => ({
                 id: m.id,
                 title: m.title,
@@ -122,7 +122,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ tenant
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                        Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify({ curriculum }),
                 }
@@ -180,7 +180,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ tenant
                                 <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     {/* Edit Lesson Content Button - Routes to dedicated Lesson Editor */}
                                     <Link
-                                        href={`/${resolvedParams.tenantId}/lms/${resolvedParams.courseId}/builder/${lesson.id}`}
+                                        href={`/${resolvedParams.tenantId}/lms/${resolvedParams.courseId}/builder/${lesson.id}?type=${lesson.type}`}
                                         className="text-primary hover:bg-primary/10 p-1.5 rounded transition-colors"
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>

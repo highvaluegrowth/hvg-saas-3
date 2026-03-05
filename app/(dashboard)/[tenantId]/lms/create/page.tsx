@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { auth } from '@/lib/firebase/client';
+import { authService } from '@/features/auth/services/authService';
 
 export default function CreateCoursePage({ params }: { params: Promise<{ tenantId: string }> }) {
     const router = useRouter();
@@ -18,12 +18,12 @@ export default function CreateCoursePage({ params }: { params: Promise<{ tenantI
         setLoading(true);
         setError(null);
         try {
-            const token = await auth.currentUser?.getIdToken();
+            const token = await authService.getIdToken();
             const res = await fetch(`/api/tenants/${resolvedParams.tenantId}/lms/courses`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({ title, description, isPublic }),
             });

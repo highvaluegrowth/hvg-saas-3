@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { auth } from '@/lib/firebase/client';
+import { authService } from '@/features/auth/services/authService';
 import { CourseDoc } from '@/features/lms/services/courseService';
 
 export default function LMSDashboard({ params }: { params: Promise<{ tenantId: string }> }) {
@@ -15,9 +15,9 @@ export default function LMSDashboard({ params }: { params: Promise<{ tenantId: s
         let cancelled = false;
         async function fetchCourses() {
             try {
-                const token = await auth.currentUser?.getIdToken();
+                const token = await authService.getIdToken();
                 const res = await fetch(`/api/tenants/${resolvedParams.tenantId}/lms/courses`, {
-                    headers: token ? { Authorization: `Bearer ${token}` } : {},
+                    headers: { Authorization: `Bearer ${token}` },
                 });
                 if (!res.ok) {
                     const data = await res.json();

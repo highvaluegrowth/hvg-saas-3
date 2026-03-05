@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { auth } from '@/lib/firebase/client';
+import { authService } from '@/features/auth/services/authService';
 
 interface EnrollmentRecord {
   id: string;
@@ -37,10 +37,10 @@ export default function CourseAnalyticsPage({ params }: { params: Promise<{ tena
     let cancelled = false;
     async function load() {
       try {
-        const token = await auth.currentUser?.getIdToken();
+        const token = await authService.getIdToken();
         const res = await fetch(
           `/api/tenants/${tenantId}/lms/courses/${courseId}/analytics`,
-          { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
         if (!res.ok) {
           const data = await res.json();

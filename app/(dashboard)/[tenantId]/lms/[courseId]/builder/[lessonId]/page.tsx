@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
-import { auth } from '@/lib/firebase/client';
+import { authService } from '@/features/auth/services/authService';
 import { RichTextEditor } from '@/components/lms/RichTextEditor';
 import { QuizQuestionBuilder } from '@/components/lms/quiz/QuizQuestionBuilder';
 import { QuizQuestion } from '@/types/lms/course';
@@ -94,13 +94,22 @@ function SlidesEditor({ slides, onChange }: { slides: SlideItem[]; onChange: (s:
 
 export default function LessonEditorPage({
     params,
+    searchParams,
 }: {
     params: Promise<{ tenantId: string; courseId: string; lessonId: string }>;
+    searchParams: Promise<{ type?: string }>;
 }) {
     const resolvedParams = React.use(params);
+    const resolvedSearch = React.use(searchParams);
     const { tenantId, courseId, lessonId } = resolvedParams;
 
-    const [lessonType, setLessonType] = useState<LessonType>('TEXT');
+    // Use the ?type= query param as the correct type for brand-new lessons not yet saved to Firestore
+    const validTypes: LessonType[] = ['VIDEO', 'TEXT', 'QUIZ', 'SLIDES'];
+    const initialType: LessonType = validTypes.includes(resolvedSearch?.type as LessonType)
+        ? (resolvedSearch.type as LessonType)
+        : 'TEXT';
+
+    const [lessonType, setLessonType] = useState<LessonType>(initialType);
     const [title, setTitle] = useState('');
     const [videoUrl, setVideoUrl] = useState('');
     const [thumbnailUrl, setThumbnailUrl] = useState('');
@@ -127,10 +136,10 @@ export default function LessonEditorPage({
         let cancelled = false;
         async function load() {
             try {
-                const token = await auth.currentUser?.getIdToken();
+                const token = await authService.getIdToken();
                 const res = await fetch(
                     `/api/tenants/${tenantId}/lms/courses/${courseId}/lessons/${lessonId}`,
-                    { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+                    { headers: { Authorization: `Bearer ${token}` } }
                 );
                 if (!res.ok) {
                     const data = await res.json();
@@ -162,7 +171,7 @@ export default function LessonEditorPage({
         setSaveError(null);
         setSaved(false);
         try {
-            const token = await auth.currentUser?.getIdToken();
+            const token = await authService.getIdToken();
             const body: Partial<LessonDoc> = {
                 title,
                 type: lessonType,
@@ -177,7 +186,7 @@ export default function LessonEditorPage({
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
-                        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+                        Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify(body),
                 }
