@@ -44,6 +44,8 @@ function formatDate(iso?: string): string {
   });
 }
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Blog — High Value Growth',
   description: 'Insights, guides, and news from the High Value Growth team on sober living, recovery, and house management.',
