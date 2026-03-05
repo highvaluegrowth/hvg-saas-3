@@ -6,7 +6,11 @@ export type QuestionType =
     | 'SHORT_ANSWER'
     | 'LONG_ANSWER'
     | 'FILL_BLANK'
-    | 'LIKERT_SCALE';
+    | 'LIKERT_SCALE'
+    | 'MATCHING'
+    | 'ORDERING'
+    | 'RATING'
+    | 'IMAGE_CHOICE';
 
 export interface QuizQuestion {
     id: string;
