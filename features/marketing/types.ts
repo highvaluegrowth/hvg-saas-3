@@ -32,6 +32,7 @@ export interface SocialPost {
     createdAt: string;
     updatedAt: string;
     aiGenerated: boolean;
+    imageUrl?: string | null;
     sourceContext: Record<string, unknown>;
     engagement?: PostEngagement;
 }
@@ -65,6 +66,7 @@ export interface CreatePostPayload {
     platforms: SocialPlatform[];
     hashtags: string[];
     postType: PostType;
+    imageUrl?: string | null;
     scheduledAt?: string | null;
     aiGenerated: boolean;
     sourceContext?: Record<string, unknown>;

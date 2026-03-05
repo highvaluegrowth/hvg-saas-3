@@ -19,6 +19,14 @@ export const userApi = {
   getProgress: () => api.get<ProgressData>('/api/mobile/users/me/progress'),
 };
 
+// --- LMS ---
+export const lmsApi = {
+  getCourses: (tenantId: string) =>
+    api.get<{ courses: MobileCourse[] }>(`/api/mobile/tenants/${tenantId}/courses`),
+  getCourse: (tenantId: string, courseId: string) =>
+    api.get<{ course: MobileCourseDetail }>(`/api/mobile/tenants/${tenantId}/courses/${courseId}`),
+};
+
 // --- Tenants ---
 export const tenantApi = {
   list: () => api.get<{ tenants: PublicTenant[] }>('/api/mobile/tenants'),
@@ -129,6 +137,44 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   createdAt: string;
+}
+
+export interface MobileCourse {
+  id: string;
+  title: string;
+  description: string;
+  totalLessons: number;
+  moduleCount: number;
+  enrolled: boolean;
+  progress: number; // 0-100
+  enrollmentStatus: string | null;
+  completedLessons: number;
+}
+
+export interface MobileLessonContent {
+  id: string;
+  title: string;
+  type: 'VIDEO' | 'TEXT' | 'QUIZ' | 'SLIDES';
+  order: number;
+  videoUrl?: string;
+  thumbnailUrl?: string;
+  content?: string;
+  questions?: unknown[];
+  slides?: { id: string; imageUrl: string; caption?: string }[];
+}
+
+export interface MobileCourseModule {
+  id: string;
+  title: string;
+  order: number;
+  lessons: MobileLessonContent[];
+}
+
+export interface MobileCourseDetail {
+  id: string;
+  title: string;
+  description: string;
+  modules: MobileCourseModule[];
 }
 
 export interface CourseProgress {

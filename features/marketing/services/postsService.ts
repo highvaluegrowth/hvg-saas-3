@@ -27,6 +27,7 @@ export const postsService = {
             createdAt: now,
             updatedAt: now,
             aiGenerated: payload.aiGenerated,
+            imageUrl: payload.imageUrl ?? null,
             sourceContext: payload.sourceContext ?? {},
         };
         await ref.set(post);

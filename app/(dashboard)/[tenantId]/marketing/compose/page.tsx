@@ -3,6 +3,7 @@
 import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { PostType, SocialPlatform, DraftPostResult } from '@/features/marketing/types';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 
 const POST_TYPES: { value: PostType; label: string; icon: string; desc: string }[] = [
     { value: 'bed_availability', label: 'Bed Availability', icon: '🛏️', desc: 'Announce open beds at your house' },
@@ -30,6 +31,7 @@ export default function ComposePage({ params }: { params: Promise<{ tenantId: st
     const [postType, setPostType] = useState<PostType | null>(null);
     const [contextText, setContextText] = useState('');
     const [tone, setTone] = useState<'professional' | 'warm' | 'urgent' | 'celebratory'>('warm');
+    const [imageUrl, setImageUrl] = useState('');
 
     const [draft, setDraft] = useState('');
     const [aiHashtags, setAiHashtags] = useState<DraftPostResult['hashtags'] | null>(null);
@@ -45,7 +47,9 @@ export default function ComposePage({ params }: { params: Promise<{ tenantId: st
 
     const [generating, setGenerating] = useState(false);
     const [submitting, setSubmitting] = useState(false);
+    const [publishing, setPublishing] = useState(false);
     const [error, setError] = useState('');
+    const [publishResult, setPublishResult] = useState<{ platform: string; success: boolean; error?: string }[] | null>(null);
 
     async function generateDraft() {
         if (!postType) return;
@@ -71,32 +75,70 @@ export default function ComposePage({ params }: { params: Promise<{ tenantId: st
         }
     }
 
+    async function savePost(asDraft: boolean): Promise<string | null> {
+        if (!postType) return null;
+        const allHashtags = [...selectedGeneralTags, ...selectedHouseTags, ...selectedPlatformTags, ...customTags];
+        const body = {
+            content: draft,
+            platforms: selectedPlatforms,
+            hashtags: allHashtags,
+            postType,
+            imageUrl: imageUrl || null,
+            scheduledAt: !asDraft && scheduleMode === 'schedule' ? scheduledAt : null,
+            aiGenerated: !!aiHashtags,
+            sourceContext: { contextText, tone },
+        };
+        const res = await fetch(`/api/tenants/${tenantId}/marketing/posts`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json() as { post: { id: string } };
+        return data.post.id;
+    }
+
     async function submit(asDraft: boolean) {
-        if (!postType) return;
         setSubmitting(true);
         setError('');
         try {
-            const allHashtags = [...selectedGeneralTags, ...selectedHouseTags, ...selectedPlatformTags, ...customTags];
-            const body = {
-                content: draft,
-                platforms: selectedPlatforms,
-                hashtags: allHashtags,
-                postType,
-                scheduledAt: !asDraft && scheduleMode === 'schedule' ? scheduledAt : null,
-                aiGenerated: !!aiHashtags,
-                sourceContext: { contextText, tone },
-            };
-            const res = await fetch(`/api/tenants/${tenantId}/marketing/posts`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body),
-            });
-            if (!res.ok) throw new Error(await res.text());
+            await savePost(asDraft);
             router.push(`/${tenantId}/marketing/posts`);
         } catch (e) {
             setError(String(e));
         } finally {
             setSubmitting(false);
+        }
+    }
+
+    async function publishNow() {
+        if (!postType || selectedPlatforms.length === 0) return;
+        setPublishing(true);
+        setError('');
+        setPublishResult(null);
+        try {
+            // First save the post
+            const postId = await savePost(false);
+            if (!postId) throw new Error('Failed to save post');
+
+            // Then publish it
+            const res = await fetch(`/api/tenants/${tenantId}/marketing/publish`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ postId }),
+            });
+            if (!res.ok) throw new Error(await res.text());
+            const data = await res.json() as { results: { platform: string; success: boolean; error?: string }[] };
+            setPublishResult(data.results);
+
+            // Redirect after 2s if any success
+            if (data.results.some((r) => r.success)) {
+                setTimeout(() => router.push(`/${tenantId}/marketing/posts`), 2000);
+            }
+        } catch (e) {
+            setError(String(e));
+        } finally {
+            setPublishing(false);
         }
     }
 
@@ -116,7 +158,7 @@ export default function ComposePage({ params }: { params: Promise<{ tenantId: st
         setSelectedPlatforms(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p]);
     }
 
-    const stepLabels = ['Post Type', 'Context', 'Edit & Approve', 'Platforms & Timing'];
+    const stepLabels = ['Post Type', 'Context & Image', 'Edit & Approve', 'Platforms & Timing'];
 
     return (
         <div className="max-w-2xl mx-auto p-6 space-y-6">
@@ -156,7 +198,7 @@ export default function ComposePage({ params }: { params: Promise<{ tenantId: st
                 </div>
             )}
 
-            {/* Step 2: Context */}
+            {/* Step 2: Context + Image */}
             {step === 2 && (
                 <div className="space-y-4">
                     <h2 className="text-xl font-bold text-gray-900">Give the AI some context</h2>
@@ -177,6 +219,28 @@ export default function ComposePage({ params }: { params: Promise<{ tenantId: st
                             ))}
                         </div>
                     </div>
+
+                    {/* Image Upload */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Post Image <span className="text-gray-400 font-normal">(optional — required for Instagram)</span>
+                        </label>
+                        <ImageUpload
+                            storagePath={`tenants/${tenantId}/marketing/posts/${Date.now()}`}
+                            onUpload={(url: string) => setImageUrl(url)}
+                            currentUrl={imageUrl}
+                            accept="image/*"
+                        />
+                        {imageUrl && (
+                            <button
+                                onClick={() => setImageUrl('')}
+                                className="mt-2 text-xs text-rose-500 hover:underline"
+                            >
+                                Remove image
+                            </button>
+                        )}
+                    </div>
+
                     <div className="flex gap-3">
                         <button onClick={() => setStep(1)} className="px-4 py-2 border border-gray-300 rounded-lg text-sm">← Back</button>
                         <button onClick={async () => { await generateDraft(); setStep(3); }} disabled={generating || !contextText.trim()}
@@ -191,6 +255,15 @@ export default function ComposePage({ params }: { params: Promise<{ tenantId: st
             {step === 3 && (
                 <div className="space-y-4">
                     <h2 className="text-xl font-bold text-gray-900">Review & edit your post</h2>
+
+                    {/* Image preview */}
+                    {imageUrl && (
+                        <div className="rounded-lg overflow-hidden border border-gray-200">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={imageUrl} alt="Post image" className="w-full max-h-48 object-cover" />
+                        </div>
+                    )}
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Caption</label>
                         <textarea value={draft} onChange={e => setDraft(e.target.value)} rows={7}
@@ -262,7 +335,11 @@ export default function ComposePage({ params }: { params: Promise<{ tenantId: st
                                 </button>
                             ))}
                         </div>
-                        <p className="text-xs text-gray-400 mt-1">Note: Actual publishing requires a connected account (coming soon). Posts save to your library.</p>
+                        {selectedPlatforms.includes('instagram') && !imageUrl && (
+                            <p className="text-xs text-amber-600 mt-2 flex items-center gap-1">
+                                ⚠️ Instagram requires an image. Go back to Step 2 to add one.
+                            </p>
+                        )}
                     </div>
                     <div>
                         <p className="text-sm font-medium text-gray-700 mb-2">Timing</p>
@@ -270,7 +347,7 @@ export default function ComposePage({ params }: { params: Promise<{ tenantId: st
                             {(['now', 'schedule'] as const).map(mode => (
                                 <button key={mode} onClick={() => setScheduleMode(mode)}
                                     className={`px-4 py-2 rounded-lg text-sm capitalize border-2 transition-colors ${scheduleMode === mode ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-gray-200 text-gray-600'}`}>
-                                    {mode === 'now' ? 'Save Now' : 'Schedule'}
+                                    {mode === 'now' ? 'Publish Now' : 'Schedule'}
                                 </button>
                             ))}
                         </div>
@@ -279,17 +356,39 @@ export default function ComposePage({ params }: { params: Promise<{ tenantId: st
                                 className="mt-2 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none" />
                         )}
                     </div>
+
+                    {/* Publish result feedback */}
+                    {publishResult && (
+                        <div className="space-y-2">
+                            {publishResult.map((r) => (
+                                <div key={r.platform}
+                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${r.success ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'}`}>
+                                    <span>{r.success ? '✓' : '✗'}</span>
+                                    <span className="capitalize font-medium">{r.platform}</span>
+                                    {!r.success && r.error && <span className="text-xs opacity-75">— {r.error}</span>}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+
                     {error && <p className="text-red-600 text-sm">{error}</p>}
                     <div className="flex gap-3">
                         <button onClick={() => setStep(3)} className="px-4 py-2 border border-gray-300 rounded-lg text-sm">← Back</button>
-                        <button onClick={() => submit(true)} disabled={submitting}
+                        <button onClick={() => submit(true)} disabled={submitting || publishing}
                             className="px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-40">
                             Save Draft
                         </button>
-                        <button onClick={() => submit(false)} disabled={submitting || selectedPlatforms.length === 0}
-                            className="flex-1 py-2 bg-emerald-600 text-white rounded-lg font-medium disabled:opacity-40 hover:bg-emerald-700 transition-colors">
-                            {submitting ? 'Saving...' : scheduleMode === 'schedule' ? '📅 Schedule Post' : '💾 Save Post'}
-                        </button>
+                        {scheduleMode === 'schedule' ? (
+                            <button onClick={() => submit(false)} disabled={submitting || selectedPlatforms.length === 0 || !scheduledAt}
+                                className="flex-1 py-2 bg-emerald-600 text-white rounded-lg font-medium disabled:opacity-40 hover:bg-emerald-700 transition-colors">
+                                {submitting ? 'Scheduling...' : '📅 Schedule Post'}
+                            </button>
+                        ) : (
+                            <button onClick={publishNow} disabled={publishing || submitting || selectedPlatforms.length === 0}
+                                className="flex-1 py-2 bg-blue-600 text-white rounded-lg font-medium disabled:opacity-40 hover:bg-blue-700 transition-colors">
+                                {publishing ? 'Publishing...' : '🚀 Publish Now'}
+                            </button>
+                        )}
                     </div>
                 </div>
             )}
