@@ -26,10 +26,14 @@ export function MarketingNavbar() {
     return (
         <nav
             className={`fixed top-4 left-4 right-4 z-50 rounded-2xl transition-all duration-300 ${scrolled
-                ? 'bg-white/90 backdrop-blur-md shadow-lg border border-white/60'
-                : 'bg-white/70 backdrop-blur-sm shadow-md border border-white/40'
+                ? 'backdrop-blur-md shadow-lg'
+                : 'backdrop-blur-sm shadow-md'
                 }`}
-            style={{ fontFamily: 'var(--font-figtree), sans-serif' }}
+            style={{
+                background: scrolled ? 'rgba(12,26,46,0.92)' : 'rgba(12,26,46,0.75)',
+                border: scrolled ? '1px solid rgba(255,255,255,0.1)' : '1px solid rgba(255,255,255,0.07)',
+                fontFamily: 'var(--font-figtree), sans-serif',
+            }}
         >
             <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
                 {/* Logo */}
@@ -39,7 +43,7 @@ export function MarketingNavbar() {
                             <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
                         </svg>
                     </div>
-                    <span className="font-semibold text-lg" style={{ color: '#164E63' }}>High Value Growth</span>
+                    <span className="font-semibold text-lg text-white">High Value Growth</span>
                 </Link>
 
                 {/* Nav Links — desktop */}
@@ -49,9 +53,9 @@ export function MarketingNavbar() {
                             key={link.href}
                             href={link.href}
                             className="text-sm font-medium transition-colors duration-200 cursor-pointer"
-                            style={{ color: '#164E63' }}
-                            onMouseEnter={(e) => ((e.target as HTMLElement).style.color = '#0891B2')}
-                            onMouseLeave={(e) => ((e.target as HTMLElement).style.color = '#164E63')}
+                            style={{ color: 'rgba(255,255,255,0.65)' }}
+                            onMouseEnter={(e) => ((e.target as HTMLElement).style.color = '#67E8F9')}
+                            onMouseLeave={(e) => ((e.target as HTMLElement).style.color = 'rgba(255,255,255,0.65)')}
                         >
                             {link.label}
                         </Link>
@@ -63,16 +67,16 @@ export function MarketingNavbar() {
                     <Link
                         href="/login"
                         className="text-sm font-medium transition-colors duration-200 cursor-pointer"
-                        style={{ color: '#164E63', opacity: 0.7 }}
-                        onMouseEnter={(e) => ((e.target as HTMLElement).style.color = '#0891B2')}
-                        onMouseLeave={(e) => ((e.target as HTMLElement).style.color = '#164E63')}
+                        style={{ color: 'rgba(255,255,255,0.5)' }}
+                        onMouseEnter={(e) => ((e.target as HTMLElement).style.color = 'rgba(255,255,255,0.9)')}
+                        onMouseLeave={(e) => ((e.target as HTMLElement).style.color = 'rgba(255,255,255,0.5)')}
                     >
                         Sign In
                     </Link>
                     <Link
                         href="/register"
                         className="text-sm font-medium px-4 py-2 rounded-xl transition-all duration-200 hover:opacity-90"
-                        style={{ background: 'rgba(8,145,178,0.1)', color: '#0891B2', border: '1px solid rgba(8,145,178,0.2)' }}
+                        style={{ background: 'rgba(8,145,178,0.15)', color: '#67E8F9', border: '1px solid rgba(8,145,178,0.3)' }}
                     >
                         For Operators
                     </Link>
@@ -92,7 +96,7 @@ export function MarketingNavbar() {
                 {/* Mobile hamburger */}
                 <button
                     className="md:hidden p-2 rounded-lg cursor-pointer"
-                    style={{ color: '#0891B2' }}
+                    style={{ color: '#67E8F9' }}
                     onClick={() => setMobileOpen((v) => !v)}
                     aria-label="Toggle menu"
                 >
@@ -110,24 +114,24 @@ export function MarketingNavbar() {
 
             {/* Mobile menu */}
             {mobileOpen && (
-                <div className="md:hidden border-t border-white/40 px-6 py-4 space-y-1">
+                <div className="md:hidden px-6 py-4 space-y-1" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
                     {navLinks.map((link) => (
                         <Link
                             key={link.href}
                             href={link.href}
                             onClick={() => setMobileOpen(false)}
                             className="block py-2 text-sm font-medium transition-colors duration-200"
-                            style={{ color: '#164E63' }}
+                            style={{ color: 'rgba(255,255,255,0.65)' }}
                         >
                             {link.label}
                         </Link>
                     ))}
-                    <div className="pt-3 border-t border-white/40 space-y-2">
+                    <div className="pt-3 space-y-2" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
                         <Link
                             href="/login"
                             onClick={() => setMobileOpen(false)}
                             className="block py-2 text-sm font-medium"
-                            style={{ color: '#164E63', opacity: 0.7 }}
+                            style={{ color: 'rgba(255,255,255,0.5)' }}
                         >
                             Sign In
                         </Link>
@@ -135,7 +139,7 @@ export function MarketingNavbar() {
                             href="/register"
                             onClick={() => setMobileOpen(false)}
                             className="block text-center py-2 text-sm font-medium rounded-xl"
-                            style={{ background: 'rgba(8,145,178,0.1)', color: '#0891B2', border: '1px solid rgba(8,145,178,0.2)' }}
+                            style={{ background: 'rgba(8,145,178,0.15)', color: '#67E8F9', border: '1px solid rgba(8,145,178,0.3)' }}
                         >
                             For Operators
                         </Link>

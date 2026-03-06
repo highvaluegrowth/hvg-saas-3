@@ -41,7 +41,7 @@ const testimonials = [
         role: 'Owner · 3 houses',
         location: 'Austin, TX',
         type: 'Operator',
-        color: '#164E63',
+        color: '#67E8F9',
         rating: 5,
     },
     {
@@ -79,24 +79,37 @@ function StarRating({ count }: { count: number }) {
 export function SocialProofSection() {
     return (
         <section
-            className="py-28 px-6"
-            style={{ background: '#F0FDFA', fontFamily: 'var(--font-figtree), sans-serif' }}
+            className="py-28 px-6 relative overflow-hidden"
+            style={{
+                background: '#0A1628',
+                fontFamily: 'var(--font-figtree), sans-serif',
+            }}
         >
-            <div className="max-w-6xl mx-auto">
+            {/* Top separator */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-px pointer-events-none"
+                style={{ background: 'linear-gradient(to right, transparent, rgba(52,211,153,0.3), transparent)' }} />
+            {/* Dot grid */}
+            <div className="absolute inset-0 pointer-events-none"
+                style={{
+                    backgroundImage: 'radial-gradient(circle, rgba(8,145,178,0.03) 1px, transparent 1px)',
+                    backgroundSize: '36px 36px',
+                }} />
+
+            <div className="max-w-6xl mx-auto relative">
 
                 {/* Header */}
                 <div className="text-center mb-16">
                     <div
                         className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-5"
-                        style={{ background: 'rgba(8,145,178,0.1)', color: '#0891B2' }}
+                        style={{ background: 'rgba(8,145,178,0.12)', color: '#67E8F9', border: '1px solid rgba(8,145,178,0.22)' }}
                     >
                         Real results
                     </div>
-                    <h2 className="text-4xl md:text-5xl font-bold mb-4 leading-tight" style={{ color: '#0C1A2E' }}>
+                    <h2 className="text-4xl md:text-5xl font-bold mb-4 leading-tight text-white">
                         Trusted by operators.<br />
-                        <span style={{ color: '#059669' }}>Life-changing for residents.</span>
+                        <span style={{ color: '#34D399' }}>Life-changing for residents.</span>
                     </h2>
-                    <p className="text-lg max-w-xl mx-auto" style={{ color: '#4A6070', fontFamily: 'var(--font-noto), sans-serif' }}>
+                    <p className="text-lg max-w-xl mx-auto" style={{ color: 'rgba(255,255,255,0.6)', fontFamily: 'var(--font-noto), sans-serif' }}>
                         From house managers to residents in early recovery — here&apos;s what they&apos;re saying.
                     </p>
                 </div>
@@ -108,15 +121,15 @@ export function SocialProofSection() {
                             key={m.label}
                             className="rounded-2xl p-6 text-center transition-all duration-200 hover:-translate-y-0.5"
                             style={{
-                                background: 'white',
-                                boxShadow: '0 4px 20px rgba(8,145,178,0.08)',
-                                border: '1px solid rgba(8,145,178,0.1)',
+                                background: 'rgba(255,255,255,0.05)',
+                                boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                                border: '1px solid rgba(255,255,255,0.08)',
                             }}
                         >
                             <div className="text-2xl mb-2">{m.icon}</div>
-                            <div className="text-3xl md:text-4xl font-bold mb-1" style={{ color: '#059669' }}>{m.value}</div>
-                            <div className="text-sm font-semibold mb-1" style={{ color: '#164E63' }}>{m.label}</div>
-                            <div className="text-xs" style={{ color: '#64748B', fontFamily: 'var(--font-noto), sans-serif' }}>{m.sub}</div>
+                            <div className="text-3xl md:text-4xl font-bold mb-1" style={{ color: '#34D399' }}>{m.value}</div>
+                            <div className="text-sm font-semibold mb-1" style={{ color: 'rgba(255,255,255,0.75)' }}>{m.label}</div>
+                            <div className="text-xs" style={{ color: 'rgba(255,255,255,0.4)', fontFamily: 'var(--font-noto), sans-serif' }}>{m.sub}</div>
                         </div>
                     ))}
                 </div>
@@ -128,9 +141,9 @@ export function SocialProofSection() {
                             key={t.name}
                             className="flex flex-col rounded-2xl p-6 transition-all duration-200 hover:-translate-y-0.5"
                             style={{
-                                background: 'white',
-                                boxShadow: '0 4px 20px rgba(8,145,178,0.07)',
-                                border: '1px solid rgba(8,145,178,0.1)',
+                                background: 'rgba(255,255,255,0.05)',
+                                boxShadow: '0 4px 20px rgba(0,0,0,0.2)',
+                                border: '1px solid rgba(255,255,255,0.08)',
                             }}
                         >
                             {/* Top row: stars + badge */}
@@ -139,8 +152,8 @@ export function SocialProofSection() {
                                 <span
                                     className="text-xs font-semibold px-2.5 py-1 rounded-full"
                                     style={{
-                                        background: t.type === 'Resident' ? 'rgba(5,150,105,0.1)' : 'rgba(8,145,178,0.1)',
-                                        color: t.type === 'Resident' ? '#059669' : '#0891B2',
+                                        background: t.type === 'Resident' ? 'rgba(52,211,153,0.12)' : 'rgba(8,145,178,0.12)',
+                                        color: t.type === 'Resident' ? '#34D399' : '#67E8F9',
                                     }}
                                 >
                                     {t.type}
@@ -150,22 +163,22 @@ export function SocialProofSection() {
                             {/* Quote */}
                             <p
                                 className="text-sm leading-relaxed flex-1 mb-5"
-                                style={{ color: '#334155', fontFamily: 'var(--font-noto), sans-serif' }}
+                                style={{ color: 'rgba(255,255,255,0.7)', fontFamily: 'var(--font-noto), sans-serif' }}
                             >
                                 &ldquo;{t.quote}&rdquo;
                             </p>
 
                             {/* Attribution */}
-                            <div className="flex items-center gap-3 pt-4" style={{ borderTop: '1px solid rgba(8,145,178,0.08)' }}>
+                            <div className="flex items-center gap-3 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
                                 <div
                                     className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
-                                    style={{ background: `${t.color}15`, color: t.color }}
+                                    style={{ background: `${t.color}20`, color: t.color }}
                                 >
                                     {t.name[0]}
                                 </div>
                                 <div>
-                                    <div className="text-sm font-semibold" style={{ color: '#0C1A2E' }}>{t.name}</div>
-                                    <div className="text-xs" style={{ color: '#64748B' }}>{t.role} · {t.location}</div>
+                                    <div className="text-sm font-semibold text-white">{t.name}</div>
+                                    <div className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>{t.role} · {t.location}</div>
                                 </div>
                             </div>
                         </div>

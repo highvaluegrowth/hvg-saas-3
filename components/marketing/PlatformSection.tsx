@@ -12,26 +12,26 @@ const tabs = [
             </svg>
         ),
         headline: 'Everything at a glance',
-        description: 'One dashboard for all your houses, residents, and KPIs. Know which beds are filled, who\'s behind on rent, and which residents need a check-in — in under 60 seconds.',
+        description: "One dashboard for all your houses, residents, and KPIs. Know which beds are filled, who's behind on rent, and which residents need a check-in — in under 60 seconds.",
         bullets: ['Occupancy & bed management', 'Rent tracking & payment status', 'Incident log & house rules', 'Multi-property view'],
         preview: (
             <div className="space-y-3">
                 <div className="grid grid-cols-3 gap-2">
                     {[
-                        { label: 'Occupancy', value: '94%', color: '#059669' },
-                        { label: 'Rent Collected', value: '$8,240', color: '#0891B2' },
+                        { label: 'Occupancy', value: '94%', color: '#34D399' },
+                        { label: 'Rent Collected', value: '$8,240', color: '#67E8F9' },
                         { label: 'Open Incidents', value: '2', color: '#F97316' },
                     ].map((s) => (
-                        <div key={s.label} className="rounded-xl p-3 text-center" style={{ background: 'rgba(8,145,178,0.06)', border: '1px solid rgba(8,145,178,0.1)' }}>
+                        <div key={s.label} className="rounded-xl p-3 text-center" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)' }}>
                             <div className="text-lg font-bold" style={{ color: s.color }}>{s.value}</div>
-                            <div className="text-xs mt-0.5" style={{ color: '#164E63', opacity: 0.6 }}>{s.label}</div>
+                            <div className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>{s.label}</div>
                         </div>
                     ))}
                 </div>
-                <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(8,145,178,0.1)' }}>
+                <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.08)' }}>
                     {['James W. · Room 4 · ✓ Paid', 'Maria G. · Room 7 · ⚠ Rent Due', 'Darius L. · Room 2 · ✓ Paid'].map((row, i) => (
                         <div key={row} className="px-3 py-2.5 text-xs flex justify-between items-center border-b last:border-0"
-                            style={{ background: i % 2 === 0 ? 'white' : 'rgba(8,145,178,0.02)', borderColor: 'rgba(8,145,178,0.08)', color: '#164E63' }}>
+                            style={{ background: i % 2 === 0 ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.02)', borderColor: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.7)' }}>
                             <span>{row.split('·')[0]}</span>
                             <span className="font-medium">{row.split('·')[2].trim()}</span>
                         </div>
@@ -53,7 +53,7 @@ const tabs = [
         bullets: ['12 quiz & lesson types', 'Drag-and-drop course builder', 'Streaks + milestone badges', '78% avg completion rate'],
         preview: (
             <div className="space-y-2">
-                <div className="px-3 py-2 rounded-lg text-xs font-semibold" style={{ background: 'rgba(8,145,178,0.08)', color: '#0891B2' }}>
+                <div className="px-3 py-2 rounded-lg text-xs font-semibold" style={{ background: 'rgba(8,145,178,0.15)', color: '#67E8F9' }}>
                     📚 Module 3: Relapse Prevention
                 </div>
                 {[
@@ -63,18 +63,18 @@ const tabs = [
                     { label: 'Assignment: Reflection Journal', done: false },
                 ].map((item) => (
                     <div key={item.label} className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm"
-                        style={{ background: item.done ? 'rgba(5,150,105,0.07)' : 'white', border: '1px solid rgba(8,145,178,0.08)', color: '#164E63' }}>
-                        <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0 font-bold ${item.done ? 'bg-emerald-500 text-white' : 'border border-gray-200 text-gray-300'}`}>
+                        style={{ background: item.done ? 'rgba(52,211,153,0.08)' : 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.75)' }}>
+                        <div className={`w-5 h-5 rounded-full flex items-center justify-center text-xs flex-shrink-0 font-bold ${item.done ? 'bg-emerald-500 text-white' : 'border border-white/20 text-white/20'}`}>
                             {item.done ? '✓' : ''}
                         </div>
                         {item.label}
                     </div>
                 ))}
                 <div className="flex items-center gap-2 pt-1">
-                    <div className="flex-1 h-1.5 rounded-full" style={{ background: 'rgba(8,145,178,0.1)' }}>
-                        <div className="h-full rounded-full" style={{ width: '50%', background: '#059669' }} />
+                    <div className="flex-1 h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
+                        <div className="h-full rounded-full" style={{ width: '50%', background: '#34D399' }} />
                     </div>
-                    <span className="text-xs font-medium" style={{ color: '#059669' }}>50%</span>
+                    <span className="text-xs font-medium" style={{ color: '#34D399' }}>50%</span>
                 </div>
             </div>
         ),
@@ -94,19 +94,19 @@ const tabs = [
             <div className="space-y-3">
                 <div className="flex gap-1.5 items-end h-16">
                     {[45, 62, 58, 75, 68, 88, 82, 91, 78, 95, 88, 100].map((h, i) => (
-                        <div key={i} className="flex-1 rounded-t-sm" style={{ height: `${h}%`, background: i >= 9 ? '#059669' : 'rgba(8,145,178,0.2)' }} />
+                        <div key={i} className="flex-1 rounded-t-sm" style={{ height: `${h}%`, background: i >= 9 ? '#34D399' : 'rgba(8,145,178,0.25)' }} />
                     ))}
                 </div>
-                <div className="text-xs" style={{ color: '#164E63', opacity: 0.5 }}>LMS completion — last 12 weeks</div>
+                <div className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>LMS completion — last 12 weeks</div>
                 <div className="space-y-2 pt-1">
                     {[
-                        { name: 'James W.', bar: 92, color: '#059669' },
+                        { name: 'James W.', bar: 92, color: '#34D399' },
                         { name: 'Maria G.', bar: 34, color: '#F97316', alert: true },
-                        { name: 'Darius L.', bar: 78, color: '#0891B2' },
+                        { name: 'Darius L.', bar: 78, color: '#67E8F9' },
                     ].map((r) => (
-                        <div key={r.name} className="flex items-center gap-2 text-xs" style={{ color: '#164E63' }}>
+                        <div key={r.name} className="flex items-center gap-2 text-xs" style={{ color: 'rgba(255,255,255,0.7)' }}>
                             <span className="w-16 flex-shrink-0">{r.name}</span>
-                            <div className="flex-1 h-1.5 rounded-full" style={{ background: 'rgba(8,145,178,0.1)' }}>
+                            <div className="flex-1 h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
                                 <div className="h-full rounded-full transition-all" style={{ width: `${r.bar}%`, background: r.color }} />
                             </div>
                             <span className="w-8 text-right font-medium">{r.bar}%</span>
@@ -131,16 +131,16 @@ const tabs = [
         preview: (
             <div className="space-y-2">
                 {[
-                    { task: 'Kitchen deep clean', who: 'James W.', status: '✓ Done', color: '#059669' },
+                    { task: 'Kitchen deep clean', who: 'James W.', status: '✓ Done', color: '#34D399' },
                     { task: 'Bathroom — Floor 2', who: 'Maria G.', status: '⏳ Due today', color: '#F97316' },
-                    { task: 'Trash to curb', who: 'Darius L.', status: '✓ Done', color: '#059669' },
-                    { task: 'Laundry room wipe', who: 'Kevin P.', status: '● Pending', color: '#94A3B8' },
+                    { task: 'Trash to curb', who: 'Darius L.', status: '✓ Done', color: '#34D399' },
+                    { task: 'Laundry room wipe', who: 'Kevin P.', status: '● Pending', color: '#64748B' },
                 ].map((item) => (
                     <div key={item.task} className="flex items-center justify-between px-3 py-2.5 rounded-lg text-xs"
-                        style={{ background: 'white', border: '1px solid rgba(8,145,178,0.08)', color: '#164E63' }}>
+                        style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)', color: 'rgba(255,255,255,0.75)' }}>
                         <div>
                             <div className="font-medium">{item.task}</div>
-                            <div style={{ color: '#64748B' }}>{item.who}</div>
+                            <div style={{ color: 'rgba(255,255,255,0.4)' }}>{item.who}</div>
                         </div>
                         <span className="font-semibold" style={{ color: item.color }}>{item.status}</span>
                     </div>
@@ -156,22 +156,35 @@ export function PlatformSection() {
 
     return (
         <section
-            className="py-28 px-6 overflow-hidden"
-            style={{ background: '#ECFEFF', fontFamily: 'var(--font-figtree), sans-serif' }}
+            className="py-28 px-6 overflow-hidden relative"
+            style={{
+                background: '#0C1A2E',
+                fontFamily: 'var(--font-figtree), sans-serif',
+            }}
         >
-            <div className="max-w-6xl mx-auto">
+            {/* Dot grid */}
+            <div className="absolute inset-0 pointer-events-none"
+                style={{
+                    backgroundImage: 'radial-gradient(circle, rgba(8,145,178,0.04) 1px, transparent 1px)',
+                    backgroundSize: '40px 40px',
+                }} />
+            {/* Top separator */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-px pointer-events-none"
+                style={{ background: 'linear-gradient(to right, transparent, rgba(8,145,178,0.3), transparent)' }} />
+
+            <div className="max-w-6xl mx-auto relative">
                 {/* Header */}
                 <div className="text-center mb-14">
                     <div
                         className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-5"
-                        style={{ background: 'rgba(8,145,178,0.1)', color: '#0891B2' }}
+                        style={{ background: 'rgba(8,145,178,0.12)', color: '#67E8F9', border: '1px solid rgba(8,145,178,0.22)' }}
                     >
                         For Operators
                     </div>
-                    <h2 className="text-4xl md:text-5xl font-bold mb-4 leading-tight" style={{ color: '#164E63' }}>
+                    <h2 className="text-4xl md:text-5xl font-bold mb-4 leading-tight text-white">
                         One platform. Every tool<br />your house needs.
                     </h2>
-                    <p className="text-lg max-w-xl mx-auto" style={{ color: '#164E63', opacity: 0.65, fontFamily: 'var(--font-noto), sans-serif' }}>
+                    <p className="text-lg max-w-xl mx-auto" style={{ color: 'rgba(255,255,255,0.60)', fontFamily: 'var(--font-noto), sans-serif' }}>
                         From intake to graduation — HVG manages the full resident journey so you can focus on what matters most.
                     </p>
                 </div>
@@ -184,11 +197,11 @@ export function PlatformSection() {
                             onClick={() => setActiveTab(tab.id)}
                             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer"
                             style={{
-                                background: activeTab === tab.id ? '#0891B2' : 'white',
-                                color: activeTab === tab.id ? 'white' : '#164E63',
+                                background: activeTab === tab.id ? '#0891B2' : 'rgba(255,255,255,0.06)',
+                                color: activeTab === tab.id ? 'white' : 'rgba(255,255,255,0.6)',
                                 border: '1px solid',
-                                borderColor: activeTab === tab.id ? '#0891B2' : 'rgba(8,145,178,0.15)',
-                                boxShadow: activeTab === tab.id ? '0 4px 16px rgba(8,145,178,0.3)' : 'none',
+                                borderColor: activeTab === tab.id ? '#0891B2' : 'rgba(255,255,255,0.08)',
+                                boxShadow: activeTab === tab.id ? '0 4px 16px rgba(8,145,178,0.35)' : 'none',
                             }}
                         >
                             {tab.icon}
@@ -201,19 +214,19 @@ export function PlatformSection() {
                 <div
                     className="grid grid-cols-1 lg:grid-cols-2 gap-10 rounded-3xl p-8 md:p-12"
                     style={{
-                        background: 'white',
-                        border: '1px solid rgba(8,145,178,0.12)',
-                        boxShadow: '0 8px 40px rgba(8,145,178,0.1)',
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                        boxShadow: '0 8px 40px rgba(0,0,0,0.3)',
                     }}
                 >
                     {/* Left: copy */}
                     <div className="flex flex-col justify-center">
-                        <h3 className="text-2xl md:text-3xl font-bold mb-4 leading-snug" style={{ color: '#0C1A2E' }}>
+                        <h3 className="text-2xl md:text-3xl font-bold mb-4 leading-snug text-white">
                             {active.headline}
                         </h3>
                         <p
                             className="text-base leading-relaxed mb-8"
-                            style={{ color: '#4A6070', fontFamily: 'var(--font-noto), sans-serif' }}
+                            style={{ color: 'rgba(255,255,255,0.6)', fontFamily: 'var(--font-noto), sans-serif' }}
                         >
                             {active.description}
                         </p>
@@ -221,12 +234,12 @@ export function PlatformSection() {
                             {active.bullets.map((b) => (
                                 <li key={b} className="flex items-center gap-3">
                                     <div className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center"
-                                        style={{ background: 'rgba(8,145,178,0.1)', color: '#0891B2' }}>
+                                        style={{ background: 'rgba(8,145,178,0.15)', color: '#67E8F9' }}>
                                         <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                                             <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                                         </svg>
                                     </div>
-                                    <span className="text-sm font-medium" style={{ color: '#164E63' }}>{b}</span>
+                                    <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.75)' }}>{b}</span>
                                 </li>
                             ))}
                         </ul>
@@ -236,15 +249,15 @@ export function PlatformSection() {
                     <div
                         className="rounded-2xl p-6"
                         style={{
-                            background: '#F8FBFF',
-                            border: '1px solid rgba(8,145,178,0.1)',
+                            background: 'rgba(255,255,255,0.03)',
+                            border: '1px solid rgba(255,255,255,0.07)',
                         }}
                     >
                         <div className="flex items-center gap-1.5 mb-5">
-                            <div className="w-2.5 h-2.5 rounded-full bg-red-400" />
-                            <div className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
-                            <div className="w-2.5 h-2.5 rounded-full bg-green-400" />
-                            <span className="ml-2 text-xs font-mono" style={{ color: '#94A3B8' }}>hvg.app / dashboard</span>
+                            <div className="w-2.5 h-2.5 rounded-full bg-red-500/70" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/70" />
+                            <div className="w-2.5 h-2.5 rounded-full bg-green-500/70" />
+                            <span className="ml-2 text-xs font-mono" style={{ color: 'rgba(255,255,255,0.3)' }}>hvg.app / dashboard</span>
                         </div>
                         {active.preview}
                     </div>
@@ -255,7 +268,7 @@ export function PlatformSection() {
                     <a
                         href="#demo"
                         className="inline-flex items-center gap-2 px-8 py-4 rounded-xl text-white font-semibold text-sm transition-all duration-200 cursor-pointer hover:opacity-90 hover:-translate-y-0.5"
-                        style={{ background: '#059669', boxShadow: '0 8px 24px rgba(5,150,105,0.3)' }}
+                        style={{ background: 'linear-gradient(135deg, #0891B2, #059669)', boxShadow: '0 8px 24px rgba(8,145,178,0.3)' }}
                     >
                         Schedule a Free Demo
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>

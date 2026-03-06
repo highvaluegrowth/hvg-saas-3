@@ -25,7 +25,7 @@ const features = [
         emoji: '📚',
         title: 'Recovery Program',
         description: 'Structured 12-step content, CBT exercises, and mindfulness modules — all on your phone.',
-        color: '#8B5CF6',
+        color: '#818CF8',
     },
 ];
 
@@ -41,41 +41,47 @@ export function AIRecoverySection() {
         <section
             id="ai-recovery"
             className="py-28 px-6 relative overflow-hidden"
-            style={{ background: '#fff', fontFamily: 'var(--font-figtree), sans-serif' }}
+            style={{
+                background: '#0C1A2E',
+                fontFamily: 'var(--font-figtree), sans-serif',
+            }}
         >
-            {/* Ambient glow */}
+            {/* Ambient glow — stronger on dark bg */}
             <div
                 className="absolute top-0 right-0 w-96 h-96 rounded-full pointer-events-none"
                 style={{
-                    background: 'radial-gradient(circle, rgba(8,145,178,0.07) 0%, transparent 70%)',
+                    background: 'radial-gradient(circle, rgba(8,145,178,0.12) 0%, transparent 70%)',
                     transform: 'translate(30%, -30%)',
                 }}
             />
             <div
                 className="absolute bottom-0 left-0 w-96 h-96 rounded-full pointer-events-none"
                 style={{
-                    background: 'radial-gradient(circle, rgba(5,150,105,0.06) 0%, transparent 70%)',
+                    background: 'radial-gradient(circle, rgba(5,150,105,0.10) 0%, transparent 70%)',
                     transform: 'translate(-30%, 30%)',
                 }}
             />
+            {/* Top separator */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-px pointer-events-none"
+                style={{ background: 'linear-gradient(to right, transparent, rgba(8,145,178,0.3), transparent)' }} />
 
             <div className="max-w-6xl mx-auto relative">
                 {/* Header */}
                 <div className="text-center mb-16">
                     <div
                         className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-5"
-                        style={{ background: 'rgba(5,150,105,0.1)', color: '#059669' }}
+                        style={{ background: 'rgba(5,150,105,0.12)', color: '#34D399', border: '1px solid rgba(52,211,153,0.2)' }}
                     >
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse" />
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
                         Powered by Google Gemini 2.5
                     </div>
-                    <h2 className="text-4xl md:text-5xl font-bold mb-5 leading-tight" style={{ color: '#0C1A2E' }}>
+                    <h2 className="text-4xl md:text-5xl font-bold mb-5 leading-tight text-white">
                         A recovery coach in your pocket.<br />
-                        <span style={{ color: '#0891B2' }}>24/7, no waiting room.</span>
+                        <span style={{ color: '#67E8F9' }}>24/7, no waiting room.</span>
                     </h2>
                     <p
                         className="text-lg max-w-2xl mx-auto leading-relaxed"
-                        style={{ color: '#4A6070', fontFamily: 'var(--font-noto), sans-serif' }}
+                        style={{ color: 'rgba(255,255,255,0.65)', fontFamily: 'var(--font-noto), sans-serif' }}
                     >
                         No judgment. No appointment. Just compassionate, evidence-based support from an AI
                         built specifically to help people navigate early recovery.
@@ -85,7 +91,7 @@ export function AIRecoverySection() {
                 {/* Main layout: chat mockup + feature list */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
 
-                    {/* — Phone mockup (chat UI) — */}
+                    {/* — Phone mockup (chat UI) — unchanged / already dark */}
                     <div className="flex justify-center">
                         <div
                             className="w-full max-w-sm rounded-3xl overflow-hidden shadow-2xl"
@@ -163,20 +169,20 @@ export function AIRecoverySection() {
                                 key={f.title}
                                 className="flex gap-4 rounded-2xl p-5 transition-all duration-200 hover:-translate-y-0.5 cursor-default"
                                 style={{
-                                    background: '#F8FBFF',
-                                    border: '1px solid rgba(8,145,178,0.1)',
-                                    boxShadow: '0 2px 12px rgba(8,145,178,0.05)',
+                                    background: 'rgba(255,255,255,0.05)',
+                                    border: '1px solid rgba(255,255,255,0.08)',
+                                    boxShadow: '0 2px 12px rgba(0,0,0,0.2)',
                                 }}
                             >
                                 <div
                                     className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
-                                    style={{ background: `${f.color}12` }}
+                                    style={{ background: `${f.color}18` }}
                                 >
                                     {f.emoji}
                                 </div>
                                 <div>
-                                    <h3 className="font-semibold mb-1" style={{ color: '#0C1A2E' }}>{f.title}</h3>
-                                    <p className="text-sm leading-relaxed" style={{ color: '#4A6070', fontFamily: 'var(--font-noto), sans-serif' }}>
+                                    <h3 className="font-semibold mb-1 text-white">{f.title}</h3>
+                                    <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)', fontFamily: 'var(--font-noto), sans-serif' }}>
                                         {f.description}
                                     </p>
                                 </div>
@@ -185,7 +191,7 @@ export function AIRecoverySection() {
                     </div>
                 </div>
 
-                {/* Download CTA */}
+                {/* Download CTA — already dark, kept as-is */}
                 <div
                     className="rounded-3xl p-10 text-center relative overflow-hidden"
                     style={{
@@ -193,7 +199,6 @@ export function AIRecoverySection() {
                         boxShadow: '0 24px 64px rgba(8,145,178,0.2)',
                     }}
                 >
-                    {/* Decorative circles */}
                     <div className="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none opacity-10"
                         style={{ background: 'radial-gradient(circle, white, transparent)', transform: 'translate(30%, -30%)' }} />
                     <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full pointer-events-none opacity-10"

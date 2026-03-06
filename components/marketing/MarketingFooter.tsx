@@ -26,10 +26,10 @@ const footerLinks = {
 export function MarketingFooter() {
     return (
         <footer
-            className="border-t py-16 px-6"
+            className="py-16 px-6"
             style={{
-                background: '#ECFEFF',
-                borderColor: 'rgba(8,145,178,0.12)',
+                background: '#060E1A',
+                borderTop: '1px solid rgba(255,255,255,0.07)',
                 fontFamily: 'var(--font-figtree), sans-serif',
             }}
         >
@@ -44,9 +44,9 @@ export function MarketingFooter() {
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5" />
                                 </svg>
                             </div>
-                            <span className="font-semibold text-lg" style={{ color: '#164E63' }}>High Value Growth</span>
+                            <span className="font-semibold text-lg text-white">High Value Growth</span>
                         </div>
-                        <p className="text-sm leading-relaxed mb-6 max-w-xs" style={{ color: '#164E63', opacity: 0.65, fontFamily: 'var(--font-noto), sans-serif' }}>
+                        <p className="text-sm leading-relaxed mb-6 max-w-xs" style={{ color: 'rgba(255,255,255,0.45)', fontFamily: 'var(--font-noto), sans-serif' }}>
                             The all-in-one platform for sober living operators and recovery residents. HIPAA-aware. Built with care.
                         </p>
                         <AppStoreBadges />
@@ -55,16 +55,16 @@ export function MarketingFooter() {
                     {/* Links */}
                     {Object.entries(footerLinks).map(([group, links]) => (
                         <div key={group}>
-                            <h4 className="text-sm font-semibold mb-4" style={{ color: '#164E63' }}>{group}</h4>
+                            <h4 className="text-xs font-semibold mb-4 uppercase tracking-widest" style={{ color: 'rgba(255,255,255,0.4)' }}>{group}</h4>
                             <ul className="space-y-2.5">
                                 {links.map((link) => (
                                     <li key={link.label}>
                                         <a
                                             href={link.href}
                                             className="text-sm transition-colors duration-200 cursor-pointer"
-                                            style={{ color: '#164E63', opacity: 0.6 }}
-                                            onMouseEnter={(e) => { (e.target as HTMLElement).style.opacity = '1'; (e.target as HTMLElement).style.color = '#0891B2'; }}
-                                            onMouseLeave={(e) => { (e.target as HTMLElement).style.opacity = '0.6'; (e.target as HTMLElement).style.color = '#164E63'; }}
+                                            style={{ color: 'rgba(255,255,255,0.45)' }}
+                                            onMouseEnter={(e) => { (e.target as HTMLElement).style.color = '#67E8F9'; }}
+                                            onMouseLeave={(e) => { (e.target as HTMLElement).style.color = 'rgba(255,255,255,0.45)'; }}
                                         >
                                             {link.label}
                                         </a>
@@ -76,12 +76,12 @@ export function MarketingFooter() {
                 </div>
 
                 {/* Bottom bar */}
-                <div className="pt-8 border-t flex flex-col sm:flex-row items-center justify-between gap-4"
-                    style={{ borderColor: 'rgba(8,145,178,0.1)' }}>
-                    <p className="text-xs" style={{ color: '#164E63', opacity: 0.5, fontFamily: 'var(--font-noto), sans-serif' }}>
+                <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4"
+                    style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.28)', fontFamily: 'var(--font-noto), sans-serif' }}>
                         © {new Date().getFullYear()} High Value Growth. All rights reserved.
                     </p>
-                    <p className="text-xs" style={{ color: '#164E63', opacity: 0.4, fontFamily: 'var(--font-noto), sans-serif' }}>
+                    <p className="text-xs" style={{ color: 'rgba(255,255,255,0.22)', fontFamily: 'var(--font-noto), sans-serif' }}>
                         This platform does not provide medical advice. Not a substitute for professional treatment.
                     </p>
                 </div>

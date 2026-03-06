@@ -13,8 +13,8 @@ const AUDIENCE_CARDS = [
         body: 'AI tools, resident LMS, social marketing, billing, and analytics — all in one dashboard.',
         cta: { label: 'Get a Demo →', href: '#demo', style: { background: '#0891B2', color: '#fff' } as React.CSSProperties },
         accent: '#0891B2',
-        bg: 'rgba(8,145,178,0.06)',
-        border: 'rgba(8,145,178,0.18)',
+        bg: 'rgba(8,145,178,0.08)',
+        border: 'rgba(8,145,178,0.2)',
     },
     {
         icon: (
@@ -28,8 +28,8 @@ const AUDIENCE_CARDS = [
         body: 'Browse available sober living beds, submit your application, and get matched with the right house.',
         cta: { label: 'Apply Now →', href: '/apply/bed', style: { background: '#059669', color: '#fff' } as React.CSSProperties },
         accent: '#059669',
-        bg: 'rgba(5,150,105,0.06)',
-        border: 'rgba(5,150,105,0.18)',
+        bg: 'rgba(5,150,105,0.08)',
+        border: 'rgba(5,150,105,0.2)',
     },
     {
         icon: (
@@ -41,9 +41,9 @@ const AUDIENCE_CARDS = [
         headline: 'Recovery support in your pocket.',
         body: 'AI recovery guide, sobriety tracking, courses, meetings, and daily check-ins — all on your phone.',
         cta: null,
-        accent: '#7C3AED',
-        bg: 'rgba(124,58,237,0.06)',
-        border: 'rgba(124,58,237,0.18)',
+        accent: '#818CF8',
+        bg: 'rgba(129,140,248,0.08)',
+        border: 'rgba(129,140,248,0.2)',
     },
 ] as const;
 
@@ -52,34 +52,43 @@ export function HeroSection() {
         <section
             className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-28 pb-20 overflow-hidden"
             style={{
-                background: 'linear-gradient(160deg, #ECFEFF 0%, #f0fdfa 50%, #ECFEFF 100%)',
+                background: 'linear-gradient(160deg, #0C1A2E 0%, #0C4A6E 50%, #0C1A2E 100%)',
                 fontFamily: 'var(--font-figtree), sans-serif',
             }}
         >
+            {/* Dot grid texture */}
+            <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                    backgroundImage: 'radial-gradient(circle, rgba(8,145,178,0.05) 1px, transparent 1px)',
+                    backgroundSize: '40px 40px',
+                }}
+            />
+
             {/* Background orbs */}
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full opacity-20 blur-3xl pointer-events-none"
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full opacity-25 blur-3xl pointer-events-none"
                 style={{ background: 'radial-gradient(circle, #0891B2, transparent)' }} />
-            <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full opacity-15 blur-3xl pointer-events-none"
+            <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full opacity-20 blur-3xl pointer-events-none"
                 style={{ background: 'radial-gradient(circle, #059669, transparent)' }} />
-            <div className="absolute top-1/2 right-1/3 w-64 h-64 rounded-full opacity-10 blur-3xl pointer-events-none"
-                style={{ background: 'radial-gradient(circle, #7C3AED, transparent)' }} />
+            <div className="absolute top-1/2 right-1/3 w-64 h-64 rounded-full opacity-15 blur-3xl pointer-events-none"
+                style={{ background: 'radial-gradient(circle, #818CF8, transparent)' }} />
 
             <div className="relative z-10 w-full max-w-6xl mx-auto text-center">
                 {/* Badge */}
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium mb-6"
-                    style={{ background: 'rgba(8,145,178,0.1)', color: '#0891B2', border: '1px solid rgba(8,145,178,0.2)' }}>
-                    <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#059669' }} />
+                    style={{ background: 'rgba(8,145,178,0.15)', color: '#67E8F9', border: '1px solid rgba(8,145,178,0.25)' }}>
+                    <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: '#34D399' }} />
                     Powered by Gemini AI · Built for Recovery
                 </div>
 
                 {/* Main headline */}
-                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-5" style={{ color: '#164E63' }}>
+                <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold leading-tight mb-5 text-white">
                     Recovery Housing.<br />
-                    <span style={{ color: '#0891B2' }}>Reimagined.</span>
+                    <span style={{ color: '#67E8F9' }}>Reimagined.</span>
                 </h1>
 
                 <p className="text-lg md:text-xl max-w-2xl mx-auto mb-14 leading-relaxed"
-                    style={{ color: '#164E63', opacity: 0.7, fontFamily: 'var(--font-noto), sans-serif' }}>
+                    style={{ color: 'rgba(255,255,255,0.65)', fontFamily: 'var(--font-noto), sans-serif' }}>
                     Supporting operators, residents, and applicants —<br className="hidden md:block" />
                     every step of the recovery journey.
                 </p>
@@ -89,14 +98,18 @@ export function HeroSection() {
                     {AUDIENCE_CARDS.map((card) => (
                         <div
                             key={card.label}
-                            className="rounded-2xl p-6 flex flex-col gap-4 shadow-sm"
-                            style={{ background: card.bg, border: `1px solid ${card.border}` }}
+                            className="rounded-2xl p-6 flex flex-col gap-4 transition-all duration-300 hover:-translate-y-1"
+                            style={{
+                                background: card.bg,
+                                border: `1px solid ${card.border}`,
+                                boxShadow: '0 4px 24px rgba(0,0,0,0.2)',
+                            }}
                         >
                             {/* Icon + label */}
                             <div className="flex items-center gap-3">
                                 <div
                                     className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-                                    style={{ background: `${card.accent}18`, color: card.accent }}
+                                    style={{ background: `${card.accent}20`, color: card.accent }}
                                 >
                                     {card.icon}
                                 </div>
@@ -107,8 +120,8 @@ export function HeroSection() {
 
                             {/* Text */}
                             <div>
-                                <h3 className="text-lg font-bold mb-1" style={{ color: '#164E63' }}>{card.headline}</h3>
-                                <p className="text-sm leading-relaxed" style={{ color: '#164E63', opacity: 0.65, fontFamily: 'var(--font-noto), sans-serif' }}>
+                                <h3 className="text-lg font-bold mb-1 text-white">{card.headline}</h3>
+                                <p className="text-sm leading-relaxed" style={{ color: 'rgba(255,255,255,0.6)', fontFamily: 'var(--font-noto), sans-serif' }}>
                                     {card.body}
                                 </p>
                             </div>
@@ -139,8 +152,8 @@ export function HeroSection() {
                         { value: '100%', label: 'HIPAA-aware mobile app' },
                     ].map((stat) => (
                         <div key={stat.label} className="text-center">
-                            <div className="text-2xl font-bold" style={{ color: '#0891B2' }}>{stat.value}</div>
-                            <div className="text-sm mt-0.5" style={{ color: '#164E63', opacity: 0.6, fontFamily: 'var(--font-noto), sans-serif' }}>{stat.label}</div>
+                            <div className="text-2xl font-bold" style={{ color: '#67E8F9' }}>{stat.value}</div>
+                            <div className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.5)', fontFamily: 'var(--font-noto), sans-serif' }}>{stat.label}</div>
                         </div>
                     ))}
                 </div>
