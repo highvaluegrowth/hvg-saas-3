@@ -350,7 +350,7 @@ export function MarketingSection() {
                                     </div>
                                     {i < workflowSteps.length - 1 && (
                                         <div
-                                            className="hidden md:flex items-center justify-center text-xl flex-shrink-0"
+                                            className="hidden md:flex items-center justify-center text-xl shrink-0"
                                             style={{
                                                 color: activeStep === i ? '#6366f1' : '#334155',
                                                 transition: reducedMotion ? 'none' : 'color 320ms ease',

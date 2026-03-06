@@ -124,9 +124,9 @@ function BentoTile({
             onMouseLeave={() => setHovered(false)}
             className="rounded-2xl p-6 cursor-pointer"
             style={{
-                background: hovered ? tile.accentBg.replace('0.08', '0.13') : tile.accentBg,
-                border: `1px solid ${hovered ? tile.accentBorder.replace('0.18', '0.35') : tile.accentBorder}`,
-                boxShadow: hovered ? `0 12px 40px ${tile.shadow}` : '0 2px 8px rgba(0,0,0,0.04)',
+                background: hovered ? tile.accentBg.replace('0.08', '0.13') : 'rgba(255,255,255,0.05)',
+                border: `1px solid ${hovered ? tile.accentBorder.replace('0.18', '0.35') : 'rgba(255,255,255,0.08)'}`,
+                boxShadow: hovered ? `0 12px 40px ${tile.shadow}` : '0 2px 12px rgba(0,0,0,0.2)',
                 transform: isVisible
                     ? hovered
                         ? 'translateY(-4px) scale(1.025)'
@@ -141,7 +141,7 @@ function BentoTile({
             <div
                 className="w-11 h-11 rounded-xl flex items-center justify-center mb-4"
                 style={{
-                    background: '#fff',
+                    background: tile.accentBg,
                     boxShadow: hovered
                         ? `0 4px 18px ${tile.shadow}, 0 0 0 3px ${tile.accentBg}`
                         : `0 2px 10px ${tile.shadow.replace('0.22', '0.15')}`,
@@ -150,12 +150,12 @@ function BentoTile({
             >
                 <Icon size={18} strokeWidth={2} color={tile.accent} />
             </div>
-            <h3 className="text-base font-bold mb-2" style={{ color: '#164E63' }}>
+            <h3 className="text-base font-bold mb-2" style={{ color: 'white' }}>
                 {tile.label}
             </h3>
             <p
                 className="text-sm leading-relaxed"
-                style={{ color: '#164E63', opacity: 0.65, fontFamily: 'var(--font-noto), sans-serif' }}
+                style={{ color: 'rgba(255,255,255,0.6)', fontFamily: 'var(--font-noto), sans-serif' }}
             >
                 {tile.desc}
             </p>
@@ -190,23 +190,33 @@ export function OperationsSection() {
 
     return (
         <section
-            className="py-24 px-6"
+            className="py-24 px-6 relative overflow-hidden"
             style={{
-                background: '#fff',
+                background: '#0C1A2E',
                 fontFamily: 'var(--font-figtree), sans-serif',
             }}
         >
-            <div className="max-w-6xl mx-auto">
+            {/* Dot grid */}
+            <div className="absolute inset-0 pointer-events-none"
+                style={{
+                    backgroundImage: 'radial-gradient(circle, rgba(8,145,178,0.04) 1px, transparent 1px)',
+                    backgroundSize: '40px 40px',
+                }} />
+            {/* Top separator */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-3xl h-px pointer-events-none"
+                style={{ background: 'linear-gradient(to right, transparent, rgba(5,150,105,0.3), transparent)' }} />
+
+            <div className="max-w-6xl mx-auto relative">
                 {/* Header */}
                 <div className="text-center mb-16">
                     <div
-                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-medium mb-4"
-                        style={{ background: 'rgba(5,150,105,0.1)', color: '#059669' }}
+                        className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-5"
+                        style={{ background: 'rgba(5,150,105,0.12)', color: '#34D399', border: '1px solid rgba(52,211,153,0.2)' }}
                     >
                         <span
-                            className="w-2 h-2 rounded-full"
+                            className="w-1.5 h-1.5 rounded-full"
                             style={{
-                                background: '#059669',
+                                background: '#34D399',
                                 animation: reducedMotion ? 'none' : 'ops-pulse 2s ease-in-out infinite',
                             }}
                         />
@@ -214,15 +224,15 @@ export function OperationsSection() {
                     </div>
                     <h2
                         className="text-4xl md:text-5xl font-bold mb-4 leading-tight"
-                        style={{ color: '#164E63' }}
+                        style={{ color: 'white' }}
                     >
                         Run your whole operation
                         <br />
-                        <span style={{ color: '#059669' }}>from one screen.</span>
+                        <span style={{ color: '#34D399' }}>from one screen.</span>
                     </h2>
                     <p
                         className="text-lg max-w-2xl mx-auto leading-relaxed"
-                        style={{ color: '#164E63', opacity: 0.65, fontFamily: 'var(--font-noto), sans-serif' }}
+                        style={{ color: 'rgba(255,255,255,0.6)', fontFamily: 'var(--font-noto), sans-serif' }}
                     >
                         Every operational tool your recovery house needs — unified, mobile-ready, and built for the realities of sober living management.
                     </p>
@@ -247,11 +257,11 @@ export function OperationsSection() {
                     onMouseLeave={() => setCalloutHovered(false)}
                     className="mt-12 rounded-2xl p-8 flex flex-col md:flex-row items-center gap-6 text-center md:text-left overflow-hidden"
                     style={{
-                        background: 'linear-gradient(135deg, #ECFEFF 0%, #F0FDF4 100%)',
-                        border: `1px solid ${calloutHovered ? 'rgba(5,150,105,0.4)' : 'rgba(5,150,105,0.2)'}`,
+                        background: 'linear-gradient(135deg, rgba(5,150,105,0.15) 0%, rgba(8,145,178,0.12) 100%)',
+                        border: `1px solid ${calloutHovered ? 'rgba(52,211,153,0.4)' : 'rgba(52,211,153,0.18)'}`,
                         boxShadow: calloutHovered
-                            ? '0 16px 48px rgba(5,150,105,0.12)'
-                            : '0 4px 16px rgba(5,150,105,0.06)',
+                            ? '0 16px 48px rgba(5,150,105,0.18)'
+                            : '0 4px 20px rgba(0,0,0,0.25)',
                         transform: calloutVisible ? 'translateY(0)' : 'translateY(20px)',
                         opacity: calloutVisible ? 1 : 0,
                         transition: reducedMotion
@@ -260,12 +270,12 @@ export function OperationsSection() {
                     }}
                 >
                     <div className="flex-1">
-                        <h3 className="text-xl font-bold mb-2" style={{ color: '#164E63' }}>
+                        <h3 className="text-xl font-bold mb-2" style={{ color: 'white' }}>
                             Everything your staff needs. Nothing they don&apos;t.
                         </h3>
                         <p
                             className="text-sm leading-relaxed"
-                            style={{ color: '#164E63', opacity: 0.65, fontFamily: 'var(--font-noto), sans-serif' }}
+                            style={{ color: 'rgba(255,255,255,0.6)', fontFamily: 'var(--font-noto), sans-serif' }}
                         >
                             Role-based access means house managers see what they need, residents see what they need, and administrators see everything — all from the same platform.
                         </p>

@@ -92,7 +92,7 @@ export function ProblemSection() {
                                         border: '1px solid rgba(239,68,68,0.12)',
                                     }}
                                 >
-                                    <span className="text-2xl flex-shrink-0">{item.emoji}</span>
+                                    <span className="text-2xl shrink-0">{item.emoji}</span>
                                     <span
                                         className="text-sm font-medium line-through decoration-red-400/50"
                                         style={{ color: 'rgba(255,255,255,0.35)' }}
@@ -132,7 +132,7 @@ export function ProblemSection() {
                                         border: '1px solid rgba(52,211,153,0.12)',
                                     }}
                                 >
-                                    <span className="text-2xl flex-shrink-0">{item.emoji}</span>
+                                    <span className="text-2xl shrink-0">{item.emoji}</span>
                                     <span className="text-sm font-semibold" style={{ color: 'rgba(255,255,255,0.85)' }}>
                                         {item.text}
                                     </span>

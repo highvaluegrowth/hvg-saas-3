@@ -171,7 +171,7 @@ export function SocialProofSection() {
                             {/* Attribution */}
                             <div className="flex items-center gap-3 pt-4" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
                                 <div
-                                    className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0"
+                                    className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0"
                                     style={{ background: `${t.color}20`, color: t.color }}
                                 >
                                     {t.name[0]}
