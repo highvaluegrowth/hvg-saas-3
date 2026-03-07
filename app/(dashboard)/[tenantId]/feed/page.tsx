@@ -34,11 +34,11 @@ function formatTimestamp(iso: string): string {
 
 function roleBadgeClass(role: string): string {
   switch (role) {
-    case 'super_admin': return 'bg-purple-100 text-purple-800';
-    case 'tenant_admin': return 'bg-blue-100 text-blue-800';
-    case 'staff_admin': return 'bg-cyan-100 text-cyan-800';
-    case 'staff': return 'bg-green-100 text-green-800';
-    default: return 'bg-gray-100 text-gray-600';
+    case 'super_admin': return 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30';
+    case 'tenant_admin': return 'bg-blue-500/20 text-blue-300 border border-blue-500/30';
+    case 'staff_admin': return 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+    case 'staff': return 'bg-teal-500/20 text-teal-300 border border-teal-500/30';
+    default: return 'bg-white/10 text-white/50 border border-white/10';
   }
 }
 
@@ -74,53 +74,54 @@ function PostCard({ post, currentUid, tenantId, onReact }: PostCardProps) {
   }
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5 space-y-3">
+    <div className="rounded-xl border p-5 space-y-3" style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.08)' }}>
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           {/* Avatar */}
-          <div className="w-9 h-9 rounded-full bg-cyan-100 flex items-center justify-center flex-shrink-0">
-            <span className="text-sm font-semibold text-cyan-700">
+          <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, rgba(8,145,178,0.4), rgba(5,150,105,0.4))', border: '1px solid rgba(103,232,249,0.2)' }}>
+            <span className="text-sm font-semibold text-cyan-300">
               {post.authorName.charAt(0).toUpperCase()}
             </span>
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-sm font-semibold text-gray-900">{post.authorName}</span>
+              <span className="text-sm font-semibold text-white">{post.authorName}</span>
               <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${roleBadgeClass(post.authorRole)}`}>
                 {roleLabel(post.authorRole)}
               </span>
               {post.pinned && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-300 border border-amber-500/30">
                   📌 Pinned
                 </span>
               )}
             </div>
-            <p className="text-xs text-gray-500 mt-0.5">{formatTimestamp(post.createdAt)}</p>
+            <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.4)' }}>{formatTimestamp(post.createdAt)}</p>
           </div>
         </div>
         {/* Scope badge */}
         {post.scope === 'global' && (
-          <span className="flex-shrink-0 text-xs bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-full font-medium">
+          <span className="flex-shrink-0 text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-medium">
             Announcement
           </span>
         )}
         {post.scope === 'house' && (
-          <span className="flex-shrink-0 text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">
+          <span className="flex-shrink-0 text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-medium">
             House
           </span>
         )}
       </div>
 
       {/* Body */}
-      <p className="text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">{post.body}</p>
+      <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: 'rgba(255,255,255,0.8)' }}>{post.body}</p>
 
       {/* Image */}
       {post.imageUrl && (
         <img
           src={post.imageUrl}
           alt="Post image"
-          className="rounded-lg w-full max-h-72 object-cover border border-gray-100"
+          className="rounded-lg w-full max-h-72 object-cover"
+          style={{ border: '1px solid rgba(255,255,255,0.08)' }}
         />
       )}
 
@@ -134,11 +135,12 @@ function PostCard({ post, currentUid, tenantId, onReact }: PostCardProps) {
               key={emoji}
               onClick={() => handleReact(emoji)}
               disabled={reacting || !currentUid}
-              className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-sm border transition-colors
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-sm border transition-all
                 ${hasReacted
-                  ? 'bg-cyan-50 border-cyan-300 text-cyan-700 font-medium'
-                  : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'
+                  ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-300 font-medium'
+                  : 'border-white/10 text-white/50 hover:border-white/20 hover:text-white/70'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
+              style={{ background: hasReacted ? undefined : 'rgba(255,255,255,0.04)' }}
             >
               <span>{emoji}</span>
               {uids.length > 0 && (
@@ -148,7 +150,7 @@ function PostCard({ post, currentUid, tenantId, onReact }: PostCardProps) {
           );
         })}
         {post.commentCount > 0 && (
-          <span className="ml-auto text-xs text-gray-500">
+          <span className="ml-auto text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
             {post.commentCount} comment{post.commentCount !== 1 ? 's' : ''}
           </span>
         )}
@@ -181,8 +183,8 @@ export default function FeedPage({ params }: { params: Promise<{ tenantId: strin
       if (!res.ok) throw new Error('Failed to load feed');
       const data = await res.json();
       setPosts(data.posts ?? []);
-    } catch (err: any) {
-      setError(err.message ?? 'Unknown error');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Unknown error');
     } finally {
       setLoading(false);
     }
@@ -221,8 +223,8 @@ export default function FeedPage({ params }: { params: Promise<{ tenantId: strin
       setComposeBody('');
       setComposing(false);
       await fetchPosts();
-    } catch (err: any) {
-      setSubmitError(err.message ?? 'Failed to post');
+    } catch (err: unknown) {
+      setSubmitError(err instanceof Error ? err.message : 'Failed to post');
     } finally {
       setSubmitting(false);
     }
@@ -241,7 +243,6 @@ export default function FeedPage({ params }: { params: Promise<{ tenantId: strin
       });
       if (!res.ok) return;
       const data = await res.json();
-      // Optimistically update reactions in state
       setPosts((prev) =>
         prev.map((p) =>
           p.id === postId ? { ...p, reactions: data.reactions } : p
@@ -255,7 +256,7 @@ export default function FeedPage({ params }: { params: Promise<{ tenantId: strin
   if (authLoading || loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-4 border-cyan-600 border-t-transparent" />
+        <div className="animate-spin rounded-full h-8 w-8 border-4 border-cyan-500 border-t-transparent" />
       </div>
     );
   }
@@ -264,17 +265,18 @@ export default function FeedPage({ params }: { params: Promise<{ tenantId: strin
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">News Feed</h1>
-        <p className="text-gray-600 mt-1">Updates and announcements from your community</p>
+        <h1 className="text-2xl font-bold text-white">News Feed</h1>
+        <p className="mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>Updates and announcements from your community</p>
       </div>
 
       {/* Compose Bar */}
       {canCompose && (
-        <div className="bg-white border border-gray-200 rounded-xl p-4">
+        <div className="rounded-xl border p-4" style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.08)' }}>
           {!composing ? (
             <button
               onClick={() => setComposing(true)}
-              className="w-full text-left px-4 py-2.5 bg-gray-50 rounded-lg border border-gray-200 text-gray-400 text-sm hover:bg-gray-100 transition-colors"
+              className="w-full text-left px-4 py-2.5 rounded-lg border text-sm transition-colors hover:border-white/20"
+              style={{ background: 'rgba(255,255,255,0.04)', borderColor: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.35)' }}
             >
               Share an update with your community...
             </button>
@@ -285,16 +287,18 @@ export default function FeedPage({ params }: { params: Promise<{ tenantId: strin
                 onChange={(e) => setComposeBody(e.target.value)}
                 placeholder="What's on your mind?"
                 rows={4}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent resize-none"
+                className="w-full px-4 py-3 rounded-lg text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-cyan-500 resize-none"
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}
                 autoFocus
               />
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <div className="flex items-center gap-2">
-                  <label className="text-xs text-gray-500 font-medium">Scope:</label>
+                  <label className="text-xs font-medium" style={{ color: 'rgba(255,255,255,0.5)' }}>Scope:</label>
                   <select
                     value={composeScope}
                     onChange={(e) => setComposeScope(e.target.value as typeof composeScope)}
-                    className="text-xs border border-gray-200 rounded-md px-2 py-1 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    className="text-xs rounded-md px-2 py-1 text-white focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                    style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}
                   >
                     <option value="tenant">Tenant-wide</option>
                     <option value="house">House</option>
@@ -306,7 +310,8 @@ export default function FeedPage({ params }: { params: Promise<{ tenantId: strin
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => { setComposing(false); setComposeBody(''); setSubmitError(null); }}
-                    className="px-4 py-1.5 text-sm text-gray-600 hover:text-gray-900 transition-colors"
+                    className="px-4 py-1.5 text-sm transition-colors"
+                    style={{ color: 'rgba(255,255,255,0.5)' }}
                     disabled={submitting}
                   >
                     Cancel
@@ -314,14 +319,15 @@ export default function FeedPage({ params }: { params: Promise<{ tenantId: strin
                   <button
                     onClick={handleSubmitPost}
                     disabled={submitting || !composeBody.trim()}
-                    className="px-4 py-1.5 text-sm font-medium bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="px-4 py-1.5 text-sm font-medium text-white rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ background: 'linear-gradient(135deg, #0891B2, #059669)' }}
                   >
                     {submitting ? 'Posting...' : 'Post'}
                   </button>
                 </div>
               </div>
               {submitError && (
-                <p className="text-xs text-red-600">{submitError}</p>
+                <p className="text-xs text-red-400">{submitError}</p>
               )}
             </div>
           )}
@@ -329,16 +335,17 @@ export default function FeedPage({ params }: { params: Promise<{ tenantId: strin
       )}
 
       {/* Scope Filter Tabs */}
-      <div className="flex gap-1 border-b border-gray-200">
+      <div className="flex gap-1 border-b" style={{ borderColor: 'rgba(255,255,255,0.08)' }}>
         {SCOPE_TABS.map((tab) => (
           <button
             key={tab.value}
             onClick={() => setScopeFilter(tab.value)}
             className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors -mb-px
               ${scopeFilter === tab.value
-                ? 'border-cyan-600 text-cyan-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'border-cyan-500 text-cyan-400'
+                : 'border-transparent hover:border-white/20'
               }`}
+            style={{ color: scopeFilter === tab.value ? undefined : 'rgba(255,255,255,0.45)' }}
           >
             {tab.label}
           </button>
@@ -347,17 +354,17 @@ export default function FeedPage({ params }: { params: Promise<{ tenantId: strin
 
       {/* Error */}
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm">
+        <div className="p-4 rounded-xl text-sm" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)', color: 'rgba(252,165,165,0.9)' }}>
           {error}
         </div>
       )}
 
       {/* Feed List */}
       {filteredPosts.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl py-16 text-center">
+        <div className="rounded-xl py-16 text-center border" style={{ background: 'rgba(255,255,255,0.03)', borderColor: 'rgba(255,255,255,0.07)' }}>
           <div className="text-4xl mb-3">📰</div>
-          <p className="text-gray-500 font-medium">No posts yet</p>
-          <p className="text-sm text-gray-400 mt-1">
+          <p className="font-medium" style={{ color: 'rgba(255,255,255,0.6)' }}>No posts yet</p>
+          <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.35)' }}>
             {scopeFilter === 'all'
               ? 'Be the first to share an update with your community.'
               : `No ${scopeFilter === 'global' ? 'announcement' : scopeFilter} posts yet.`}
@@ -365,7 +372,8 @@ export default function FeedPage({ params }: { params: Promise<{ tenantId: strin
           {canCompose && !composing && (
             <button
               onClick={() => setComposing(true)}
-              className="mt-4 px-4 py-2 text-sm font-medium text-cyan-600 border border-cyan-300 rounded-lg hover:bg-cyan-50 transition-colors"
+              className="mt-4 px-4 py-2 text-sm font-medium rounded-lg transition-all border"
+              style={{ color: '#67E8F9', borderColor: 'rgba(103,232,249,0.3)', background: 'rgba(8,145,178,0.1)' }}
             >
               Create a post
             </button>

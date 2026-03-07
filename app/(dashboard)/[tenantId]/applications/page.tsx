@@ -4,20 +4,20 @@ import { use, useEffect, useState, useCallback } from 'react';
 import { authService } from '@/features/auth/services/authService';
 import type { Application, ApplicationStatus, ApplicationType } from '@/features/applications/types';
 
-const STATUS_CONFIG: Record<ApplicationStatus, { label: string; color: string }> = {
-  draft:    { label: 'Draft',    color: 'bg-gray-100 text-gray-600' },
-  pending:  { label: 'Pending',  color: 'bg-yellow-100 text-yellow-700' },
-  assigned: { label: 'Assigned', color: 'bg-blue-100 text-blue-700' },
-  accepted: { label: 'Accepted', color: 'bg-emerald-100 text-emerald-700' },
-  rejected: { label: 'Rejected', color: 'bg-red-100 text-red-700' },
-  archived: { label: 'Archived', color: 'bg-gray-100 text-gray-500' },
+const STATUS_CONFIG: Record<ApplicationStatus, { label: string; badge: React.CSSProperties }> = {
+  draft: { label: 'Draft', badge: { background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' } },
+  pending: { label: 'Pending', badge: { background: 'rgba(245,158,11,0.15)', color: '#FCD34D', border: '1px solid rgba(245,158,11,0.3)' } },
+  assigned: { label: 'Assigned', badge: { background: 'rgba(8,145,178,0.15)', color: '#67E8F9', border: '1px solid rgba(8,145,178,0.3)' } },
+  accepted: { label: 'Accepted', badge: { background: 'rgba(52,211,153,0.15)', color: '#6EE7B7', border: '1px solid rgba(52,211,153,0.3)' } },
+  rejected: { label: 'Rejected', badge: { background: 'rgba(239,68,68,0.15)', color: '#FCA5A5', border: '1px solid rgba(239,68,68,0.3)' } },
+  archived: { label: 'Archived', badge: { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)' } },
 };
 
 const TYPE_CONFIG: Record<ApplicationType, { label: string; icon: string }> = {
-  bed:    { label: 'Bed',    icon: '🛏' },
-  staff:  { label: 'Staff',  icon: '👤' },
+  bed: { label: 'Bed', icon: '🛏' },
+  staff: { label: 'Staff', icon: '👤' },
   course: { label: 'Course', icon: '📚' },
-  event:  { label: 'Event',  icon: '📅' },
+  event: { label: 'Event', icon: '📅' },
   tenant: { label: 'Tenant', icon: '🏠' },
 };
 
@@ -99,17 +99,17 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
 
   // Counts for filter tabs
   const counts = {
-    all:      applications.length,
-    pending:  applications.filter(a => a.status === 'pending').length,
+    all: applications.length,
+    pending: applications.filter(a => a.status === 'pending').length,
     assigned: applications.filter(a => a.status === 'assigned').length,
     accepted: applications.filter(a => a.status === 'accepted').length,
     rejected: applications.filter(a => a.status === 'rejected').length,
   };
 
   const STATUS_TABS: { value: FilterStatus; label: string }[] = [
-    { value: 'all',      label: `All (${counts.all})` },
+    { value: 'all', label: `All (${counts.all})` },
     { value: 'assigned', label: `Assigned (${counts.assigned})` },
-    { value: 'pending',  label: `Pending (${counts.pending})` },
+    { value: 'pending', label: `Pending (${counts.pending})` },
     { value: 'accepted', label: `Accepted (${counts.accepted})` },
     { value: 'rejected', label: `Rejected (${counts.rejected})` },
   ];
@@ -118,8 +118,8 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
     <div className="max-w-6xl mx-auto p-6 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Applications</h1>
-        <p className="text-gray-500 mt-1">
+        <h1 className="text-2xl font-bold text-white">Applications</h1>
+        <p className="mt-1 text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
           Bed and staff applications assigned to your house
         </p>
       </div>
@@ -127,16 +127,16 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center">
         {/* Status tabs */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 lg:gap-1 p-1 rounded-2xl w-fit" style={{ background: 'rgba(255,255,255,0.05)' }}>
           {STATUS_TABS.map(tab => (
             <button
               key={tab.value}
               onClick={() => setStatusFilter(tab.value)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                statusFilter === tab.value
-                  ? 'bg-emerald-600 text-white'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
+              className="px-4 py-1.5 rounded-xl text-sm font-medium transition-all"
+              style={statusFilter === tab.value
+                ? { background: 'linear-gradient(135deg,#0891B2,#059669)', color: 'white' }
+                : { color: 'rgba(255,255,255,0.6)', background: 'transparent' }
+              }
             >
               {tab.label}
             </button>
@@ -147,126 +147,113 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
         <select
           value={typeFilter}
           onChange={e => setTypeFilter(e.target.value as FilterType)}
-          className="ml-auto px-3 py-1.5 rounded-lg border border-gray-200 text-sm text-gray-700 bg-white"
+          className="ml-auto px-4 py-2 rounded-xl text-sm transition-all outline-none"
+          style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: 'white' }}
         >
-          <option value="all">All Types</option>
-          <option value="bed">Bed</option>
-          <option value="staff">Staff</option>
-          <option value="course">Course</option>
-          <option value="event">Event</option>
+          <option value="all" className="bg-gray-800 text-white">All Types</option>
+          <option value="bed" className="bg-gray-800 text-white">Bed</option>
+          <option value="staff" className="bg-gray-800 text-white">Staff</option>
+          <option value="course" className="bg-gray-800 text-white">Course</option>
+          <option value="event" className="bg-gray-800 text-white">Event</option>
         </select>
       </div>
 
       {/* Content */}
       {loading ? (
         <div className="flex justify-center py-16">
-          <div className="w-8 h-8 border-2 border-emerald-600 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : error ? (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-6 text-center text-red-700">
+        <div className="rounded-xl p-6 text-center text-red-200" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)' }}>
           {error}
         </div>
       ) : applications.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-xl p-16 text-center">
+        <div className="rounded-2xl p-16 text-center" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
           <p className="text-4xl mb-3">📋</p>
-          <p className="text-gray-900 font-medium">No applications found</p>
-          <p className="text-gray-500 text-sm mt-1">
+          <p className="text-white font-medium">No applications found</p>
+          <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>
             {statusFilter !== 'all' || typeFilter !== 'all'
               ? 'Try adjusting your filters.'
               : 'Applications assigned to your house will appear here.'}
           </p>
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Applicant</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Type</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Zip</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Status</th>
-                <th className="text-left px-4 py-3 font-medium text-gray-600">Submitted</th>
-                <th className="text-right px-4 py-3 font-medium text-gray-600">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {applications.map(app => {
-                const statusCfg = STATUS_CONFIG[app.status] ?? STATUS_CONFIG.pending;
-                const typeCfg = TYPE_CONFIG[app.type] ?? { label: app.type, icon: '📄' };
-                const submittedDate = app.submittedAt
-                  ? new Date(app.submittedAt).toLocaleDateString('en-US', {
-                      month: 'short', day: 'numeric', year: 'numeric',
-                    })
-                  : '—';
-                const canAct = app.status === 'assigned' || app.status === 'pending';
+        <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+                <tr>
+                  <th className="text-left px-5 py-4 font-semibold uppercase tracking-wider text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Applicant</th>
+                  <th className="text-left px-5 py-4 font-semibold uppercase tracking-wider text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Type</th>
+                  <th className="text-left px-5 py-4 font-semibold uppercase tracking-wider text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Zip</th>
+                  <th className="text-left px-5 py-4 font-semibold uppercase tracking-wider text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Status</th>
+                  <th className="text-left px-5 py-4 font-semibold uppercase tracking-wider text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Submitted</th>
+                  <th className="text-right px-5 py-4 font-semibold uppercase tracking-wider text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {applications.map(app => {
+                  const statusCfg = STATUS_CONFIG[app.status] ?? STATUS_CONFIG.pending;
+                  const typeCfg = TYPE_CONFIG[app.type] ?? { label: app.type, icon: '📄' };
+                  const submittedDate = app.submittedAt
+                    ? new Date(app.submittedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                    : '—';
+                  const canAct = app.status === 'assigned' || app.status === 'pending';
 
-                return (
-                  <tr key={app.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-4 py-3">
-                      <p className="font-medium text-gray-900">{app.applicantName}</p>
-                      <p className="text-gray-500 text-xs">{app.applicantEmail}</p>
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className="inline-flex items-center gap-1.5">
-                        <span>{typeCfg.icon}</span>
-                        <span className="text-gray-700">{typeCfg.label}</span>
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">{app.zipCode || '—'}</td>
-                    <td className="px-4 py-3">
-                      <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${statusCfg.color}`}>
-                        {statusCfg.label}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-gray-600">{submittedDate}</td>
-                    <td className="px-4 py-3 text-right">
-                      {canAct ? (
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            onClick={() =>
-                              setConfirming({
-                                applicationId: app.id,
-                                applicantName: app.applicantName,
-                                action: 'accepted',
-                              })
-                            }
-                            className="px-2.5 py-1 text-xs font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg transition-colors"
-                          >
-                            Accept
-                          </button>
-                          <button
-                            onClick={() =>
-                              setConfirming({
-                                applicationId: app.id,
-                                applicantName: app.applicantName,
-                                action: 'rejected',
-                              })
-                            }
-                            className="px-2.5 py-1 text-xs font-medium bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-colors"
-                          >
-                            Reject
-                          </button>
-                        </div>
-                      ) : (
-                        <span className="text-gray-400 text-xs">—</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                  return (
+                    <tr key={app.id} className="hover:bg-white/5 transition-colors">
+                      <td className="px-5 py-4">
+                        <p className="font-semibold text-white">{app.applicantName}</p>
+                        <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.5)' }}>{app.applicantEmail}</p>
+                      </td>
+                      <td className="px-5 py-4">
+                        <span className="inline-flex items-center gap-2">
+                          <span className="w-8 h-8 rounded-full flex items-center justify-center text-base" style={{ background: 'rgba(255,255,255,0.08)' }}>{typeCfg.icon}</span>
+                          <span style={{ color: 'rgba(255,255,255,0.85)' }}>{typeCfg.label}</span>
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 font-mono text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>{app.zipCode || '—'}</td>
+                      <td className="px-5 py-4">
+                        <span className="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold" style={statusCfg.badge}>
+                          {statusCfg.label}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 font-mono text-xs" style={{ color: 'rgba(255,255,255,0.6)' }}>{submittedDate}</td>
+                      <td className="px-5 py-4 text-right">
+                        {canAct ? (
+                          <div className="flex items-center justify-end gap-2 text-sm font-semibold">
+                            <button onClick={() => setConfirming({ applicationId: app.id, applicantName: app.applicantName, action: 'accepted' })}
+                              className="px-3 py-1.5 rounded-lg transition-colors hover:opacity-80"
+                              style={{ color: '#6EE7B7', background: 'rgba(52,211,153,0.15)' }}>
+                              Accept
+                            </button>
+                            <button onClick={() => setConfirming({ applicationId: app.id, applicantName: app.applicantName, action: 'rejected' })}
+                              className="px-3 py-1.5 rounded-lg transition-colors hover:opacity-80"
+                              style={{ color: '#FCA5A5', background: 'rgba(239,68,68,0.15)' }}>
+                              Reject
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-xs" style={{ color: 'rgba(255,255,255,0.3)' }}>—</span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
-      {/* Confirm dialog */}
+      {/* Confirm dialog modal */}
       {confirming && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4">
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md px-4">
+          <div className="rounded-3xl shadow-2xl p-6 w-full max-w-sm" style={{ background: 'rgba(12,26,46,0.95)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <h3 className="text-lg font-bold text-white mb-2">
               {confirming.action === 'accepted' ? 'Accept Application' : 'Reject Application'}
             </h3>
-            <p className="text-gray-600 text-sm mb-6">
+            <p className="text-sm mb-6" style={{ color: 'rgba(255,255,255,0.6)' }}>
               {confirming.action === 'accepted'
                 ? `Are you sure you want to accept ${confirming.applicantName}'s application?`
                 : `Are you sure you want to reject ${confirming.applicantName}'s application? This cannot be undone.`}
@@ -275,18 +262,16 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
               <button
                 onClick={() => setConfirming(null)}
                 disabled={actionLoading}
-                className="flex-1 px-4 py-2 border border-gray-200 text-gray-700 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50 hover:bg-white/10"
+                style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleAction(confirming.action)}
                 disabled={actionLoading}
-                className={`flex-1 px-4 py-2 rounded-xl text-sm font-medium text-white transition-colors disabled:opacity-50 ${
-                  confirming.action === 'accepted'
-                    ? 'bg-emerald-600 hover:bg-emerald-700'
-                    : 'bg-red-600 hover:bg-red-700'
-                }`}
+                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50 hover:opacity-90 ${confirming.action === 'accepted' ? '' : 'bg-red-600'}`}
+                style={confirming.action === 'accepted' ? { background: 'linear-gradient(135deg,#0891B2,#059669)' } : {}}
               >
                 {actionLoading ? 'Saving…' : confirming.action === 'accepted' ? 'Accept' : 'Reject'}
               </button>

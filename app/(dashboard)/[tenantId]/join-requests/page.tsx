@@ -2,8 +2,6 @@
 
 import { use, useState, useEffect, useCallback } from 'react';
 import { authService } from '@/features/auth/services/authService';
-import { Button } from '@/components/ui';
-import { Badge } from '@/components/ui/Badge';
 
 type Params = Promise<{ tenantId: string }>;
 
@@ -72,109 +70,97 @@ export default function JoinRequestsPage({ params }: { params: Params }) {
 
   if (loading) {
     return (
-      <div className="p-8">
+      <div className="p-8 max-w-4xl mx-auto">
         <div className="animate-pulse space-y-4">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-24 bg-gray-100 rounded-lg" />
+            <div key={i} className="h-24 rounded-2xl" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }} />
           ))}
         </div>
       </div>
     );
   }
 
+  const cardStyle: React.CSSProperties = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' };
+
   return (
-    <div className="p-8 max-w-3xl">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Join Requests</h1>
-        <p className="text-gray-500 mt-1">
+    <div className="p-8 max-w-4xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-white">Join Requests</h1>
+        <p className="mt-1 text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>
           Residents requesting to join your organization via the mobile app.
         </p>
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+        <div className="p-3 bg-red-500/10 border border-red-500/25 rounded-xl text-red-200 text-sm">
           {error}
         </div>
       )}
 
       {requests.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl border border-gray-200">
-          <svg
-            className="mx-auto h-12 w-12 text-gray-300 mb-3"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-            />
-          </svg>
-          <p className="text-gray-500 font-medium">No pending join requests</p>
-          <p className="text-gray-400 text-sm mt-1">
+        <div className="text-center py-16 rounded-2xl" style={cardStyle}>
+          <div className="w-12 h-12 rounded-full mx-auto flex items-center justify-center mb-3" style={{ background: 'rgba(255,255,255,0.05)' }}>
+            <svg className="w-6 h-6" style={{ color: 'rgba(255,255,255,0.4)' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+            </svg>
+          </div>
+          <p className="text-white font-medium">No pending join requests</p>
+          <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.4)' }}>
             When residents request to join from the mobile app, they&apos;ll appear here.
           </p>
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {requests.map(req => (
-            <div
-              key={req.id}
-              className="bg-white rounded-xl border border-gray-200 p-5 flex items-start justify-between gap-4"
-            >
+            <div key={req.id} className="rounded-2xl p-6 flex flex-col sm:flex-row items-start justify-between gap-5 transition-all hover:bg-white/5" style={cardStyle}>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <p className="font-semibold text-gray-900">{req.displayName}</p>
+                <div className="flex items-center gap-3 mb-1.5">
+                  <p className="font-semibold text-white">{req.displayName}</p>
                   {req.residentId ? (
-                    <Badge variant="success">Linked to resident</Badge>
+                    <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(52,211,153,0.15)', color: '#6EE7B7', border: '1px solid rgba(52,211,153,0.3)' }}>
+                      Linked to resident
+                    </span>
                   ) : (
-                    <Badge variant="warning">No resident record</Badge>
+                    <span className="px-2 py-0.5 rounded-full text-xs font-semibold" style={{ background: 'rgba(245,158,11,0.15)', color: '#FCD34D', border: '1px solid rgba(245,158,11,0.3)' }}>
+                      No resident record
+                    </span>
                   )}
                 </div>
-                <p className="text-sm text-gray-500">{req.email}</p>
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.6)' }}>{req.email}</p>
 
                 {req.message && (
-                  <p className="mt-2 text-sm text-gray-700 bg-gray-50 rounded p-2 italic">
+                  <p className="mt-3 text-sm rounded-xl p-3 italic" style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.7)' }}>
                     &ldquo;{req.message}&rdquo;
                   </p>
                 )}
 
-                <div className="flex gap-4 mt-2 text-xs text-gray-400">
+                <div className="flex gap-4 mt-4 text-xs font-mono" style={{ color: 'rgba(255,255,255,0.4)' }}>
                   {req.createdAt && (
                     <span>Requested: {new Date(req.createdAt).toLocaleDateString()}</span>
                   )}
                   {req.desiredMoveInDate && (
-                    <span>
-                      Desired move-in: {new Date(req.desiredMoveInDate).toLocaleDateString()}
-                    </span>
+                    <span>Desired move-in: {new Date(req.desiredMoveInDate).toLocaleDateString()}</span>
                   )}
                 </div>
 
                 {!req.residentId && (
-                  <p className="mt-2 text-xs text-amber-600">
+                  <p className="mt-3 text-xs font-medium" style={{ color: '#FDE68A' }}>
                     ⚠ Link this app user to a resident record before approving.
                   </p>
                 )}
               </div>
 
-              <div className="flex gap-2 shrink-0">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => handleAction(req.id, 'deny')}
-                  disabled={actionLoading === req.id}
-                >
+              <div className="flex sm:flex-col gap-2 shrink-0 sm:w-32">
+                <button onClick={() => handleAction(req.id, 'approve')} disabled={actionLoading === req.id || !req.residentId}
+                  className="w-full py-2 px-3 text-sm font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed text-white hover:opacity-90"
+                  style={{ background: 'linear-gradient(135deg,#0891B2,#059669)' }}>
+                  {actionLoading === req.id ? 'Loading...' : 'Approve'}
+                </button>
+                <button onClick={() => handleAction(req.id, 'deny')} disabled={actionLoading === req.id}
+                  className="w-full py-2 px-3 text-sm font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ background: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }}>
                   Deny
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={() => handleAction(req.id, 'approve')}
-                  disabled={actionLoading === req.id || !req.residentId}
-                >
-                  {actionLoading === req.id ? 'Processing...' : 'Approve'}
-                </Button>
+                </button>
               </div>
             </div>
           ))}

@@ -30,10 +30,10 @@ const roleLabel: Record<StaffRole, string> = {
 
 function SkeletonRow() {
   return (
-    <TableRow>
+    <TableRow className="border-b border-white/5 hover:bg-transparent">
       {[1, 2, 3, 4, 5, 6].map((i) => (
         <TableCell key={i}>
-          <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4" />
+          <div className="h-4 rounded animate-pulse w-3/4" style={{ background: 'rgba(255,255,255,0.06)' }} />
         </TableCell>
       ))}
     </TableRow>
@@ -47,16 +47,18 @@ export default function StaffPage({ params }: StaffPageProps) {
   const { user } = useAuth();
   const userCanManage = user?.role ? canManageStaff(user.role as UserRole) : false;
 
+  const cardStyle: React.CSSProperties = { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-6xl mx-auto">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Staff</h1>
-          <p className="text-gray-600 mt-1">Manage your staff members and their schedules</p>
+          <h1 className="text-2xl font-bold text-white">Staff</h1>
+          <p className="mt-1 text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>Manage your staff members and their schedules</p>
         </div>
         {userCanManage && (
           <Link href={`/${tenantId}/staff/new`}>
-            <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">
+            <Button className="text-white border-none font-semibold transition-all hover:opacity-90" style={{ background: 'linear-gradient(135deg,#0891B2,#059669)' }}>
               Add Staff Member
             </Button>
           </Link>
@@ -64,32 +66,32 @@ export default function StaffPage({ params }: StaffPageProps) {
       </div>
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-4">
-          <p className="text-sm text-red-700">{error}</p>
+        <div className="rounded-xl p-4" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)' }}>
+          <p className="text-sm" style={{ color: '#FECACA' }}>{error}</p>
         </div>
       )}
 
-      <Card className="border-gray-200 bg-white">
-        <CardHeader className="pb-0">
-          <CardTitle className="text-lg font-semibold text-gray-900">
+      <Card className="overflow-hidden border-0 shadow-none" style={cardStyle}>
+        <CardHeader className="pb-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+          <CardTitle className="text-lg font-semibold text-white flex items-center gap-2">
             Staff Members
             {!loading && (
-              <span className="ml-2 text-sm font-normal text-gray-500">
-                ({staff.length})
+              <span className="text-sm font-normal py-0.5 px-2 rounded-full" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}>
+                {staff.length}
               </span>
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0 pt-4">
+        <CardContent className="p-0">
           <Table>
-            <TableHeader>
-              <TableRow>
-                <TableCell as="th">Name</TableCell>
-                <TableCell as="th">Email</TableCell>
-                <TableCell as="th">Phone</TableCell>
-                <TableCell as="th">Role</TableCell>
-                <TableCell as="th">Houses</TableCell>
-                <TableCell as="th">Status</TableCell>
+            <TableHeader className="[&_tr]:border-b [&_tr]:border-white/10 hover:bg-transparent">
+              <TableRow className="border-b border-white/10 hover:bg-transparent">
+                <TableCell as="th" className="text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Name</TableCell>
+                <TableCell as="th" className="text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Email</TableCell>
+                <TableCell as="th" className="text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Phone</TableCell>
+                <TableCell as="th" className="text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Role</TableCell>
+                <TableCell as="th" className="text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Houses</TableCell>
+                <TableCell as="th" className="text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Status</TableCell>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -100,29 +102,19 @@ export default function StaffPage({ params }: StaffPageProps) {
                   <SkeletonRow />
                 </>
               ) : staff.length === 0 ? (
-                <TableRow>
-                  <TableCell className="text-center py-12 text-gray-500" as="td">
-                    <div className="col-span-6 flex flex-col items-center">
-                      <svg
-                        className="w-12 h-12 text-gray-300 mb-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1.5}
-                          d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
-                        />
-                      </svg>
-                      <p className="text-sm font-medium text-gray-900">No staff members yet</p>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Get started by adding your first staff member.
-                      </p>
+                <TableRow className="border-none hover:bg-transparent">
+                  <TableCell className="text-center py-16" as="td" colSpan={6}>
+                    <div className="flex flex-col items-center">
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center mb-3" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                        <svg className="w-6 h-6" style={{ color: 'rgba(255,255,255,0.4)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                      </div>
+                      <p className="text-base font-medium text-white">No staff members yet</p>
+                      <p className="text-sm mt-1 mb-5" style={{ color: 'rgba(255,255,255,0.4)' }}>Get started by adding your first staff member.</p>
                       {userCanManage && (
-                        <Link href={`/${tenantId}/staff/new`} className="mt-4">
-                          <Button className="bg-cyan-600 hover:bg-cyan-700 text-white" size="sm">
+                        <Link href={`/${tenantId}/staff/new`}>
+                          <Button className="text-white border-none font-medium text-sm transition-all" size="sm" style={{ background: 'rgba(8,145,178,0.2)', border: '1px solid rgba(8,145,178,0.4)', color: '#67E8F9' }}>
                             Add Staff Member
                           </Button>
                         </Link>
@@ -132,27 +124,24 @@ export default function StaffPage({ params }: StaffPageProps) {
                 </TableRow>
               ) : (
                 staff.map((member: StaffMember) => (
-                  <TableRow key={member.id}>
+                  <TableRow key={member.id} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                     <TableCell>
-                      <Link
-                        href={`/${tenantId}/staff/${member.id}`}
-                        className="font-medium text-cyan-600 hover:text-cyan-800 hover:underline"
-                      >
+                      <Link href={`/${tenantId}/staff/${member.id}`} className="font-medium transition-colors hover:underline" style={{ color: '#67E8F9' }}>
                         {member.firstName} {member.lastName}
                       </Link>
                     </TableCell>
-                    <TableCell className="text-gray-600">{member.email}</TableCell>
-                    <TableCell className="text-gray-600">
-                      {member.phone ?? <span className="text-gray-400">—</span>}
+                    <TableCell style={{ color: 'rgba(255,255,255,0.7)' }}>{member.email}</TableCell>
+                    <TableCell style={{ color: 'rgba(255,255,255,0.7)' }}>
+                      {member.phone ?? <span style={{ color: 'rgba(255,255,255,0.3)' }}>—</span>}
                     </TableCell>
                     <TableCell>
                       <Badge variant={roleBadgeVariant[member.role]}>
                         {roleLabel[member.role]}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-gray-600">
+                    <TableCell style={{ color: 'rgba(255,255,255,0.7)' }}>
                       {member.houseIds.length === 0
-                        ? <span className="text-gray-400">None</span>
+                        ? <span style={{ color: 'rgba(255,255,255,0.3)' }}>None</span>
                         : member.houseIds.length}
                     </TableCell>
                     <TableCell>
