@@ -18,8 +18,16 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                     }`}
                 style={
                     isUser
-                        ? { background: '#CFFAFE', color: '#164E63', border: '1px solid rgba(8,145,178,0.2)' }
-                        : { background: '#FFFFFF', color: '#164E63', border: '1px solid rgba(8,145,178,0.15)' }
+                        ? {
+                            background: 'linear-gradient(135deg, rgba(8,145,178,0.35) 0%, rgba(6,78,100,0.5) 100%)',
+                            color: '#E0F7FC',
+                            border: '1px solid rgba(8,145,178,0.35)',
+                        }
+                        : {
+                            background: 'rgba(255,255,255,0.06)',
+                            color: 'rgba(255,255,255,0.88)',
+                            border: '1px solid rgba(255,255,255,0.08)',
+                        }
                 }
             >
                 {message.content}
@@ -27,11 +35,11 @@ export function MessageBubble({ message }: MessageBubbleProps) {
 
             {message.component && !!message.componentData && (
                 <div className={`w-full ${isUser ? 'pr-2' : 'pl-2'}`}>
-                    <CommandCard type={message.component} data={message.componentData as any} />
+                    <CommandCard type={message.component} data={message.componentData as Record<string, unknown>} />
                 </div>
             )}
 
-            <span className="text-xs px-1" style={{ color: '#78716C' }}>{time}</span>
+            <span className="text-xs px-1" style={{ color: 'rgba(255,255,255,0.3)' }}>{time}</span>
         </div>
     );
 }

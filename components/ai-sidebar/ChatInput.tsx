@@ -11,7 +11,6 @@ interface ChatInputProps {
 
 export function ChatInput({ onSend, isLoading, userRole }: ChatInputProps) {
     const [value, setValue] = useState('');
-    const [showMenu, setShowMenu] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     const isOperator = userRole && userRole !== 'resident';
@@ -19,22 +18,19 @@ export function ChatInput({ onSend, isLoading, userRole }: ChatInputProps) {
         (c) => c.roles.includes(isOperator ? 'operator' : 'resident')
     );
 
-    // Show slash command autocomplete when user types /
+    // Derive slash command suggestions directly — no state needed
     const slashFilter = value.startsWith('/') && !value.includes(' ') ? value.slice(1).toLowerCase() : null;
     const suggestions = slashFilter !== null
         ? filteredCommands.filter(c => c.command.slice(1).startsWith(slashFilter))
         : [];
-
-    useEffect(() => {
-        setShowMenu(suggestions.length > 0);
-    }, [suggestions.length]);
+    const showMenu = suggestions.length > 0;
 
     function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
             submit();
         }
-        if (e.key === 'Escape') setShowMenu(false);
+        // Escape: user can just clear value to dismiss
     }
 
     function submit() {
@@ -42,12 +38,10 @@ export function ChatInput({ onSend, isLoading, userRole }: ChatInputProps) {
         if (!trimmed || isLoading) return;
         onSend(trimmed);
         setValue('');
-        setShowMenu(false);
     }
 
     function selectCommand(cmd: string) {
         setValue(cmd + ' ');
-        setShowMenu(false);
         textareaRef.current?.focus();
     }
 
@@ -60,22 +54,31 @@ export function ChatInput({ onSend, isLoading, userRole }: ChatInputProps) {
     }, [value]);
 
     return (
-        <div className="border-t p-3 relative" style={{ borderColor: 'rgba(8,145,178,0.15)', background: 'transparent' }}>
+        <div
+            className="border-t p-3 relative"
+            style={{ borderColor: 'rgba(8,145,178,0.15)', background: 'transparent' }}
+        >
             {/* Slash command autocomplete */}
             {showMenu && (
                 <div
-                    className="absolute bottom-full left-3 right-3 mb-1 rounded-xl overflow-hidden shadow-lg z-10"
-                    style={{ background: 'white', border: '1px solid rgba(8,145,178,0.2)' }}
+                    className="absolute bottom-full left-3 right-3 mb-1 rounded-xl overflow-hidden shadow-2xl z-10"
+                    style={{
+                        background: 'rgba(6,14,26,0.98)',
+                        border: '1px solid rgba(8,145,178,0.25)',
+                        backdropFilter: 'blur(16px)',
+                    }}
                 >
                     {suggestions.map((cmd) => (
                         <button
                             key={cmd.command}
                             type="button"
                             onClick={() => selectCommand(cmd.command)}
-                            className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors duration-150 cursor-pointer hover:bg-cyan-50"
+                            className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors duration-150 cursor-pointer"
+                            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(8,145,178,0.12)'; }}
+                            onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                         >
-                            <span className="font-mono text-xs font-semibold w-24 shrink-0" style={{ color: '#0891B2' }}>{cmd.command}</span>
-                            <span className="text-xs" style={{ color: '#78716C' }}>{cmd.description}</span>
+                            <span className="font-mono text-xs font-semibold w-24 shrink-0" style={{ color: '#67E8F9' }}>{cmd.command}</span>
+                            <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{cmd.description}</span>
                         </button>
                     ))}
                 </div>
@@ -91,22 +94,26 @@ export function ChatInput({ onSend, isLoading, userRole }: ChatInputProps) {
                     placeholder="Ask anything, or type / for commands…"
                     className="flex-1 resize-none rounded-xl px-3 py-2.5 text-sm outline-none transition-all duration-200"
                     style={{
-                        background: 'white',
-                        border: '1px solid rgba(8,145,178,0.2)',
-                        color: '#164E63',
+                        background: 'rgba(255,255,255,0.06)',
+                        border: '1px solid rgba(255,255,255,0.1)',
+                        color: 'rgba(255,255,255,0.88)',
                         minHeight: '40px',
                         maxHeight: '120px',
                     }}
-                    onFocus={(e) => (e.target.style.borderColor = '#0891B2')}
-                    onBlur={(e) => (e.target.style.borderColor = 'rgba(8,145,178,0.2)')}
+                    onFocus={(e) => (e.target.style.borderColor = 'rgba(8,145,178,0.5)')}
+                    onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
                     disabled={isLoading}
                 />
                 <button
                     type="button"
                     onClick={submit}
                     disabled={isLoading || !value.trim()}
-                    className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-40 hover:opacity-90"
-                    style={{ background: value.trim() ? '#0891B2' : 'rgba(8,145,178,0.3)' }}
+                    className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-30 hover:opacity-90"
+                    style={{
+                        background: value.trim()
+                            ? 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)'
+                            : 'rgba(8,145,178,0.2)',
+                    }}
                     aria-label="Send message"
                 >
                     <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
@@ -114,7 +121,9 @@ export function ChatInput({ onSend, isLoading, userRole }: ChatInputProps) {
                     </svg>
                 </button>
             </div>
-            <p className="text-xs mt-1.5 px-1" style={{ color: '#78716C' }}>Shift+Enter for new line · /help for commands</p>
+            <p className="text-xs mt-1.5 px-1" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                Shift+Enter for new line · /help for commands
+            </p>
         </div>
     );
 }

@@ -142,7 +142,8 @@ export function AISidebar() {
             {/* Backdrop for mobile */}
             {isOpen && (
                 <div
-                    className="fixed inset-0 bg-black/20 z-40 lg:hidden transition-opacity"
+                    className="fixed inset-0 z-40 lg:hidden transition-opacity"
+                    style={{ background: 'rgba(0,0,0,0.5)' }}
                     onClick={() => setOpen(false)}
                 />
             )}
@@ -157,20 +158,21 @@ export function AISidebar() {
                     width: typeof window !== 'undefined' && window.innerWidth >= 1024
                         ? `${sidebarWidth}px`
                         : '100%',
-                    background: 'rgba(248, 250, 252, 0.95)',
-                    backdropFilter: 'blur(12px)',
-                    borderColor: 'rgba(8, 145, 178, 0.15)',
+                    background: 'rgba(6,14,26,0.97)',
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)',
+                    borderColor: 'rgba(8,145,178,0.2)',
                     transform: isOpen ? 'translate(0, 0)' : 'translate(0, 100%)',
                 }}
             >
                 {/* Drag Handle for desktop */}
                 <div
-                    className="hidden lg:block absolute left-0 top-0 w-2 h-full cursor-col-resize -translate-x-1/2 bg-transparent hover:bg-cyan-500/20 transition-colors z-50"
+                    className="hidden lg:block absolute left-0 top-0 w-2 h-full cursor-col-resize -translate-x-1/2 bg-transparent hover:bg-cyan-500/30 transition-colors z-50"
                     onMouseDown={handleMouseDown}
                 />
                 {/* Visual handle for mobile drawer */}
                 <div className="w-full flex justify-center pt-3 pb-1 lg:hidden">
-                    <div className="w-12 h-1.5 bg-stone-300 rounded-full" />
+                    <div className="w-12 h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }} />
                 </div>
 
                 <SidebarHeader
