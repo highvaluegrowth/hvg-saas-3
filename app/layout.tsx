@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Figtree, Noto_Sans } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/next';
 import './globals.css';
 
 const figtree = Figtree({
@@ -25,7 +26,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${notoSans.variable} ${figtree.variable} font-sans`}>{children}</body>
+      <body className={`${notoSans.variable} ${figtree.variable} font-sans`}>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
