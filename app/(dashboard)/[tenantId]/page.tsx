@@ -22,7 +22,7 @@ function formatEventDate(date: Date): string {
 }
 
 function Skeleton({ className = '' }: { className?: string }) {
-  return <div className={`animate-pulse bg-gray-200 rounded ${className}`} />;
+  return <div className={`animate-pulse rounded ${className}`} style={{ background: 'rgba(255,255,255,0.06)' }} />;
 }
 
 // ─── Occupancy Ring ───────────────────────────────────────────────────────────
@@ -35,7 +35,7 @@ function OccupancyRing({ rate }: { rate: number }) {
 
   return (
     <svg width="72" height="72" viewBox="0 0 72 72">
-      <circle cx="36" cy="36" r={r} fill="none" stroke="#e5e7eb" strokeWidth="8" />
+      <circle cx="36" cy="36" r={r} fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="8" />
       <circle
         cx="36" cy="36" r={r} fill="none"
         stroke={color} strokeWidth="8"
@@ -44,7 +44,7 @@ function OccupancyRing({ rate }: { rate: number }) {
         transform="rotate(-90 36 36)"
         style={{ transition: 'stroke-dasharray 0.6s ease' }}
       />
-      <text x="36" y="40" textAnchor="middle" fontSize="13" fontWeight="700" fill="#111827">
+      <text x="36" y="40" textAnchor="middle" fontSize="13" fontWeight="700" fill="white">
         {rate}%
       </text>
     </svg>
@@ -67,9 +67,23 @@ interface KPICardProps {
 function KPICard({ label, value, sub, icon, href, accent, badge, loading }: KPICardProps) {
   return (
     <Link href={href} className="group block">
-      <div className="bg-white rounded-xl border border-gray-200 p-5 hover:border-cyan-300 hover:shadow-md transition-all h-full">
+      <div
+        className="rounded-xl p-5 transition-all h-full"
+        style={{
+          background: 'rgba(255,255,255,0.04)',
+          border: '1px solid rgba(255,255,255,0.08)',
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLElement).style.borderColor = 'rgba(8,145,178,0.4)';
+          (e.currentTarget as HTMLElement).style.background = 'rgba(8,145,178,0.06)';
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.08)';
+          (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)';
+        }}
+      >
         <div className="flex items-start justify-between">
-          <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${accent}`}>
+          <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${accent}`}>
             {icon}
           </div>
           {badge && (
@@ -86,9 +100,9 @@ function KPICard({ label, value, sub, icon, href, accent, badge, loading }: KPIC
             </>
           ) : (
             <>
-              <p className="text-2xl font-bold text-gray-900 leading-none">{value}</p>
-              <p className="text-xs text-gray-500 mt-1">{label}</p>
-              {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+              <p className="text-2xl font-bold leading-none" style={{ color: 'white' }}>{value}</p>
+              <p className="text-xs mt-1" style={{ color: 'rgba(255,255,255,0.5)' }}>{label}</p>
+              {sub && <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.35)' }}>{sub}</p>}
             </>
           )}
         </div>
@@ -140,7 +154,7 @@ const IconChevron = () => (
   </svg>
 );
 const IconDot = ({ color }: { color: string }) => (
-  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${color}`} />
+  <span className={`w-2 h-2 rounded-full shrink-0 ${color}`} />
 );
 
 // ─── Page ─────────────────────────────────────────────────────────────────────
@@ -166,13 +180,20 @@ export default function DashboardPage({ params }: DashboardPageProps) {
       {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-2xl font-bold" style={{ color: 'white' }}>Dashboard</h1>
+          <p className="text-sm mt-0.5" style={{ color: 'rgba(255,255,255,0.45)' }}>
             {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
           </p>
         </div>
         {needsAttention && (
-          <div className="flex items-center gap-2 bg-amber-50 border border-amber-200 text-amber-800 text-sm font-medium px-3 py-1.5 rounded-lg">
+          <div
+            className="flex items-center gap-2 text-sm font-medium px-3 py-1.5 rounded-lg"
+            style={{
+              background: 'rgba(245,158,11,0.1)',
+              border: '1px solid rgba(245,158,11,0.2)',
+              color: '#FCD34D',
+            }}
+          >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
               <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
             </svg>
@@ -186,7 +207,7 @@ export default function DashboardPage({ params }: DashboardPageProps) {
 
         {/* Occupancy hero card */}
         <Link href={`/${tenantId}/residents`} className="group lg:col-span-1">
-          <div className="bg-gradient-to-br from-cyan-600 to-cyan-700 rounded-xl p-5 text-white hover:from-cyan-500 hover:to-cyan-600 transition-all h-full flex flex-col justify-between">
+          <div className="bg-linear-to-br from-cyan-600 to-cyan-700 rounded-xl p-5 text-white hover:from-cyan-500 hover:to-cyan-600 transition-all h-full flex flex-col justify-between">
             <div>
               <p className="text-cyan-100 text-xs font-semibold uppercase tracking-wider mb-1">Occupancy</p>
               <div className="flex items-center gap-4 mt-2">
@@ -220,7 +241,7 @@ export default function DashboardPage({ params }: DashboardPageProps) {
             value={stats.houseCount}
             icon={<IconHouse />}
             href={`/${tenantId}/houses`}
-            accent="bg-blue-50 text-blue-600"
+            accent="bg-blue-900/40 text-blue-300"
             loading={loading}
           />
           <KPICard
@@ -228,7 +249,7 @@ export default function DashboardPage({ params }: DashboardPageProps) {
             value={stats.staffCount}
             icon={<IconUser />}
             href={`/${tenantId}/staff`}
-            accent="bg-violet-50 text-violet-600"
+            accent="bg-slate-700/60 text-slate-300"
             loading={loading}
           />
           <KPICard
@@ -236,7 +257,7 @@ export default function DashboardPage({ params }: DashboardPageProps) {
             value={stats.upcomingEventCount}
             icon={<IconCalendar />}
             href={`/${tenantId}/events`}
-            accent="bg-emerald-50 text-emerald-600"
+            accent="bg-emerald-900/40 text-emerald-400"
             loading={loading}
           />
           <KPICard
@@ -245,8 +266,8 @@ export default function DashboardPage({ params }: DashboardPageProps) {
             sub={stats.openApplicationsCount === 0 ? 'All reviewed' : 'Awaiting review'}
             icon={<IconInbox />}
             href={`/${tenantId}/applications`}
-            accent={stats.openApplicationsCount > 0 ? 'bg-amber-50 text-amber-600' : 'bg-gray-50 text-gray-400'}
-            badge={stats.openApplicationsCount > 0 ? { text: 'New', color: 'bg-amber-100 text-amber-700' } : null}
+            accent={stats.openApplicationsCount > 0 ? 'bg-amber-900/40 text-amber-400' : 'bg-white/5 text-white/30'}
+            badge={stats.openApplicationsCount > 0 ? { text: 'New', color: 'bg-amber-400/15 text-amber-300' } : null}
             loading={loading}
           />
           <KPICard
@@ -255,8 +276,8 @@ export default function DashboardPage({ params }: DashboardPageProps) {
             sub={stats.pendingJoinRequestsCount === 0 ? 'None pending' : 'Residents requesting access'}
             icon={<IconUserPlus />}
             href={`/${tenantId}/join-requests`}
-            accent={stats.pendingJoinRequestsCount > 0 ? 'bg-rose-50 text-rose-600' : 'bg-gray-50 text-gray-400'}
-            badge={stats.pendingJoinRequestsCount > 0 ? { text: 'New', color: 'bg-rose-100 text-rose-700' } : null}
+            accent={stats.pendingJoinRequestsCount > 0 ? 'bg-rose-900/40 text-rose-400' : 'bg-white/5 text-white/30'}
+            badge={stats.pendingJoinRequestsCount > 0 ? { text: 'New', color: 'bg-rose-400/15 text-rose-300' } : null}
             loading={loading}
           />
           <KPICard
@@ -265,7 +286,7 @@ export default function DashboardPage({ params }: DashboardPageProps) {
             sub="Residents + Staff"
             icon={<IconPeople />}
             href={`/${tenantId}/residents`}
-            accent="bg-teal-50 text-teal-600"
+            accent="bg-cyan-900/40 text-cyan-400"
             loading={loading}
           />
         </div>
@@ -275,15 +296,23 @@ export default function DashboardPage({ params }: DashboardPageProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
         {/* Upcoming events feed */}
-        <div className="lg:col-span-2 bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900">Upcoming Events</h2>
+        <div
+          className="lg:col-span-2 rounded-xl overflow-hidden"
+          style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+        >
+          <div
+            className="flex items-center justify-between px-5 py-4"
+            style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}
+          >
+            <h2 className="font-semibold" style={{ color: 'white' }}>Upcoming Events</h2>
             <Link href={`/${tenantId}/events`}
-              className="text-xs text-cyan-600 hover:text-cyan-700 font-medium flex items-center gap-1">
+              className="text-xs font-medium flex items-center gap-1 transition-colors"
+              style={{ color: '#67E8F9' }}
+            >
               View all <IconChevron />
             </Link>
           </div>
-          <div className="divide-y divide-gray-50">
+          <div>
             {eventsLoading ? (
               <div className="p-5 space-y-3">
                 {[1, 2, 3].map(i => (
@@ -296,9 +325,11 @@ export default function DashboardPage({ params }: DashboardPageProps) {
               </div>
             ) : upcomingEvents.length === 0 ? (
               <div className="text-center py-10">
-                <p className="text-gray-400 text-sm">No upcoming events</p>
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.4)' }}>No upcoming events</p>
                 <Link href={`/${tenantId}/events/new`}
-                  className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-cyan-600 hover:text-cyan-700 border border-cyan-200 rounded-lg px-3 py-1.5">
+                  className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium rounded-lg px-3 py-1.5 transition-colors"
+                  style={{ color: '#67E8F9', border: '1px solid rgba(103,232,249,0.3)' }}
+                >
                   <IconPlus /> Schedule Event
                 </Link>
               </div>
@@ -307,22 +338,25 @@ export default function DashboardPage({ params }: DashboardPageProps) {
                 <Link
                   key={event.id}
                   href={`/${tenantId}/events/${event.id}`}
-                  className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition-colors"
+                  className="flex items-center justify-between px-5 py-3 transition-colors"
+                  style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)'; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                 >
                   <div className="flex items-center gap-3">
                     <IconDot color={
-                      event.type.includes('meeting') ? 'bg-cyan-500' :
-                      event.type.includes('group') ? 'bg-violet-500' :
-                      event.type === 'class' || event.type === 'course' ? 'bg-amber-500' : 'bg-gray-400'
+                      event.type.includes('meeting') ? 'bg-cyan-400' :
+                        event.type.includes('group') ? 'bg-teal-400' :
+                          event.type === 'class' || event.type === 'course' ? 'bg-amber-400' : 'bg-white/20'
                     } />
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{event.title}</p>
-                      <p className="text-xs text-gray-400 capitalize">
+                      <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.85)' }}>{event.title}</p>
+                      <p className="text-xs capitalize" style={{ color: 'rgba(255,255,255,0.4)' }}>
                         {event.type.replace('_', ' ')}
                       </p>
                     </div>
                   </div>
-                  <span className="text-xs text-gray-400 flex-shrink-0 ml-4">
+                  <span className="text-xs shrink-0 ml-4" style={{ color: 'rgba(255,255,255,0.35)' }}>
                     {formatEventDate(event.scheduledAt)}
                   </span>
                 </Link>
@@ -333,23 +367,29 @@ export default function DashboardPage({ params }: DashboardPageProps) {
 
         {/* Quick actions */}
         <div className="space-y-4">
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-            <div className="px-5 py-4 border-b border-gray-100">
-              <h2 className="font-semibold text-gray-900">Quick Actions</h2>
+          <div
+            className="rounded-xl overflow-hidden"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}
+          >
+            <div className="px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+              <h2 className="font-semibold" style={{ color: 'white' }}>Quick Actions</h2>
             </div>
-            <div className="p-3 space-y-1">
+            <div className="p-3 space-y-0.5">
               {[
-                { label: 'Add House', href: `/${tenantId}/houses/new`, color: 'text-blue-600' },
-                { label: 'Enroll Resident', href: `/${tenantId}/residents/new`, color: 'text-green-600' },
-                { label: 'Add Staff Member', href: `/${tenantId}/staff/new`, color: 'text-violet-600' },
-                { label: 'Schedule Event', href: `/${tenantId}/events/new`, color: 'text-cyan-600' },
-                { label: 'Create Course', href: `/${tenantId}/lms`, color: 'text-amber-600' },
-                { label: 'Post to Social', href: `/${tenantId}/marketing`, color: 'text-pink-600' },
-              ].map(({ label, href, color }) => (
+                { label: 'Add House', href: `/${tenantId}/houses/new`, accent: 'rgba(59,130,246,0.7)' },
+                { label: 'Enroll Resident', href: `/${tenantId}/residents/new`, accent: 'rgba(52,211,153,0.7)' },
+                { label: 'Add Staff Member', href: `/${tenantId}/staff/new`, accent: 'rgba(148,163,184,0.7)' },
+                { label: 'Schedule Event', href: `/${tenantId}/events/new`, accent: 'rgba(103,232,249,0.7)' },
+                { label: 'Create Course', href: `/${tenantId}/lms`, accent: 'rgba(251,191,36,0.7)' },
+                { label: 'Post to Social', href: `/${tenantId}/marketing`, accent: 'rgba(244,114,182,0.7)' },
+              ].map(({ label, href, accent }) => (
                 <Link key={label} href={href}
-                  className="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-gray-50 transition-colors group">
-                  <span className="text-sm font-medium text-gray-700 group-hover:text-gray-900">{label}</span>
-                  <span className={`${color} opacity-0 group-hover:opacity-100 transition-opacity`}>
+                  className="flex items-center justify-between px-3 py-2.5 rounded-lg transition-colors group"
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.05)'; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
+                >
+                  <span className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.7)' }}>{label}</span>
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: accent }}>
                     <IconChevron />
                   </span>
                 </Link>
@@ -358,7 +398,7 @@ export default function DashboardPage({ params }: DashboardPageProps) {
           </div>
 
           {/* AI Partner shortcut */}
-          <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-4 text-white">
+          <div className="bg-linear-to-br from-slate-800 to-slate-900 rounded-xl p-4 text-white">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-7 h-7 rounded-lg bg-cyan-500 flex items-center justify-center">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
