@@ -194,6 +194,12 @@ service cloud.firestore {
       allow write: if isSuperAdmin();
     }
 
+    // ─── QA Feedback ────────────────────────────────────────────────────────
+    match /qa_feedback/{feedbackId} {
+      allow create: if true;
+      allow read, update, delete: if isSuperAdmin();
+    }
+
     // ─── Deny all other access by default ───────────────────────────────────
     match /{document=**} {
       allow read, write: if false;

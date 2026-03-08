@@ -248,7 +248,7 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
 
       {/* Confirm dialog modal */}
       {confirming && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-md px-4">
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-100 p-4 overflow-y-auto">
           <div className="rounded-3xl shadow-2xl p-6 w-full max-w-sm" style={{ background: 'rgba(12,26,46,0.95)', border: '1px solid rgba(255,255,255,0.1)' }}>
             <h3 className="text-lg font-bold text-white mb-2">
               {confirming.action === 'accepted' ? 'Accept Application' : 'Reject Application'}

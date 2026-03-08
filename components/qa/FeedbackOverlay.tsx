@@ -140,7 +140,7 @@ export function FeedbackOverlay() {
     return (
         <div
             ref={overlayRef}
-            className={`fixed inset-0 z-[9990] cursor-crosshair ${isCapturing ? 'bg-black/10' : 'bg-transparent'}`}
+            className={`fixed inset-0 z-9990 cursor-crosshair ${isCapturing ? 'bg-black/10' : 'bg-transparent'}`}
             style={{ userSelect: 'none' }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}

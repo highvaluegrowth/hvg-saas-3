@@ -48,7 +48,7 @@ export function FeedbackForm() {
                 boundingBox: selectedBox,
                 type,
                 description,
-                screenshotDataUrl,
+                screenshotDataUrl: screenshotDataUrl || undefined,
                 viewportSize: {
                     width: window.innerWidth,
                     height: window.innerHeight,
@@ -90,7 +90,7 @@ export function FeedbackForm() {
     return (
         <>
             <div
-                className="fixed border-2 border-cyan-600 bg-cyan-600/10 pointer-events-none z-[9999]"
+                className="fixed border-2 border-cyan-600 bg-cyan-600/10 pointer-events-none z-9999"
                 style={{
                     left: selectedBox.x,
                     top: selectedBox.y,
