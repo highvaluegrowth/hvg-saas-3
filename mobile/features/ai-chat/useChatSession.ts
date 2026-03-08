@@ -30,7 +30,7 @@ export function useChatSession(initialConversationId?: string) {
       }
     }
     loadHistory();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);  
 
   const mutation = useMutation({
     mutationFn: (text: string) =>

@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { authService } from '@/features/auth/services/authService';
 import { Sidebar } from '@/components/dashboard/Sidebar';
-import { Header } from '@/components/dashboard/Header';
+import { GlobalNavbar } from '@/components/layout/GlobalNavbar';
 import { AISidebar } from '@/components/ai-sidebar/AISidebar';
 import { useAISidebarStore } from '@/lib/stores/aiSidebarStore';
 
@@ -122,7 +122,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
             : { transition: 'padding-right 0.3s ease' }
         }
       >
-        <Header
+        <GlobalNavbar
           tenantName={tenantName}
           onMenuClick={() => setSidebarOpen(true)}
         />

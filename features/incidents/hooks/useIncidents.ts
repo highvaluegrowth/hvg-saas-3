@@ -61,7 +61,7 @@ export function useIncidents(
     );
 
     return unsubscribe;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [tenantId, options.status]);
 
   return { incidents, loading, error };

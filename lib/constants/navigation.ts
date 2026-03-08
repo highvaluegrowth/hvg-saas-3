@@ -20,13 +20,6 @@ export const navigationItems: NavigationItem[] = [
     description: 'Overview and quick stats',
   },
   {
-    label: 'Events',
-    href: '/events',
-    icon: 'calendar',
-    roles: 'all',
-    description: 'Program events and activities',
-  },
-  {
     label: 'Courses',
     href: '/lms',
     icon: 'book',
@@ -139,25 +132,11 @@ export const navigationItems: NavigationItem[] = [
     description: 'Residents, staff, and external contacts',
   },
   {
-    label: 'Kanban',
-    href: '/kanban',
-    icon: 'layout',
-    roles: ['tenant_admin', 'staff_admin', 'super_admin'],
-    description: 'Task and workflow board',
-  },
-  {
     label: 'Billing',
     href: '/billing',
     icon: 'creditcard',
     roles: ['tenant_admin'],
     description: 'Manage subscription and billing',
-  },
-  {
-    label: 'Settings',
-    href: '/settings',
-    icon: 'settings',
-    roles: ['tenant_admin', 'super_admin'],
-    description: 'Organization settings',
   },
 ];
 

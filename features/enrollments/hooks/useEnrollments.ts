@@ -73,7 +73,7 @@ export function useEnrollments(
     );
 
     return unsubscribe;
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [tenantId, options.status, options.houseId]);
 
   return { enrollments, loading, error };
