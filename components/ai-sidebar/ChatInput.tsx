@@ -7,9 +7,10 @@ interface ChatInputProps {
     onSend: (text: string) => void;
     isLoading: boolean;
     userRole?: string;
+    isDirector?: boolean;
 }
 
-export function ChatInput({ onSend, isLoading, userRole }: ChatInputProps) {
+export function ChatInput({ onSend, isLoading, userRole, isDirector }: ChatInputProps) {
     const [value, setValue] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -56,15 +57,15 @@ export function ChatInput({ onSend, isLoading, userRole }: ChatInputProps) {
     return (
         <div
             className="border-t p-3 relative"
-            style={{ borderColor: 'rgba(8,145,178,0.15)', background: 'transparent' }}
+            style={{ borderColor: isDirector ? 'rgba(217,70,239,0.15)' : 'rgba(8,145,178,0.15)', background: 'transparent' }}
         >
             {/* Slash command autocomplete */}
             {showMenu && (
                 <div
                     className="absolute bottom-full left-3 right-3 mb-1 rounded-xl overflow-hidden shadow-2xl z-10"
                     style={{
-                        background: 'rgba(6,14,26,0.98)',
-                        border: '1px solid rgba(8,145,178,0.25)',
+                        background: isDirector ? 'rgba(15,7,26,0.98)' : 'rgba(6,14,26,0.98)',
+                        border: isDirector ? '1px solid rgba(217,70,239,0.25)' : '1px solid rgba(8,145,178,0.25)',
                         backdropFilter: 'blur(16px)',
                     }}
                 >
@@ -74,10 +75,10 @@ export function ChatInput({ onSend, isLoading, userRole }: ChatInputProps) {
                             type="button"
                             onClick={() => selectCommand(cmd.command)}
                             className="w-full flex items-center gap-3 px-3 py-2.5 text-left transition-colors duration-150 cursor-pointer"
-                            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(8,145,178,0.12)'; }}
+                            onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = isDirector ? 'rgba(217,70,239,0.12)' : 'rgba(8,145,178,0.12)'; }}
                             onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
                         >
-                            <span className="font-mono text-xs font-semibold w-24 shrink-0" style={{ color: '#67E8F9' }}>{cmd.command}</span>
+                            <span className="font-mono text-xs font-semibold w-24 shrink-0" style={{ color: isDirector ? '#E879F9' : '#67E8F9' }}>{cmd.command}</span>
                             <span className="text-xs" style={{ color: 'rgba(255,255,255,0.5)' }}>{cmd.description}</span>
                         </button>
                     ))}
@@ -100,7 +101,7 @@ export function ChatInput({ onSend, isLoading, userRole }: ChatInputProps) {
                         minHeight: '40px',
                         maxHeight: '120px',
                     }}
-                    onFocus={(e) => (e.target.style.borderColor = 'rgba(8,145,178,0.5)')}
+                    onFocus={(e) => (e.target.style.borderColor = isDirector ? 'rgba(217,70,239,0.5)' : 'rgba(8,145,178,0.5)')}
                     onBlur={(e) => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
                     disabled={isLoading}
                 />
@@ -111,8 +112,8 @@ export function ChatInput({ onSend, isLoading, userRole }: ChatInputProps) {
                     className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 cursor-pointer disabled:opacity-30 hover:opacity-90"
                     style={{
                         background: value.trim()
-                            ? 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)'
-                            : 'rgba(8,145,178,0.2)',
+                            ? (isDirector ? 'linear-gradient(135deg, #D946EF 0%, #A21CAF 100%)' : 'linear-gradient(135deg, #0891B2 0%, #0E7490 100%)')
+                            : (isDirector ? 'rgba(217,70,239,0.2)' : 'rgba(8,145,178,0.2)'),
                     }}
                     aria-label="Send message"
                 >

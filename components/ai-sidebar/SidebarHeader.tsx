@@ -6,6 +6,7 @@ interface SidebarHeaderProps {
     persona: 'recovery' | 'operator';
     onClose: () => void;
     onClear: () => void;
+    isDirector?: boolean;
 }
 
 const PERSONA_LABELS: Record<string, { label: string; icon: React.ReactNode }> = {
@@ -27,29 +28,35 @@ const PERSONA_LABELS: Record<string, { label: string; icon: React.ReactNode }> =
     },
 };
 
-export function SidebarHeader({ persona, onClose, onClear }: SidebarHeaderProps) {
+export function SidebarHeader({ persona, onClose, onClear, isDirector }: SidebarHeaderProps) {
     const info = PERSONA_LABELS[persona] ?? PERSONA_LABELS.recovery;
 
     return (
         <div
             className="flex items-center justify-between px-4 py-3 border-b"
-            style={{ borderColor: 'rgba(8,145,178,0.15)' }}
+            style={{ borderColor: isDirector ? 'rgba(217,70,239,0.15)' : 'rgba(8,145,178,0.15)' }}
         >
             {/* Agent identity */}
             <div className="flex items-center gap-2.5">
                 <div
                     className="w-8 h-8 rounded-xl flex items-center justify-center"
                     style={{
-                        background: 'linear-gradient(135deg, rgba(8,145,178,0.3) 0%, rgba(52,211,153,0.15) 100%)',
-                        border: '1px solid rgba(8,145,178,0.3)',
-                        color: '#67E8F9',
+                        background: isDirector
+                            ? 'linear-gradient(135deg, rgba(217,70,239,0.3) 0%, rgba(139,92,246,0.15) 100%)'
+                            : 'linear-gradient(135deg, rgba(8,145,178,0.3) 0%, rgba(52,211,153,0.15) 100%)',
+                        border: isDirector ? '1px solid rgba(217,70,239,0.3)' : '1px solid rgba(8,145,178,0.3)',
+                        color: isDirector ? '#E879F9' : '#67E8F9',
                     }}
                 >
                     {info.icon}
                 </div>
                 <div>
-                    <p className="text-sm font-semibold leading-tight" style={{ color: 'white' }}>HVG Partner</p>
-                    <p className="text-xs leading-tight" style={{ color: '#67E8F9' }}>{info.label}</p>
+                    <p className="text-sm font-semibold leading-tight" style={{ color: 'white' }}>
+                        {isDirector ? 'HVG Director' : 'HVG Partner'}
+                    </p>
+                    <p className="text-xs leading-tight" style={{ color: isDirector ? '#E879F9' : '#67E8F9' }}>
+                        {isDirector ? 'Strategic System Intelligence' : info.label}
+                    </p>
                 </div>
             </div>
 

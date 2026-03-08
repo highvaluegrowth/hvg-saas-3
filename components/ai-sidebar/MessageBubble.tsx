@@ -5,9 +5,10 @@ import { CommandCard } from './commands/CommandCard';
 
 interface MessageBubbleProps {
     message: ChatMessage;
+    isDirector?: boolean;
 }
 
-export function MessageBubble({ message }: MessageBubbleProps) {
+export function MessageBubble({ message, isDirector }: MessageBubbleProps) {
     const isUser = message.role === 'user';
     const time = new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
@@ -19,9 +20,9 @@ export function MessageBubble({ message }: MessageBubbleProps) {
                 style={
                     isUser
                         ? {
-                            background: 'linear-gradient(135deg, rgba(8,145,178,0.35) 0%, rgba(6,78,100,0.5) 100%)',
-                            color: '#E0F7FC',
-                            border: '1px solid rgba(8,145,178,0.35)',
+                            background: isDirector ? 'linear-gradient(135deg, rgba(217,70,239,0.25) 0%, rgba(139,92,246,0.3) 100%)' : 'linear-gradient(135deg, rgba(8,145,178,0.35) 0%, rgba(6,78,100,0.5) 100%)',
+                            color: isDirector ? '#FDF4FF' : '#E0F7FC',
+                            border: isDirector ? '1px solid rgba(217,70,239,0.35)' : '1px solid rgba(8,145,178,0.35)',
                         }
                         : {
                             background: 'rgba(255,255,255,0.06)',
