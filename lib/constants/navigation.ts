@@ -55,6 +55,13 @@ export const navigationItems: NavigationItem[] = [
     description: 'House chores and tasks',
   },
   {
+    label: 'Events',
+    href: '/events',
+    icon: 'calendar',
+    roles: ['tenant_admin', 'staff_admin', 'staff', 'super_admin'],
+    description: 'Manage scheduled programs and meetings',
+  },
+  {
     label: 'Incidents',
     href: '/incidents',
     icon: 'alert',

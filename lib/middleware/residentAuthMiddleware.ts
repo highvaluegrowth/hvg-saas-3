@@ -22,10 +22,14 @@ export class ResidentAuthError extends Error {
   }
 }
 
+/** Roles that can access the resident-facing mobile API */
+const MOBILE_ALLOWED_ROLES = ['resident', 'super_admin', 'admin', 'tenant_admin', 'house_manager', 'staff'];
+
 /**
  * Verifies that the request bearer token belongs to a resident
  * who has an active or waitlist enrollment for the given tenantId.
  * Throws ResidentAuthError (403) or (401) if checks fail.
+ * Admins and Staff are granted preview access.
  */
 export async function verifyResidentTenantAccess(
   request: NextRequest,
@@ -45,16 +49,35 @@ export async function verifyResidentTenantAccess(
   }
 
   const uid = decodedToken.uid;
+  const role = decodedToken.role as string | undefined;
 
-  // Must have resident role in claims
-  if (decodedToken.role !== 'resident') {
-    throw new ResidentAuthError('Access restricted to residents');
+  if (!role || !MOBILE_ALLOWED_ROLES.includes(role)) {
+    throw new ResidentAuthError('Access restricted to permitted roles');
   }
 
   // Must have a /users/{uid} document
-  const appUser = await appUserService.getByUid(uid);
+  let appUser = await appUserService.getByUid(uid);
   if (!appUser) {
-    throw new ResidentAuthError('App user profile not found');
+    if (role !== 'resident') {
+      try {
+        appUser = await appUserService.findOrCreate(decodedToken);
+      } catch {
+        throw new ResidentAuthError('App user profile not found', 404);
+      }
+    } else {
+      throw new ResidentAuthError('App user profile not found');
+    }
+  }
+
+  // If the user isn't a resident (e.g., they're an admin), grant them a preview bypass
+  if (role !== 'resident') {
+    return {
+      uid,
+      residentId: appUser.residentId || `preview-mode-${uid}`,
+      tenantId,
+      enrollmentStatus: 'active',
+      appUser,
+    };
   }
 
   if (!appUser.residentId) {
@@ -87,9 +110,6 @@ export async function verifyResidentTenantAccess(
     appUser,
   };
 }
-
-/** Roles that can access the resident-facing mobile API */
-const MOBILE_ALLOWED_ROLES = ['resident', 'super_admin', 'admin', 'tenant_admin', 'house_manager', 'staff'];
 
 /**
  * Lighter version: verifies resident token exists + /users doc exists.

@@ -102,40 +102,40 @@ function EventCard({ event, tenantId }: { event: ProgramEvent; tenantId: string 
 
   return (
     <Link href={`/${tenantId}/events/${event.id}`} className="block group">
-      <Card className="border border-gray-200 bg-white hover:border-cyan-300 hover:shadow-md transition-all duration-150">
+      <Card className="border border-white/10 bg-white/5 hover:border-cyan-500/50 hover:bg-white/10 transition-all duration-150 rounded-xl">
         <CardContent className="p-5">
           <div className="flex items-start justify-between gap-4">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-2">
                 <Badge variant={badgeVariant} className={badgeClass}>
                   {TYPE_LABELS[event.type]}
                 </Badge>
               </div>
-              <h3 className="text-base font-semibold text-gray-900 group-hover:text-cyan-600 truncate">
+              <h3 className="text-base font-semibold text-white group-hover:text-cyan-400 truncate transition-colors">
                 {event.title}
               </h3>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-white/50 mt-1">
                 {formatDateTime(event.scheduledAt)}
               </p>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-gray-600">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-sm text-white/60">
                 <span>{formatDuration(event.duration)}</span>
                 {event.location && (
                   <span className="flex items-center gap-1">
-                    <span className="text-gray-400">at</span> {event.location}
+                    <span className="text-white/30">at</span> {event.location}
                   </span>
                 )}
                 {event.facilitator && (
                   <span className="flex items-center gap-1">
-                    <span className="text-gray-400">by</span> {event.facilitator}
+                    <span className="text-white/30">by</span> {event.facilitator}
                   </span>
                 )}
               </div>
             </div>
             <div className="shrink-0 text-right">
-              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-cyan-50 text-cyan-700 text-sm font-semibold">
+              <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-cyan-500/20 text-cyan-300 text-sm font-semibold border border-cyan-500/30">
                 {event.attendeeIds.length}
               </span>
-              <p className="text-xs text-gray-500 mt-1">attendees</p>
+              <p className="text-xs text-white/40 mt-1 uppercase tracking-wider font-medium">attendees</p>
             </div>
           </div>
         </CardContent>
@@ -166,28 +166,28 @@ export default function EventsPage({ params }: EventsPageProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">
+          <h1 className="text-2xl font-bold text-white">
             {view === 'list' ? 'Upcoming Events' : 'Events Calendar'}
           </h1>
-          <p className="text-gray-600 mt-1">Scheduled programs, meetings, and activities</p>
+          <p className="text-white/50 mt-1">Scheduled programs, meetings, and activities</p>
         </div>
         <div className="flex items-center gap-3">
           {/* View toggle */}
-          <div className="flex rounded-md border border-gray-200 overflow-hidden">
+          <div className="flex rounded-md border border-white/10 bg-white/5 p-1 gap-1 overflow-hidden">
             <button
               onClick={() => setView('list')}
-              className={`px-3 py-1.5 text-sm font-medium transition-colors ${view === 'list'
-                  ? 'bg-cyan-600 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              className={`px-3 py-1.5 text-sm font-medium rounded transition-colors ${view === 'list'
+                ? 'bg-cyan-600 text-white shadow-sm'
+                : 'text-white/60 hover:text-white hover:bg-white/10'
                 }`}
             >
               List
             </button>
             <button
               onClick={() => setView('calendar')}
-              className={`px-3 py-1.5 text-sm font-medium transition-colors border-l border-gray-200 ${view === 'calendar'
-                  ? 'bg-cyan-600 text-white'
-                  : 'bg-white text-gray-600 hover:bg-gray-50'
+              className={`px-3 py-1.5 text-sm font-medium rounded transition-colors ${view === 'calendar'
+                ? 'bg-cyan-600 text-white shadow-sm'
+                : 'text-white/60 hover:text-white hover:bg-white/10'
                 }`}
             >
               Calendar
@@ -209,27 +209,27 @@ export default function EventsPage({ params }: EventsPageProps) {
           {loading && (
             <div className="flex items-center justify-center py-16">
               <div className="text-center">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-cyan-600 border-t-transparent"></div>
-                <p className="mt-4 text-gray-600">Loading events...</p>
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-cyan-500 border-t-transparent"></div>
+                <p className="mt-4 text-white/50">Loading events...</p>
               </div>
             </div>
           )}
 
           {error && (
-            <div className="rounded-md bg-red-50 border border-red-200 p-4">
-              <p className="text-sm text-red-700">Failed to load events: {error}</p>
+            <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-4">
+              <p className="text-sm text-red-400">Failed to load events: {error}</p>
             </div>
           )}
 
           {!loading && !error && events.length === 0 && (
-            <div className="flex flex-col items-center justify-center py-20 text-center">
-              <div className="w-16 h-16 rounded-full bg-cyan-50 flex items-center justify-center mb-4">
+            <div className="flex flex-col items-center justify-center py-20 text-center rounded-xl bg-white/5 border border-white/10 mt-6">
+              <div className="w-16 h-16 rounded-full bg-cyan-500/20 flex items-center justify-center mb-4">
                 <svg className="w-8 h-8 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-1">No upcoming events</h3>
-              <p className="text-gray-500 text-sm mb-6 max-w-xs">
+              <h3 className="text-lg font-semibold text-white mb-1">No upcoming events</h3>
+              <p className="text-white/50 text-sm mb-6 max-w-xs">
                 Schedule your first event to get started with program management.
               </p>
               {userCanWrite && (
@@ -243,7 +243,7 @@ export default function EventsPage({ params }: EventsPageProps) {
           )}
 
           {!loading && !error && events.length > 0 && (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {events.map((event) => (
                 <EventCard key={event.id} event={event} tenantId={tenantId} />
               ))}
@@ -254,18 +254,20 @@ export default function EventsPage({ params }: EventsPageProps) {
 
       {/* Calendar view */}
       {view === 'calendar' && (
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <Calendar
-            localizer={localizer}
-            events={calendarEvents}
-            defaultView="month"
-            views={['month', 'week', 'day']}
-            style={{ height: 600 }}
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            onSelectEvent={(event: any) =>
-              router.push(`/${tenantId}/events/${(event.resource as { id: string }).id}`)
-            }
-          />
+        <div className="bg-white/5 rounded-xl border border-white/10 p-5 overflow-hidden">
+          <div className="bg-white rounded-lg p-2">
+            <Calendar
+              localizer={localizer}
+              events={calendarEvents}
+              defaultView="month"
+              views={['month', 'week', 'day']}
+              style={{ height: 600 }}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              onSelectEvent={(event: any) =>
+                router.push(`/${tenantId}/events/${(event.resource as { id: string }).id}`)
+              }
+            />
+          </div>
         </div>
       )}
     </div>

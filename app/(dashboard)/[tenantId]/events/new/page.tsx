@@ -121,31 +121,31 @@ export default function NewEventPage({ params }: NewEventPageProps) {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <Link href={`/${tenantId}/events`} className="text-gray-500 hover:text-gray-700">
+        <Link href={`/${tenantId}/events`} className="text-white/50 hover:text-white transition-colors">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Add Event</h1>
-          <p className="text-gray-600 mt-0.5 text-sm">Schedule a new program event</p>
+          <h1 className="text-2xl font-bold text-white">Add Event</h1>
+          <p className="text-white/50 mt-0.5 text-sm">Schedule a new program event</p>
         </div>
       </div>
 
-      <Card className="border border-gray-200 bg-white">
+      <Card className="border border-white/10 bg-white/5 rounded-xl">
         <CardHeader>
-          <CardTitle className="text-lg font-semibold text-gray-900">Event Details</CardTitle>
+          <CardTitle className="text-lg font-semibold text-white">Event Details</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="rounded-md bg-red-50 border border-red-200 p-3">
-                <p className="text-sm text-red-700">{error}</p>
+              <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3">
+                <p className="text-sm text-red-400">{error}</p>
               </div>
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-white/80 mb-1">
                 Title <span className="text-red-500">*</span>
               </label>
               <Input
@@ -179,7 +179,7 @@ export default function NewEventPage({ params }: NewEventPageProps) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white/80 mb-1">
                   Date &amp; Time <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -191,7 +191,7 @@ export default function NewEventPage({ params }: NewEventPageProps) {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white/80 mb-1">
                   Duration (minutes) <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -208,7 +208,7 @@ export default function NewEventPage({ params }: NewEventPageProps) {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white/80 mb-1">
                   Location
                 </label>
                 <Input
@@ -220,7 +220,7 @@ export default function NewEventPage({ params }: NewEventPageProps) {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white/80 mb-1">
                   Facilitator
                 </label>
                 <Input
@@ -235,7 +235,7 @@ export default function NewEventPage({ params }: NewEventPageProps) {
 
             {/* Cover Image */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-white/80 mb-1">
                 Cover Image <span className="text-gray-400 font-normal">(optional)</span>
               </label>
               <ImageUpload
@@ -247,14 +247,14 @@ export default function NewEventPage({ params }: NewEventPageProps) {
 
             <div className="flex items-center justify-end gap-3 pt-2">
               <Link href={`/${tenantId}/events`}>
-                <Button type="button" variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
+                <Button type="button" variant="outline" className="border-white/10 text-white/70 hover:bg-white/10 bg-transparent">
                   Cancel
                 </Button>
               </Link>
               <Button
                 type="submit"
                 disabled={submitting}
-                className="bg-cyan-600 hover:bg-cyan-700 text-white disabled:opacity-50"
+                className="bg-cyan-600 hover:bg-cyan-700 text-white disabled:opacity-50 shadow-lg shadow-cyan-900/20"
               >
                 {submitting ? 'Saving...' : 'Add Event'}
               </Button>

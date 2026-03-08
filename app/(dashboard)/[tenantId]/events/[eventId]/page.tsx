@@ -90,9 +90,9 @@ interface DetailRowProps {
 
 function DetailRow({ label, value }: DetailRowProps) {
   return (
-    <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-4 py-3 border-b border-gray-100 last:border-0">
-      <dt className="w-32 shrink-0 text-sm font-medium text-gray-500">{label}</dt>
-      <dd className="text-sm text-gray-900">{value}</dd>
+    <div className="flex flex-col sm:flex-row sm:items-start gap-1 sm:gap-4 py-3 border-b border-white/5 last:border-0">
+      <dt className="w-32 shrink-0 text-sm font-medium text-white/50">{label}</dt>
+      <dd className="text-sm text-white/90">{value}</dd>
     </div>
   );
 }
@@ -166,8 +166,8 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
     return (
       <div className="flex items-center justify-center py-16">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-cyan-600 border-t-transparent"></div>
-          <p className="mt-4 text-gray-600">Loading event...</p>
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-cyan-500 border-t-transparent"></div>
+          <p className="mt-4 text-white/50">Loading event...</p>
         </div>
       </div>
     );
@@ -177,15 +177,15 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
     return (
       <div className="max-w-2xl mx-auto space-y-6">
         <div className="flex items-center gap-3">
-          <Link href={`/${tenantId}/events`} className="text-gray-500 hover:text-gray-700">
+          <Link href={`/${tenantId}/events`} className="text-white/50 hover:text-white transition-colors">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Event</h1>
+          <h1 className="text-2xl font-bold text-white">Event</h1>
         </div>
-        <div className="rounded-md bg-red-50 border border-red-200 p-4">
-          <p className="text-sm text-red-700">{error ?? 'Event not found.'}</p>
+        <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-4">
+          <p className="text-sm text-red-400">{error ?? 'Event not found.'}</p>
         </div>
       </div>
     );
@@ -198,7 +198,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
     <div className="max-w-2xl mx-auto space-y-6">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-3 min-w-0">
-          <Link href={`/${tenantId}/events`} className="text-gray-500 hover:text-gray-700 shrink-0">
+          <Link href={`/${tenantId}/events`} className="text-white/50 hover:text-white shrink-0 transition-colors">
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
@@ -209,21 +209,21 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
                 {TYPE_LABELS[event.type]}
               </Badge>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 truncate">{event.title}</h1>
+            <h1 className="text-2xl font-bold text-white truncate">{event.title}</h1>
           </div>
         </div>
         {userCanWrite && (
           <Link href={`/${tenantId}/events/${event.id}/edit`} className="shrink-0">
-            <Button variant="outline" className="border-gray-300 text-gray-700 hover:bg-gray-50">
+            <Button variant="outline" className="border-white/10 text-white/70 hover:bg-white/10 bg-transparent">
               Edit
             </Button>
           </Link>
         )}
       </div>
 
-      <Card className="border border-gray-200 bg-white">
+      <Card className="border border-white/10 bg-white/5 rounded-xl">
         <CardHeader>
-          <CardTitle className="text-base font-semibold text-gray-900">Details</CardTitle>
+          <CardTitle className="text-base font-semibold text-white">Details</CardTitle>
         </CardHeader>
         <CardContent className="pt-0">
           <dl>
@@ -236,9 +236,9 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
         </CardContent>
       </Card>
 
-      <Card className="border border-gray-200 bg-white">
+      <Card className="border border-white/10 bg-white/5 rounded-xl">
         <CardHeader>
-          <CardTitle className="text-base font-semibold text-gray-900">
+          <CardTitle className="text-base font-semibold text-white">
             Attendees ({event.attendeeIds.length})
           </CardTitle>
         </CardHeader>
@@ -251,7 +251,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
               label="Attendees"
             />
           ) : (
-            <p className="text-sm text-gray-700 py-2">
+            <p className="text-sm text-white/70 py-2">
               {event.attendeeIds.length === 0
                 ? 'No attendees registered yet.'
                 : `${event.attendeeIds.length} resident${event.attendeeIds.length !== 1 ? 's' : ''} assigned`}
@@ -260,7 +260,7 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
         </CardContent>
       </Card>
 
-      <p className="text-xs text-gray-400">
+      <p className="text-xs text-white/30">
         Created {new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(event.createdAt)}
         {' '}&middot;{' '}
         Last updated {new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(event.updatedAt)}
