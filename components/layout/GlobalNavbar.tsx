@@ -13,6 +13,7 @@ import {
     Settings,
     Inbox,
     Menu,
+    Bug,
 } from 'lucide-react';
 
 interface GlobalNavbarProps {
@@ -133,6 +134,20 @@ export function GlobalNavbar({ tenantName, onMenuClick }: GlobalNavbarProps) {
                     className="hidden md:block h-5 mx-1"
                     style={{ width: 1, background: 'rgba(255,255,255,0.1)' }}
                 />
+
+                {/* SuperAdmin QA Link */}
+                {user?.role === 'super_admin' && (
+                    <Link
+                        href="/admin/qa"
+                        title="SuperAdmin: QA Feedback"
+                        className="w-9 h-9 flex items-center justify-center rounded-lg hover:text-white transition-colors hover:bg-white/5"
+                        style={{
+                            color: pathname === '/admin/qa' ? '#0891B2' : 'rgba(255,255,255,0.45)',
+                        }}
+                    >
+                        <Bug className="w-5 h-5" />
+                    </Link>
+                )}
 
                 {/* User Profile & Logout */}
                 <div className="flex items-center space-x-3 pl-1">
