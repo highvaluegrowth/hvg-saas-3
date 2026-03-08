@@ -35,7 +35,13 @@ export function GlobalNavbar({ tenantName, onMenuClick }: GlobalNavbarProps) {
         router.push('/login');
     };
 
-    const navLinks = [
+    const isAdminRoute = pathname?.startsWith('/admin');
+    const navLinks = isAdminRoute ? [
+        { name: 'Calendar', href: `/admin/events`, icon: Calendar, roles: ['super_admin'] },
+        { name: 'Kanban', href: `/admin/kanban`, icon: Layout, roles: ['super_admin'] },
+        { name: 'Inbox', href: `/admin/inbox`, icon: Inbox, badge: unreadCount, roles: ['super_admin'] },
+        { name: 'Settings', href: `/admin/system`, icon: Settings, roles: ['super_admin'] },
+    ] : [
         { name: 'Calendar', href: `/${tenantId}/events`, icon: Calendar, roles: ['all'] },
         { name: 'Kanban', href: `/${tenantId}/kanban`, icon: Layout, roles: ['tenant_admin', 'staff_admin', 'super_admin'] },
         { name: 'Inbox', href: `/${tenantId}/inbox`, icon: Inbox, badge: unreadCount, roles: ['tenant_admin', 'staff_admin', 'super_admin'] },
