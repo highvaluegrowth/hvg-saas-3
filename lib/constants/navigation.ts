@@ -20,18 +20,18 @@ export const navigationItems: NavigationItem[] = [
     description: 'Overview and quick stats',
   },
   {
+    label: 'Residents',
+    href: '/residents',
+    icon: 'users',
+    roles: ['tenant_admin', 'staff_admin', 'staff', 'super_admin'],
+    description: 'Resident directory',
+  },
+  {
     label: 'Courses',
     href: '/lms',
     icon: 'book',
     roles: ['tenant_admin', 'super_admin'],
     description: 'Course builder and LMS',
-  },
-  {
-    label: 'Residents',
-    href: '/residents',
-    icon: 'users',
-    roles: ['tenant_admin', 'staff_admin', 'staff'],
-    description: 'Resident directory',
   },
   {
     label: 'Houses',
