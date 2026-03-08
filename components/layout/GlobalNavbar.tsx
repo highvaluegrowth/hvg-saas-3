@@ -102,14 +102,18 @@ export function GlobalNavbar({ tenantName, onMenuClick }: GlobalNavbarProps) {
                                 href={link.href}
                                 className="relative p-2 rounded-lg flex items-center justify-center transition-colors group"
                                 style={{
-                                    color: isActive ? '#67E8F9' : 'rgba(255,255,255,0.45)',
-                                    background: isActive ? 'rgba(8,145,178,0.1)' : 'transparent',
+                                    color: isActive
+                                        ? (isAdminRoute ? '#D946EF' : '#67E8F9')
+                                        : 'rgba(255,255,255,0.45)',
+                                    background: isActive
+                                        ? (isAdminRoute ? 'rgba(217,70,239,0.1)' : 'rgba(8,145,178,0.1)')
+                                        : 'transparent',
                                 }}
                                 title={link.name}
                             >
-                                <Icon className="w-5 h-5 group-hover:text-cyan-400 transition-colors" />
+                                <Icon className={`w-5 h-5 transition-colors ${isAdminRoute ? 'group-hover:text-fuchsia-400' : 'group-hover:text-cyan-400'}`} />
                                 {link.badge && link.badge > 0 ? (
-                                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-cyan-500 animate-pulse" />
+                                    <span className={`absolute top-1.5 right-1.5 w-2 h-2 rounded-full animate-pulse ${isAdminRoute ? 'bg-fuchsia-500' : 'bg-cyan-500'}`} />
                                 ) : null}
                             </Link>
                         );
@@ -127,7 +131,11 @@ export function GlobalNavbar({ tenantName, onMenuClick }: GlobalNavbarProps) {
                     onClick={() => setOpen(!isOpen)}
                     data-ai-toggle
                     title="Toggle AI Assistant"
-                    style={{ color: isOpen ? '#67E8F9' : 'rgba(255,255,255,0.45)' }}
+                    style={{
+                        color: isOpen
+                            ? (isAdminRoute ? '#D946EF' : '#67E8F9')
+                            : 'rgba(255,255,255,0.45)'
+                    }}
                     className="w-9 h-9 flex items-center justify-center rounded-lg hover:text-white transition-colors ml-1"
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -148,7 +156,7 @@ export function GlobalNavbar({ tenantName, onMenuClick }: GlobalNavbarProps) {
                         title="SuperAdmin: QA Feedback"
                         className="w-9 h-9 flex items-center justify-center rounded-lg hover:text-white transition-colors hover:bg-white/5"
                         style={{
-                            color: pathname === '/admin/qa' ? '#0891B2' : 'rgba(255,255,255,0.45)',
+                            color: pathname === '/admin/qa' ? '#D946EF' : 'rgba(255,255,255,0.45)',
                         }}
                     >
                         <Bug className="w-5 h-5" />

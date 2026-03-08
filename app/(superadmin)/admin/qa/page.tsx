@@ -79,7 +79,7 @@ ${JSON.stringify(item.targetElement, null, 2)}
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-1.5">
                         {item.status === 'open' ? (
-                            <CircleDashed size={16} className="text-cyan-500" />
+                            <CircleDashed size={16} className="text-purple-500" />
                         ) : item.status === 'resolved' ? (
                             <CheckCircle2 size={16} className="text-emerald-500" />
                         ) : (

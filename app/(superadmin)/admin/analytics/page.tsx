@@ -52,16 +52,16 @@ function KpiCard({
   label: string;
   value: string | number;
   sub?: string;
-  color?: 'emerald' | 'blue' | 'amber' | 'purple' | 'cyan' | 'rose';
+  color?: 'emerald' | 'blue' | 'fuchsia' | 'purple' | 'cyan' | 'rose';
   icon: string;
 }) {
   const colors: Record<string, { bg: string; text: string; icon: string }> = {
     emerald: { bg: 'bg-emerald-50', text: 'text-emerald-700', icon: 'text-emerald-500' },
-    blue:    { bg: 'bg-blue-50',    text: 'text-blue-700',    icon: 'text-blue-500' },
-    amber:   { bg: 'bg-amber-50',   text: 'text-amber-700',   icon: 'text-amber-500' },
-    purple:  { bg: 'bg-purple-50',  text: 'text-purple-700',  icon: 'text-purple-500' },
-    cyan:    { bg: 'bg-cyan-50',    text: 'text-cyan-700',    icon: 'text-cyan-500' },
-    rose:    { bg: 'bg-rose-50',    text: 'text-rose-700',    icon: 'text-rose-500' },
+    blue: { bg: 'bg-blue-50', text: 'text-blue-700', icon: 'text-blue-500' },
+    fuchsia: { bg: 'bg-fuchsia-50', text: 'text-fuchsia-700', icon: 'text-fuchsia-500' },
+    purple: { bg: 'bg-purple-50', text: 'text-purple-700', icon: 'text-purple-500' },
+    cyan: { bg: 'bg-cyan-50', text: 'text-cyan-700', icon: 'text-cyan-500' },
+    rose: { bg: 'bg-rose-50', text: 'text-rose-700', icon: 'text-rose-500' },
   };
   const c = colors[color];
 
@@ -103,12 +103,12 @@ function FunnelBar({ label, value, total, color }: { label: string; value: numbe
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
-    active:   'bg-emerald-100 text-emerald-700',
+    active: 'bg-emerald-100 text-emerald-700',
     approved: 'bg-emerald-100 text-emerald-700',
-    pending:  'bg-amber-100   text-amber-700',
-    trial:    'bg-blue-100    text-blue-700',
-    inactive: 'bg-gray-100   text-gray-600',
-    suspended:'bg-rose-100   text-rose-700',
+    pending: 'bg-fuchsia-100 text-fuchsia-700',
+    trial: 'bg-blue-100 text-blue-700',
+    inactive: 'bg-gray-100 text-gray-600',
+    suspended: 'bg-rose-100   text-rose-700',
     rejected: 'bg-rose-100   text-rose-700',
   };
   return (
@@ -122,10 +122,10 @@ function StatusBadge({ status }: { status: string }) {
 
 function PlanBadge({ plan }: { plan: string }) {
   const map: Record<string, string> = {
-    free:         'bg-gray-100 text-gray-600',
-    starter:      'bg-blue-100 text-blue-700',
+    free: 'bg-gray-100 text-gray-600',
+    starter: 'bg-blue-100 text-blue-700',
     professional: 'bg-purple-100 text-purple-700',
-    enterprise:   'bg-amber-100 text-amber-700',
+    enterprise: 'bg-fuchsia-100 text-fuchsia-700',
   };
   return (
     <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${map[plan] ?? 'bg-gray-100 text-gray-600'}`}>
@@ -224,7 +224,7 @@ export default function AdminAnalyticsPage() {
             label="Applications (30d)"
             value={platform.recentApplications}
             sub="bed + staff applications"
-            color="amber"
+            color="fuchsia"
             icon="📋"
           />
           <KpiCard
@@ -243,7 +243,7 @@ export default function AdminAnalyticsPage() {
           <h2 className="text-base font-semibold text-gray-900 mb-1">Application Funnel</h2>
           <p className="text-xs text-gray-400 mb-5">All-time ({applicationFunnel.total} total)</p>
           <div className="space-y-4">
-            <FunnelBar label="Pending" value={applicationFunnel.pending} total={applicationFunnel.total} color="bg-amber-400" />
+            <FunnelBar label="Pending" value={applicationFunnel.pending} total={applicationFunnel.total} color="bg-fuchsia-400" />
             <FunnelBar label="Assigned to Tenant" value={applicationFunnel.assigned} total={applicationFunnel.total} color="bg-blue-400" />
             <FunnelBar label="Accepted" value={applicationFunnel.accepted} total={applicationFunnel.total} color="bg-emerald-500" />
             <FunnelBar label="Rejected" value={applicationFunnel.rejected} total={applicationFunnel.total} color="bg-rose-400" />

@@ -35,9 +35,9 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
     // Show loading state
     if (loading || !user || user.role !== 'super_admin') {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-[#0C1A2E]">
+            <div className="min-h-screen flex items-center justify-center bg-[#0F071A]">
                 <div className="text-center">
-                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-cyan-600 border-t-transparent"></div>
+                    <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-fuchsia-600 border-t-transparent"></div>
                     <p className="mt-4 text-sm" style={{ color: 'rgba(255,255,255,0.5)' }}>Verifying SuperAdmin Access...</p>
                 </div>
             </div>
@@ -50,7 +50,7 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
     }
 
     return (
-        <div className="min-h-screen flex overflow-hidden bg-[#0C1A2E]">
+        <div className="min-h-screen flex overflow-hidden bg-gradient-to-br from-[#1A0B2E] via-[#0F071A] to-[#2D0B3E]">
             <AdminSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
             <div
@@ -66,7 +66,7 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
                     onMenuClick={() => setSidebarOpen(true)}
                 />
 
-                <main className="flex-1 p-6 overflow-y-auto bg-[#0C1A2E]">
+                <main className="flex-1 p-6 overflow-y-auto">
                     {children}
                 </main>
             </div>

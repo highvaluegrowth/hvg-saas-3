@@ -24,15 +24,15 @@ interface Application {
 // ─── Badge Helpers ────────────────────────────────────────────────────────────
 
 const TYPE_BADGE: Record<ApplicationType, string> = {
-    bed:    'bg-indigo-100 text-indigo-800',
-    staff:  'bg-violet-100 text-violet-800',
+    bed: 'bg-indigo-100 text-indigo-800',
+    staff: 'bg-violet-100 text-violet-800',
     course: 'bg-teal-100 text-teal-800',
-    event:  'bg-orange-100 text-orange-800',
+    event: 'bg-orange-100 text-orange-800',
     tenant: 'bg-emerald-100 text-emerald-800',
 };
 
 const STATUS_BADGE: Record<ApplicationStatus, string> = {
-    pending:  'bg-amber-100 text-amber-800',
+    pending: 'bg-fuchsia-100 text-fuchsia-800',
     assigned: 'bg-blue-100 text-blue-800',
     accepted: 'bg-emerald-100 text-emerald-800',
     rejected: 'bg-red-100 text-red-800',
@@ -176,11 +176,10 @@ export default function ApplicationsInboxPage() {
                         <button
                             key={value}
                             onClick={() => setTypeFilter(value as ApplicationType | 'all')}
-                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                                typeFilter === value
+                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${typeFilter === value
                                     ? 'bg-slate-900 text-white'
                                     : 'text-slate-600 hover:bg-slate-100'
-                            }`}
+                                }`}
                         >
                             {label}
                         </button>
@@ -193,11 +192,10 @@ export default function ApplicationsInboxPage() {
                         <button
                             key={value}
                             onClick={() => setStatusFilter(value as ApplicationStatus | 'all')}
-                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                                statusFilter === value
+                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${statusFilter === value
                                     ? 'bg-slate-900 text-white'
                                     : 'text-slate-600 hover:bg-slate-100'
-                            }`}
+                                }`}
                         >
                             {label}
                         </button>

@@ -146,7 +146,7 @@ export function DirectorChat() {
             )}
 
             <div
-                className={`flex flex-col shadow-[0_0_30px_rgba(8,145,178,0.15)] transition-transform duration-300 z-50 lg:z-40
+                className={`flex flex-col shadow-[0_0_20px_rgba(139,92,246,0.3)] transition-transform duration-300 z-50 lg:z-40
                     fixed right-0 
                     bottom-0 h-[85vh] w-full rounded-t-3xl border-t  /* Mobile bottom drawer */
                     lg:top-0 lg:h-screen lg:rounded-none lg:border-t-0 lg:border-l /* Desktop side panel */
@@ -158,14 +158,14 @@ export function DirectorChat() {
                     background: 'rgba(6,14,26,0.97)',
                     backdropFilter: 'blur(20px)',
                     WebkitBackdropFilter: 'blur(20px)',
-                    borderColor: '#0891B2', /* Distinct Cyan border glow */
+                    borderColor: '#8B5CF6', /* Distinct Purple border glow */
                     borderLeftWidth: '2px',
                     transform: isOpen ? 'translate(0, 0)' : 'translate(0, 100%)',
                 }}
             >
                 {/* Drag Handle for desktop */}
                 <div
-                    className="hidden lg:block absolute left-0 top-0 w-2 h-full cursor-col-resize -translate-x-1/2 bg-transparent hover:bg-cyan-500/30 transition-colors z-50"
+                    className="hidden lg:block absolute left-0 top-0 w-2 h-full cursor-col-resize -translate-x-1/2 bg-transparent hover:bg-fuchsia-500/30 transition-colors z-50"
                     onMouseDown={handleMouseDown}
                 />
                 {/* Visual handle for mobile drawer */}

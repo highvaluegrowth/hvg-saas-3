@@ -38,15 +38,15 @@ interface TenantMatchScore {
 // ─── Badge Helpers ────────────────────────────────────────────────────────────
 
 const TYPE_BADGE: Record<ApplicationType, string> = {
-    bed:    'bg-indigo-100 text-indigo-800',
-    staff:  'bg-violet-100 text-violet-800',
+    bed: 'bg-indigo-100 text-indigo-800',
+    staff: 'bg-violet-100 text-violet-800',
     course: 'bg-teal-100 text-teal-800',
-    event:  'bg-orange-100 text-orange-800',
+    event: 'bg-orange-100 text-orange-800',
     tenant: 'bg-emerald-100 text-emerald-800',
 };
 
 const STATUS_BADGE: Record<ApplicationStatus, string> = {
-    pending:  'bg-amber-100 text-amber-800',
+    pending: 'bg-fuchsia-100 text-fuchsia-800',
     assigned: 'bg-blue-100 text-blue-800',
     accepted: 'bg-emerald-100 text-emerald-800',
     rejected: 'bg-red-100 text-red-800',
@@ -74,8 +74,8 @@ function StatusBadge({ status }: { status: ApplicationStatus }) {
 function ScoreBar({ score }: { score: number }) {
     const color =
         score >= 70 ? 'bg-emerald-500' :
-        score >= 40 ? 'bg-yellow-400' :
-        'bg-red-400';
+            score >= 40 ? 'bg-yellow-400' :
+                'bg-red-400';
 
     return (
         <div className="flex items-center gap-2">
@@ -85,11 +85,10 @@ function ScoreBar({ score }: { score: number }) {
                     style={{ width: `${Math.min(100, Math.max(0, score))}%` }}
                 />
             </div>
-            <span className={`text-sm font-semibold tabular-nums ${
-                score >= 70 ? 'text-emerald-600' :
-                score >= 40 ? 'text-yellow-600' :
-                'text-red-500'
-            }`}>
+            <span className={`text-sm font-semibold tabular-nums ${score >= 70 ? 'text-emerald-600' :
+                    score >= 40 ? 'text-yellow-600' :
+                        'text-red-500'
+                }`}>
                 {score}
             </span>
         </div>
@@ -158,11 +157,10 @@ function Toast({ message, type, onDismiss }: ToastProps) {
     }, [onDismiss]);
 
     return (
-        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border text-sm font-medium transition-all ${
-            type === 'success'
+        <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-3 px-4 py-3 rounded-xl shadow-lg border text-sm font-medium transition-all ${type === 'success'
                 ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
                 : 'bg-red-50 border-red-200 text-red-800'
-        }`}>
+            }`}>
             {type === 'success' ? (
                 <svg className="w-5 h-5 text-emerald-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -557,11 +555,10 @@ export default function ApplicationDetailPage({
                                     return (
                                         <div
                                             key={match.tenantId}
-                                            className={`rounded-xl border p-4 transition-all ${
-                                                isAssigned
+                                            className={`rounded-xl border p-4 transition-all ${isAssigned
                                                     ? 'border-emerald-300 bg-emerald-50'
                                                     : 'border-slate-200 bg-slate-50 hover:bg-white hover:border-slate-300'
-                                            }`}
+                                                }`}
                                         >
                                             <div className="flex items-start justify-between gap-4 flex-wrap">
                                                 {/* Left — tenant info */}

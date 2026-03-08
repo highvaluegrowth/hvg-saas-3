@@ -90,7 +90,7 @@ export default function OnboardingQueuePage() {
                                             {tenant.createdAt ? new Date((tenant.createdAt as any)._seconds * 1000).toLocaleDateString() : 'Unknown'}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-fuchsia-100 text-fuchsia-800">
                                                 {tenant.status}
                                             </span>
                                         </td>
