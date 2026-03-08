@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { authService } from '@/features/auth/services/authService';
-import { QaFeedback, FeedbackType } from '@/features/qa/types/qa.types';
-import { Bug, CheckCircle2, ChevronDown, ChevronUp, Copy, MessageSquare, Paintbrush, CircleDashed, ExternalLink } from 'lucide-react';
+import { qaService } from '@/features/qa/services/qaService';
+import { QAFeedback, QAFeedbackStatus, FeedbackType } from '@/features/qa/types/qa.types';
+import { Bug, CheckCircle2, ChevronDown, ChevronUp, Copy, MessageSquare, Paintbrush, CircleDashed, ExternalLink, Sparkles } from 'lucide-react';
 
 function formatDate(value: string | { _seconds: number } | undefined | null): string {
     if (!value) return '—';
@@ -22,9 +22,10 @@ const TYPE_CONFIG: Record<FeedbackType, { color: string; icon: React.ReactNode }
     'Bug': { color: 'text-rose-500 bg-rose-500/10 border-rose-500/20', icon: <Bug size={14} className="mr-1.5" /> },
     'Suggestion': { color: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20', icon: <MessageSquare size={14} className="mr-1.5" /> },
     'UI Issue': { color: 'text-indigo-500 bg-indigo-500/10 border-indigo-500/20', icon: <Paintbrush size={14} className="mr-1.5" /> },
+    'Design Reference': { color: 'text-violet-500 bg-violet-500/10 border-violet-500/20', icon: <Sparkles size={14} className="mr-1.5" /> },
 };
 
-function FeedbackRow({ item }: { item: QaFeedback }) {
+function FeedbackRow({ item, onStatusChange }: { item: QAFeedback; onStatusChange: (id: string, status: QAFeedbackStatus) => void }) {
     const [expanded, setExpanded] = useState(false);
     const [copied, setCopied] = useState(false);
 
@@ -33,8 +34,21 @@ function FeedbackRow({ item }: { item: QaFeedback }) {
     const handleCopy = (e: React.MouseEvent) => {
         e.stopPropagation();
 
-        const antigravityPrompt = `
-# QA Feedback Review
+        let antigravityPrompt = '';
+
+        if (item.type === 'Design Reference') {
+            antigravityPrompt = `
+Here is a Design Reference from the ${item.route} route. Use this exact DOM structure, component styling, and Tailwind class combination as the baseline standard for...
+${item.description}
+
+## Target Element Data
+\`\`\`json
+${JSON.stringify(item.targetElement, null, 2)}
+\`\`\`
+            `.trim();
+        } else {
+            antigravityPrompt = `
+# QA Feedback Issue to Fix
 
 **Type:** ${item.type}
 **Status:** ${item.status}
@@ -48,7 +62,8 @@ ${item.description}
 \`\`\`json
 ${JSON.stringify(item.targetElement, null, 2)}
 \`\`\`
-        `.trim();
+            `.trim();
+        }
 
         navigator.clipboard.writeText(antigravityPrompt);
         setCopied(true);
@@ -61,17 +76,25 @@ ${JSON.stringify(item.targetElement, null, 2)}
                 className="hover:bg-slate-50 transition-colors cursor-pointer border-b border-slate-100 last:border-0"
                 onClick={() => setExpanded(!expanded)}
             >
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
-                    <span className="flex items-center gap-1.5">
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-1.5">
                         {item.status === 'open' ? (
-                            <CircleDashed size={16} className="text-amber-500" />
+                            <CircleDashed size={16} className="text-cyan-500" />
                         ) : item.status === 'resolved' ? (
                             <CheckCircle2 size={16} className="text-emerald-500" />
                         ) : (
                             <CheckCircle2 size={16} className="text-slate-400" />
                         )}
-                        <span className="capitalize">{item.status}</span>
-                    </span>
+                        <select
+                            value={item.status}
+                            onChange={(e) => onStatusChange(item.id!, e.target.value as QAFeedbackStatus)}
+                            className="bg-transparent border-none text-sm font-medium focus:ring-0 p-0 cursor-pointer hover:bg-slate-50 capitalize"
+                        >
+                            <option value="open">Open</option>
+                            <option value="resolved">Resolved</option>
+                            <option value="closed">Closed</option>
+                        </select>
+                    </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border ${config.color}`}>
@@ -160,28 +183,27 @@ ${JSON.stringify(item.targetElement, null, 2)}
 
 export default function SuperAdminQADashboard() {
     const { user } = useAuth();
-    const [feedback, setFeedback] = useState<QaFeedback[]>([]);
+    const [feedback, setFeedback] = useState<QAFeedback[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+
+    const handleStatusChange = async (id: string, newStatus: QAFeedbackStatus) => {
+        try {
+            await qaService.updateQAFeedbackStatus(id, newStatus);
+            setFeedback(prev => prev.map(f => f.id === id ? { ...f, status: newStatus } : f));
+        } catch (err) {
+            console.error('Failed to update status', err);
+        }
+    };
 
     useEffect(() => {
         async function fetchFeedback() {
             if (!user) return;
             try {
-                const token = await authService.getIdToken();
-                const res = await fetch('/api/admin/qa', {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    setFeedback(data.feedback || []);
-                } else {
-                    const errorData = await res.json();
-                    setError(errorData.error || 'Failed to fetch QA feedback.');
-                }
+                const data = await qaService.getAllQAFeedback();
+                setFeedback(data || []);
             } catch (err: unknown) {
-                const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+                const errorMessage = err instanceof Error ? err.message : 'Failed to fetch QA feedback. Insufficient permissions or network error.';
                 setError(errorMessage);
             } finally {
                 setLoading(false);
@@ -246,7 +268,7 @@ export default function SuperAdminQADashboard() {
                             </thead>
                             <tbody className="bg-white">
                                 {feedback.map((item) => (
-                                    <FeedbackRow key={item.id} item={item} />
+                                    <FeedbackRow key={item.id} item={item} onStatusChange={handleStatusChange} />
                                 ))}
                             </tbody>
                         </table>

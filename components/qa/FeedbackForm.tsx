@@ -6,7 +6,14 @@ import { qaService } from '@/features/qa/services/qaService';
 import { FeedbackType } from '@/features/qa/types/qa.types';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useParams } from 'next/navigation';
-import { X } from 'lucide-react';
+import { X, ChevronDown, Info } from 'lucide-react';
+
+const FEEDBACK_OPTIONS: { type: FeedbackType; desc: string }[] = [
+    { type: 'UI Issue', desc: 'Visual bugs, overlapping elements, contrast issues, or broken styling.' },
+    { type: 'Suggestion', desc: 'Ideas for layout changes, color tweaks, or workflow improvements.' },
+    { type: 'Bug', desc: 'Broken buttons, application crashes, or data not saving correctly.' },
+    { type: 'Design Reference', desc: 'A perfect example of UI/UX. Capture this to establish approved design patterns and baselines.' },
+];
 
 export function FeedbackForm() {
     const { user } = useAuth();
@@ -24,6 +31,7 @@ export function FeedbackForm() {
 
     const [type, setType] = useState<FeedbackType>('Bug');
     const [description, setDescription] = useState('');
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -40,7 +48,7 @@ export function FeedbackForm() {
         setError(null);
 
         try {
-            await qaService.submitFeedback({
+            await qaService.submitQAFeedback({
                 tenantId: tenantId || 'system',
                 reporterId: user?.uid || 'anonymous',
                 route: targetElementData.route,
@@ -116,17 +124,36 @@ export function FeedbackForm() {
                         </div>
                     )}
 
-                    <div>
+                    <div className="relative">
                         <label className="block text-xs font-medium text-white/50 mb-1">Feedback Type</label>
-                        <select
-                            value={type}
-                            onChange={(e) => setType(e.target.value as FeedbackType)}
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-600"
+                        <button
+                            type="button"
+                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                            className="w-full flex justify-between items-center bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-cyan-600"
                         >
-                            <option value="Bug">Bug reported</option>
-                            <option value="UI Issue">UI Issue</option>
-                            <option value="Suggestion">Suggestion</option>
-                        </select>
+                            <span>{type}</span>
+                            <ChevronDown size={14} className={`text-white/50 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                        </button>
+
+                        {isDropdownOpen && (
+                            <div className="absolute z-50 w-full mt-1 bg-[#0C1A2E] border border-cyan-600/30 rounded-lg shadow-xl overflow-visible">
+                                {FEEDBACK_OPTIONS.map(opt => (
+                                    <div
+                                        key={opt.type}
+                                        className="flex justify-between items-center px-3 py-2.5 hover:bg-white/5 cursor-pointer text-sm text-white transition-colors"
+                                        onClick={() => { setType(opt.type); setIsDropdownOpen(false); }}
+                                    >
+                                        <span>{opt.type}</span>
+                                        <div className="group relative flex items-center">
+                                            <Info size={14} className="text-white/40 hover:text-cyan-400" />
+                                            <div className="absolute right-6 top-1/2 -translate-y-1/2 hidden group-hover:block w-48 p-2 bg-slate-800 text-xs text-slate-200 rounded shadow-lg border border-slate-700 pointer-events-none z-60">
+                                                {opt.desc}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     <div>

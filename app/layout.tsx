@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
 import { Figtree, Noto_Sans } from 'next/font/google';
 import { Analytics } from '@vercel/analytics/next';
-import { FeedbackOverlay } from '@/components/qa/FeedbackOverlay';
-import { FeedbackForm } from '@/components/qa/FeedbackForm';
-import { FeedbackToggle } from '@/components/qa/FeedbackToggle';
+import { QAProvider } from '@/components/qa/QAProvider';
 import './globals.css';
 
 const figtree = Figtree({
@@ -30,10 +28,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${notoSans.variable} ${figtree.variable} font-sans`}>
-        {children}
-        <FeedbackOverlay />
-        <FeedbackForm />
-        <FeedbackToggle />
+        <QAProvider>
+          {children}
+        </QAProvider>
         <Analytics />
       </body>
     </html>

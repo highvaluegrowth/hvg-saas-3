@@ -1,4 +1,5 @@
-export type FeedbackType = 'Bug' | 'Suggestion' | 'UI Issue';
+export type QAFeedbackStatus = 'open' | 'resolved' | 'closed';
+export type FeedbackType = 'Bug' | 'Suggestion' | 'UI Issue' | 'Design Reference';
 
 export interface BoundingBox {
     x: number;
@@ -7,7 +8,7 @@ export interface BoundingBox {
     h: number;
 }
 
-export interface QaFeedback {
+export interface QAFeedback {
     id?: string;
     tenantId?: string;
     reporterId?: string;
@@ -21,7 +22,7 @@ export interface QaFeedback {
     boundingBox: BoundingBox;
     type: FeedbackType;
     description: string;
-    status: 'open' | 'resolved' | 'closed';
+    status: QAFeedbackStatus;
     createdAt: string; // ISO date string or Firebase timestamp
     browserInfo?: string; // Optional metadata
     viewportSize?: { width: number; height: number };

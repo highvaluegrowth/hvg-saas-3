@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useQaStore } from '@/lib/stores/qaStore';
 import { BoundingBox } from '@/features/qa/types/qa.types';
 import html2canvas from 'html2canvas';
@@ -8,7 +8,6 @@ import html2canvas from 'html2canvas';
 export function FeedbackOverlay() {
     const {
         isFeedbackModeActive,
-        setFeedbackModeActive,
         setSelectedBox,
         setTargetElementData,
         setFormOpen,
@@ -20,20 +19,6 @@ export function FeedbackOverlay() {
     const [currentBox, setCurrentBox] = useState<BoundingBox | null>(null);
     const [isCapturing, setIsCapturing] = useState(false);
     const overlayRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            // Shift + F
-            if (e.shiftKey && e.key.toLowerCase() === 'f') {
-                setFeedbackModeActive(!isFeedbackModeActive);
-            }
-            if (e.key === 'Escape' && isFeedbackModeActive) {
-                setFeedbackModeActive(false);
-            }
-        };
-        window.addEventListener('keydown', handleKeyDown);
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isFeedbackModeActive, setFeedbackModeActive]);
 
     // Don't intercept clicks if the form is already open to allow the user to type in it
     if (!isFeedbackModeActive || isFormOpen) return null;
@@ -140,7 +125,7 @@ export function FeedbackOverlay() {
     return (
         <div
             ref={overlayRef}
-            className={`fixed inset-0 z-9990 cursor-crosshair ${isCapturing ? 'bg-black/10' : 'bg-transparent'}`}
+            className={`fixed inset-0 z-9999 cursor-crosshair ${isCapturing ? 'bg-black/10' : 'bg-transparent'}`}
             style={{ userSelect: 'none' }}
             onMouseDown={handleMouseDown}
             onMouseMove={handleMouseMove}
