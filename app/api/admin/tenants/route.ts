@@ -15,11 +15,16 @@ export async function GET(request: NextRequest) {
         }
 
         const { searchParams } = new URL(request.url);
-        const status = searchParams.get('status') || 'pending';
+        const status = searchParams.get('status');
 
-        const result = await tenantService.query({
-            where: [{ field: 'status', operator: '==', value: status }],
-        });
+        let result;
+        if (status && status !== 'all') {
+            result = await tenantService.query({
+                where: [{ field: 'status', operator: '==', value: status }],
+            });
+        } else {
+            result = await tenantService.query({});
+        }
 
         // Sort by createdAt desc by default
         const sorted = result.items.sort((a, b) => {
@@ -29,7 +34,7 @@ export async function GET(request: NextRequest) {
         });
 
         return NextResponse.json({ tenants: sorted });
-    } catch (error: any) {
+    } catch (error) {
         console.error('Error fetching admin tenants:', error);
         if (error instanceof AuthError) {
             return NextResponse.json({ error: error.message }, { status: 401 });
