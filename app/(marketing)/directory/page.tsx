@@ -79,11 +79,11 @@ function TenantCard({ tenant }: { tenant: DirectoryTenant }) {
           <img
             src={tenant.logoURL}
             alt={`${tenant.name} logo`}
-            className="w-14 h-14 rounded-xl object-cover flex-shrink-0 border border-gray-100"
+            className="w-14 h-14 rounded-xl object-cover shrink-0 border border-gray-100"
           />
         ) : (
           <div
-            className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-lg flex-shrink-0"
+            className="w-14 h-14 rounded-xl flex items-center justify-center text-white font-bold text-lg shrink-0"
             style={{ background: 'linear-gradient(135deg, #0891B2, #059669)' }}
           >
             {initials || '?'}

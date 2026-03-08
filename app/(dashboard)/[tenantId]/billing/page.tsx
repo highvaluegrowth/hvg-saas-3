@@ -127,7 +127,7 @@ export default function BillingPage() {
       {/* Success Banner */}
       {showSuccess && (
         <div className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)' }}>
-          <svg className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: '#6EE7B7' }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+          <svg className="w-5 h-5 mt-0.5 shrink-0" style={{ color: '#6EE7B7' }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
           <p className="text-sm flex-1" style={{ color: '#A7F3D0' }}>Subscription updated successfully. Your new plan is now active.</p>
           <button onClick={() => setShowSuccess(false)} style={{ color: '#6EE7B7' }}><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
         </div>
@@ -136,7 +136,7 @@ export default function BillingPage() {
       {/* Cancelled Banner */}
       {showCancelled && (
         <div className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)' }}>
-          <svg className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: '#FCD34D' }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" /></svg>
+          <svg className="w-5 h-5 mt-0.5 shrink-0" style={{ color: '#FCD34D' }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M12 2a10 10 0 100 20A10 10 0 0012 2z" /></svg>
           <p className="text-sm flex-1" style={{ color: '#FDE68A' }}>Checkout was cancelled. No charges were made.</p>
           <button onClick={() => setShowCancelled(false)} style={{ color: '#FCD34D' }}><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
         </div>
@@ -145,7 +145,7 @@ export default function BillingPage() {
       {/* Error Banner */}
       {error && (
         <div className="flex items-start gap-3 rounded-xl px-4 py-3" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)' }}>
-          <svg className="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: '#FCA5A5' }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z" /></svg>
+          <svg className="w-5 h-5 mt-0.5 shrink-0" style={{ color: '#FCA5A5' }} fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12A9 9 0 113 12a9 9 0 0118 0z" /></svg>
           <p className="text-sm flex-1" style={{ color: '#FECACA' }}>{error}</p>
           <button onClick={() => setError(null)} style={{ color: '#FCA5A5' }}><svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg></button>
         </div>
@@ -227,7 +227,7 @@ export default function BillingPage() {
                   <ul className="space-y-2 flex-1 mb-5">
                     {plan.features.map(f => (
                       <li key={f} className="flex items-start gap-2 text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>
-                        <svg className="w-4 h-4 mt-0.5 flex-shrink-0" style={{ color: '#34D399' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-4 h-4 mt-0.5 shrink-0" style={{ color: '#34D399' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                         {f}

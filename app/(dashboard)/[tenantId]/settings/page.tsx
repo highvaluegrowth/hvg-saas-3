@@ -143,9 +143,9 @@ export default function SettingsPage() {
                 <div className="px-6 py-5">
                     <div className="flex items-start gap-6">
                         {avatarUrl ? (
-                            <img src={avatarUrl} alt="Your profile photo" className="w-20 h-20 rounded-full object-cover flex-shrink-0" style={{ border: '2px solid rgba(8,145,178,0.4)' }} />
+                            <img src={avatarUrl} alt="Your profile photo" className="w-20 h-20 rounded-full object-cover shrink-0" style={{ border: '2px solid rgba(8,145,178,0.4)' }} />
                         ) : (
-                            <div className="w-20 h-20 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(8,145,178,0.15)', border: '2px solid rgba(8,145,178,0.3)' }}>
+                            <div className="w-20 h-20 rounded-full flex items-center justify-center shrink-0" style={{ background: 'rgba(8,145,178,0.15)', border: '2px solid rgba(8,145,178,0.3)' }}>
                                 <span className="text-2xl font-bold" style={{ color: '#67E8F9' }}>{user?.email?.[0]?.toUpperCase() ?? '?'}</span>
                             </div>
                         )}

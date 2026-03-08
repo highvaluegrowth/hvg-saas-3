@@ -184,7 +184,7 @@ export default function PricingPage() {
                     {plan.features.map((feature) => (
                       <li key={feature} className="flex items-start gap-2.5 text-sm text-gray-700">
                         <svg
-                          className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5"
+                          className="w-4 h-4 text-green-500 shrink-0 mt-0.5"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"

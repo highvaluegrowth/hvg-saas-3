@@ -131,7 +131,7 @@ export default function DirectoryPage() {
             <label key={opt.value} className="flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-all text-sm"
               style={checked ? { background: `${checkedBg}20`, border: `1px solid ${checkedBg}50`, color: 'white' } : { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.6)' }}>
               <input type="checkbox" checked={checked} onChange={() => onChange(opt.value)} className="sr-only" />
-              <span className="w-4 h-4 rounded flex items-center justify-center flex-shrink-0 border"
+              <span className="w-4 h-4 rounded flex items-center justify-center shrink-0 border"
                 style={checked ? { background: checkedBg, borderColor: checkedBg } : { borderColor: 'rgba(255,255,255,0.2)' }}>
                 {checked && <svg className="w-2.5 h-2.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" /></svg>}
               </span>
@@ -291,7 +291,7 @@ export default function DirectoryPage() {
               </thead>
               <tbody className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
                 {promos.map(promo => (
-                  <tr key={promo.id} className="transition-colors hover:bg-white/[0.03]">
+                  <tr key={promo.id} className="transition-colors hover:bg-white/5">
                     <td className="px-6 py-4">
                       <p className="text-sm font-medium text-white">{promo.title}</p>
                       <p className="text-xs mt-0.5 line-clamp-1" style={{ color: 'rgba(255,255,255,0.4)' }}>{promo.description}</p>

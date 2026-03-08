@@ -79,7 +79,7 @@ function PostCard({ post, currentUid, tenantId, onReact }: PostCardProps) {
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3">
           {/* Avatar */}
-          <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg, rgba(8,145,178,0.4), rgba(5,150,105,0.4))', border: '1px solid rgba(103,232,249,0.2)' }}>
+          <div className="w-9 h-9 rounded-full flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, rgba(8,145,178,0.4), rgba(5,150,105,0.4))', border: '1px solid rgba(103,232,249,0.2)' }}>
             <span className="text-sm font-semibold text-cyan-300">
               {post.authorName.charAt(0).toUpperCase()}
             </span>
@@ -101,12 +101,12 @@ function PostCard({ post, currentUid, tenantId, onReact }: PostCardProps) {
         </div>
         {/* Scope badge */}
         {post.scope === 'global' && (
-          <span className="flex-shrink-0 text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-medium">
+          <span className="shrink-0 text-xs bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-medium">
             Announcement
           </span>
         )}
         {post.scope === 'house' && (
-          <span className="flex-shrink-0 text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-medium">
+          <span className="shrink-0 text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded-full font-medium">
             House
           </span>
         )}

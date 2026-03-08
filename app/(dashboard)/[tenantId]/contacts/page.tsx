@@ -274,7 +274,7 @@ export default function ContactsPage({ params }: ContactsPageProps) {
               </thead>
               <tbody className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
                 {filtered.map(contact => (
-                  <tr key={contact.id} className="transition-colors hover:bg-white/[0.03]">
+                  <tr key={contact.id} className="transition-colors hover:bg-white/5">
                     <td className="px-6 py-3.5">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold shrink-0"

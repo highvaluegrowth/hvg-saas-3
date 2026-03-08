@@ -61,7 +61,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-start py-2 border-b border-gray-100 last:border-0">
-      <dt className="w-40 flex-shrink-0 text-sm text-gray-500">{label}</dt>
+      <dt className="w-40 shrink-0 text-sm text-gray-500">{label}</dt>
       <dd className="text-sm text-gray-900 flex-1">{value ?? '—'}</dd>
     </div>
   );

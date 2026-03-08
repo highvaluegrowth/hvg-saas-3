@@ -522,7 +522,7 @@ export default function BedApplicationPage() {
                                                     : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
                                             }`}
                                         >
-                                            <span className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center ${
+                                            <span className={`w-4 h-4 rounded border shrink-0 flex items-center justify-center ${
                                                 selected ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300'
                                             }`}>
                                                 {selected && (

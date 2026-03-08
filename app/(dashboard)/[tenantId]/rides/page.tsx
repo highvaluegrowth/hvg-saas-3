@@ -3,7 +3,7 @@
 import { use, useState } from 'react';
 import Link from 'next/link';
 import { useRides } from '@/features/rides/hooks/useRides';
-import { Ride, RideStatus } from '@/features/rides/types/ride.types';
+import { RideStatus } from '@/features/rides/types/ride.types';
 import { Button } from '@/components/ui/Button';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { canWrite } from '@/lib/utils/permissions';
@@ -63,7 +63,7 @@ export default function RidesPage({
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-white">Transportation</h1>
@@ -109,18 +109,25 @@ export default function RidesPage({
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-16 rounded-2xl" style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.15)' }}>
-          <p className="text-lg text-white font-medium mb-1">
-            No rides{filter !== 'all' ? ` with status "${STATUS_LABELS[filter as RideStatus]}"` : ''}
-          </p>
-          <p className="text-sm mb-5" style={{ color: 'rgba(255,255,255,0.4)' }}>Get started by creating a new transportation request.</p>
-          {userCanWrite && (
-            <Link href={`/${tenantId}/rides/new`} className="inline-block">
-              <Button style={{ color: '#67E8F9', background: 'rgba(8,145,178,0.15)', border: '1px solid rgba(8,145,178,0.3)' }} className="transition-all hover:bg-cyan-500/20">
-                Schedule a Ride
-              </Button>
-            </Link>
-          )}
+        <div className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="text-center py-16">
+            <div className="mx-auto w-16 h-16 flex items-center justify-center rounded-full mb-4" style={{ background: 'rgba(8,145,178,0.15)' }}>
+              <svg className="w-8 h-8" style={{ color: '#67E8F9' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+              </svg>
+            </div>
+            <p className="text-lg text-white font-semibold mb-1">
+              No rides{filter !== 'all' ? ` with status "${STATUS_LABELS[filter as RideStatus]}"` : ''}
+            </p>
+            <p className="text-sm mb-6 max-w-sm mx-auto" style={{ color: 'rgba(255,255,255,0.45)' }}>Get started by creating a new transportation request.</p>
+            {userCanWrite && (
+              <Link href={`/${tenantId}/rides/new`} className="inline-block">
+                <Button className="bg-cyan-600 hover:bg-cyan-700 text-white border-0 transition-opacity hover:opacity-90">
+                  Schedule a Ride
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
       ) : (
         <div className="rounded-2xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>

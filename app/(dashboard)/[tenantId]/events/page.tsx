@@ -131,7 +131,7 @@ function EventCard({ event, tenantId }: { event: ProgramEvent; tenantId: string 
                 )}
               </div>
             </div>
-            <div className="flex-shrink-0 text-right">
+            <div className="shrink-0 text-right">
               <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-cyan-50 text-cyan-700 text-sm font-semibold">
                 {event.attendeeIds.length}
               </span>

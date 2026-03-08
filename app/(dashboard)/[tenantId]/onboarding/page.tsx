@@ -258,7 +258,7 @@ function SkippableStep({
     return (
         <div>
             <div className="flex items-start gap-4 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-cyan-50 flex items-center justify-center flex-shrink-0 text-cyan-600">
+                <div className="w-12 h-12 rounded-xl bg-cyan-50 flex items-center justify-center shrink-0 text-cyan-600">
                     {icon}
                 </div>
                 <div>

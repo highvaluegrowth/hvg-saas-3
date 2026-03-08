@@ -6,7 +6,7 @@ import { useHouses } from '@/features/houses/hooks/useHouses';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Table, TableHeader, TableBody, TableRow, TableCell } from '@/components/ui/Table';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
+import { Card, CardContent } from '@/components/ui/Card';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { canManageStaff } from '@/lib/utils/permissions';
 import type { UserRole } from '@/features/auth/types/auth.types';
@@ -20,18 +20,18 @@ function LoadingSkeleton() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div className="h-8 w-32 bg-gray-200 rounded animate-pulse" />
-        <div className="h-10 w-28 bg-gray-200 rounded animate-pulse" />
+        <div className="h-8 w-32 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.06)' }} />
+        <div className="h-10 w-28 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.06)' }} />
       </div>
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="divide-y divide-gray-200">
+      <div className="rounded-lg overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div className="divide-y divide-white/5">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="px-6 py-4 flex items-center space-x-4">
-              <div className="h-5 w-40 bg-gray-200 rounded animate-pulse" />
-              <div className="h-5 w-32 bg-gray-200 rounded animate-pulse" />
-              <div className="h-5 w-16 bg-gray-200 rounded animate-pulse" />
-              <div className="h-5 w-16 bg-gray-200 rounded animate-pulse" />
-              <div className="h-5 w-20 bg-gray-200 rounded animate-pulse" />
+              <div className="h-5 w-40 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.06)' }} />
+              <div className="h-5 w-32 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.06)' }} />
+              <div className="h-5 w-16 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.06)' }} />
+              <div className="h-5 w-16 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.06)' }} />
+              <div className="h-5 w-20 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.06)' }} />
             </div>
           ))}
         </div>
@@ -43,13 +43,13 @@ function LoadingSkeleton() {
 function EmptyState({ tenantId, userCanManage }: { tenantId: string; userCanManage: boolean }) {
   return (
     <div className="text-center py-16">
-      <div className="mx-auto w-16 h-16 flex items-center justify-center rounded-full bg-cyan-50 mb-4">
-        <svg className="w-8 h-8 text-cyan-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div className="mx-auto w-16 h-16 flex items-center justify-center rounded-full mb-4" style={{ background: 'rgba(8,145,178,0.15)' }}>
+        <svg className="w-8 h-8" style={{ color: '#67E8F9' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
         </svg>
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-1">No houses yet</h3>
-      <p className="text-gray-500 mb-6 max-w-sm mx-auto">
+      <h3 className="text-lg font-semibold mb-1" style={{ color: 'white' }}>No houses yet</h3>
+      <p className="mb-6 max-w-sm mx-auto text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
         Get started by adding your first sober-living house to the platform.
       </p>
       {userCanManage && (
@@ -68,41 +68,36 @@ function HouseRow({ house, tenantId }: { house: House; tenantId: string }) {
   const statusVariant = house.status === 'active' ? 'success' : 'default';
 
   return (
-    <TableRow>
+    <TableRow className="border-b border-white/5 hover:bg-white/5 transition-colors">
       <TableCell>
         <Link
           href={`/${tenantId}/houses/${house.id}`}
-          className="font-medium text-cyan-600 hover:text-cyan-800 hover:underline"
+          className="font-medium transition-colors hover:underline"
+          style={{ color: '#67E8F9' }}
         >
           {house.name}
         </Link>
       </TableCell>
-      <TableCell>
-        <span className="text-gray-700">
-          {house.address.city}, {house.address.state}
-        </span>
+      <TableCell style={{ color: 'rgba(255,255,255,0.7)' }}>
+        {house.address.city}, {house.address.state}
       </TableCell>
-      <TableCell>
-        <span className="text-gray-700">{house.capacity}</span>
+      <TableCell style={{ color: 'rgba(255,255,255,0.7)' }}>
+        {house.capacity}
       </TableCell>
-      <TableCell>
-        <span className="text-gray-700">
-          {occupancy}/{house.capacity}
-        </span>
+      <TableCell style={{ color: 'rgba(255,255,255,0.7)' }}>
+        {occupancy}/{house.capacity}
       </TableCell>
       <TableCell>
         <Badge variant={statusVariant}>
           {house.status === 'active' ? 'Active' : 'Inactive'}
         </Badge>
       </TableCell>
-      <TableCell>
-        <span className="text-gray-500 text-sm">
-          {house.managerId ? house.managerId : 'Unassigned'}
-        </span>
+      <TableCell style={{ color: 'rgba(255,255,255,0.5)' }}>
+        {house.managerId ? house.managerId : 'Unassigned'}
       </TableCell>
       <TableCell>
         <Link href={`/${tenantId}/houses/${house.id}`}>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-white">
             View
           </Button>
         </Link>
@@ -135,8 +130,8 @@ export default function HousesPage({ params }: HousesPageProps) {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Houses</h1>
-          <p className="text-gray-500 mt-1 text-sm">
+          <h1 className="text-2xl font-bold text-white">Houses</h1>
+          <p className="mt-1 text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>
             Manage your sober-living house locations
           </p>
         </div>
@@ -151,24 +146,24 @@ export default function HousesPage({ params }: HousesPageProps) {
 
       {/* Content */}
       {houses.length === 0 ? (
-        <Card>
-          <CardContent className="pt-6">
+        <div className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="p-6">
             <EmptyState tenantId={tenantId} userCanManage={userCanManage} />
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ) : (
-        <Card>
+        <Card className="overflow-hidden border-0 shadow-none" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
           <CardContent className="p-0">
             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableCell as="th">Name</TableCell>
-                  <TableCell as="th">Location</TableCell>
-                  <TableCell as="th">Capacity</TableCell>
-                  <TableCell as="th">Occupancy</TableCell>
-                  <TableCell as="th">Status</TableCell>
-                  <TableCell as="th">Manager</TableCell>
-                  <TableCell as="th">Actions</TableCell>
+              <TableHeader className="[&_tr]:border-b [&_tr]:border-white/10 hover:bg-transparent">
+                <TableRow className="border-b border-white/10 hover:bg-transparent">
+                  <TableCell as="th" className="text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Name</TableCell>
+                  <TableCell as="th" className="text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Location</TableCell>
+                  <TableCell as="th" className="text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Capacity</TableCell>
+                  <TableCell as="th" className="text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Occupancy</TableCell>
+                  <TableCell as="th" className="text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Status</TableCell>
+                  <TableCell as="th" className="text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Manager</TableCell>
+                  <TableCell as="th" className="text-xs font-medium uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Actions</TableCell>
                 </TableRow>
               </TableHeader>
               <TableBody>

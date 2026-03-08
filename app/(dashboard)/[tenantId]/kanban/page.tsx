@@ -163,7 +163,7 @@ export default function KanbanPage({ params }: KanbanPageProps) {
               <div key={col.status} className="flex flex-col min-h-[400px]">
                 <div className="flex items-center justify-between px-3 py-2 rounded-xl mb-3" style={{ background: col.accentBg, border: `1px solid ${col.accentColor}22` }}>
                   <h3 className="text-sm font-semibold text-white">{col.label}</h3>
-                  <span className="text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[1.5rem] text-center" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}>
+                  <span className="text-xs font-medium px-1.5 py-0.5 rounded-full min-w-6 text-center" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }}>
                     {colCards.length}
                   </span>
                 </div>

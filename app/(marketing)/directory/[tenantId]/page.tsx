@@ -184,7 +184,7 @@ export default async function TenantDirectoryPage({ params }: { params: Params }
 
                 <Link
                   href={`/apply/bed?tenantId=${profile.id}`}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 flex-shrink-0"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 shrink-0"
                   style={{ background: 'linear-gradient(135deg, #0891B2, #059669)' }}
                 >
                   Apply for a Bed
@@ -266,7 +266,7 @@ export default async function TenantDirectoryPage({ params }: { params: Params }
                 {promos.map((promo) => (
                   <div key={promo.id} className="px-6 py-5 flex items-start gap-4">
                     <div
-                      className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 text-white text-lg font-bold"
+                      className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 text-white text-lg font-bold"
                       style={{ background: 'linear-gradient(135deg, #0891B2, #059669)' }}
                     >
                       %
@@ -277,7 +277,7 @@ export default async function TenantDirectoryPage({ params }: { params: Params }
                           <h3 className="font-semibold text-gray-900">{promo.title}</h3>
                           <p className="text-sm text-gray-500">{promo.partnerName}</p>
                         </div>
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-amber-50 text-amber-700 border border-amber-100 flex-shrink-0">
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-bold bg-amber-50 text-amber-700 border border-amber-100 shrink-0">
                           {promo.discountText}
                         </span>
                       </div>

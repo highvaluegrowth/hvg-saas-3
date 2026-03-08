@@ -2,7 +2,6 @@
 
 import { use, useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useChores } from '@/features/chores/hooks/useChores';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { authService } from '@/features/auth/services/authService';
@@ -10,7 +9,6 @@ import { Chore, ChoreStatus, ChorePriority } from '@/features/chores/types/chore
 import { canWrite } from '@/lib/utils/permissions';
 import { UserRole } from '@/features/auth/types/auth.types';
 import { Button } from '@/components/ui/Button';
-import { Card, CardContent } from '@/components/ui/Card';
 
 const STATUS_LABELS: Record<ChoreStatus, string> = {
   pending: 'Pending',
@@ -67,9 +65,10 @@ function KanbanCard({ chore, tenantId, canDrag, onDragStart }: KanbanCardProps) 
       <div
         draggable={canDrag}
         onDragStart={() => onDragStart(chore.id)}
-        className={`bg-white rounded-lg border border-gray-200 p-3 mb-2 shadow-sm hover:shadow-md transition-shadow ${canDrag ? 'cursor-grab active:cursor-grabbing' : ''}`}
+        className={`rounded-lg p-3 mb-2 shadow-sm hover:shadow-md transition-shadow ${canDrag ? 'cursor-grab active:cursor-grabbing' : ''}`}
+        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
       >
-        <p className="text-sm font-medium text-gray-900 mb-2 line-clamp-2">{chore.title}</p>
+        <p className="text-sm font-medium text-white mb-2 line-clamp-2">{chore.title}</p>
         <div className="flex items-center justify-between">
           <span className={`inline-block px-1.5 py-0.5 rounded text-xs font-medium ${priorityBadgeClass(chore.priority)}`}>
             {PRIORITY_LABELS[chore.priority]}
@@ -92,7 +91,6 @@ export default function ChoresPage({ params }: { params: Promise<{ tenantId: str
   const { chores, loading, error } = useChores(tenantId);
   const [view, setView] = useState<'list' | 'kanban'>('list');
   const [draggingId, setDraggingId] = useState<string | null>(null);
-  const router = useRouter();
 
   const userCanWrite = user?.role ? canWrite(user.role as UserRole) : false;
 
@@ -138,21 +136,21 @@ export default function ChoresPage({ params }: { params: Promise<{ tenantId: str
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Chores</h1>
-          <p className="text-gray-600 mt-1">House tasks and assignments</p>
+          <h1 className="text-2xl font-bold text-white">Chores</h1>
+          <p className="mt-1 text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>House tasks and assignments</p>
         </div>
         <div className="flex items-center gap-3">
           {/* View toggle */}
-          <div className="flex rounded-md border border-gray-300 overflow-hidden">
+          <div className="flex rounded-md overflow-hidden" style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
             <button
               onClick={() => setView('list')}
-              className={`px-3 py-1.5 text-sm font-medium ${view === 'list' ? 'bg-cyan-600 text-white' : 'text-gray-700 hover:bg-gray-50'}`}
+              className={`px-3 py-1.5 text-sm font-medium transition-colors ${view === 'list' ? 'bg-cyan-600 text-white' : 'text-white/60 hover:bg-white/5 hover:text-white'}`}
             >
               List
             </button>
             <button
               onClick={() => setView('kanban')}
-              className={`px-3 py-1.5 text-sm font-medium ${view === 'kanban' ? 'bg-cyan-600 text-white' : 'text-gray-700 hover:bg-gray-50'}`}
+              className={`px-3 py-1.5 text-sm font-medium transition-colors ${view === 'kanban' ? 'bg-cyan-600 text-white' : 'text-white/60 hover:bg-white/5 hover:text-white'}`}
             >
               Board
             </button>
@@ -166,35 +164,41 @@ export default function ChoresPage({ params }: { params: Promise<{ tenantId: str
       </div>
 
       {chores.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-12">
-            <p className="text-gray-500">No chores yet.</p>
+        <div className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="text-center py-16">
+            <div className="mx-auto w-16 h-16 flex items-center justify-center rounded-full mb-4" style={{ background: 'rgba(8,145,178,0.15)' }}>
+              <svg className="w-8 h-8" style={{ color: '#67E8F9' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold mb-1 text-white">No chores yet</h3>
+            <p className="mb-6 max-w-sm mx-auto text-sm" style={{ color: 'rgba(255,255,255,0.45)' }}>Create your first chore.</p>
             {userCanWrite && (
               <Link href={`/${tenantId}/chores/new`}>
-                <Button variant="outline" className="mt-4">Create First Chore</Button>
+                <Button className="bg-cyan-600 hover:bg-cyan-700 text-white">Create First Chore</Button>
               </Link>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ) : view === 'list' ? (
-        <Card>
-          <CardContent className="p-0">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Title</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Priority</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Status</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Due Date</th>
-                  <th className="text-left text-xs font-medium text-gray-500 uppercase tracking-wider px-6 py-3">Assignees</th>
-                  {userCanWrite && <th className="px-6 py-3" />}
+        <div className="rounded-xl overflow-hidden" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }}>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-white/10">
+              <thead style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Title</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Priority</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Status</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Due Date</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider" style={{ color: 'rgba(255,255,255,0.5)' }}>Assignees</th>
+                  {userCanWrite && <th className="px-6 py-4" />}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-white/5">
                 {chores.map((chore) => (
-                  <tr key={chore.id} className="hover:bg-gray-50">
+                  <tr key={chore.id} className="hover:bg-white/5 transition-colors">
                     <td className="px-6 py-4">
-                      <Link href={`/${tenantId}/chores/${chore.id}`} className="text-sm font-medium text-gray-900 hover:text-cyan-600">
+                      <Link href={`/${tenantId}/chores/${chore.id}`} className="text-sm font-medium transition-colors hover:underline" style={{ color: '#67E8F9' }}>
                         {chore.title}
                       </Link>
                     </td>
@@ -208,15 +212,15 @@ export default function ChoresPage({ params }: { params: Promise<{ tenantId: str
                         {STATUS_LABELS[chore.status]}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{formatDate(chore.dueDate)}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600">{chore.assigneeIds.length}</td>
+                    <td className="px-6 py-4 text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>{formatDate(chore.dueDate)}</td>
+                    <td className="px-6 py-4 text-sm" style={{ color: 'rgba(255,255,255,0.7)' }}>{chore.assigneeIds.length}</td>
                     {userCanWrite && (
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end gap-2">
                           <Link href={`/${tenantId}/chores/${chore.id}`}>
-                            <Button variant="ghost" size="sm">Edit</Button>
+                            <Button variant="outline" size="sm" className="bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-white">Edit</Button>
                           </Link>
-                          <Button variant="ghost" size="sm" className="text-red-600 hover:text-red-700" onClick={() => handleDelete(chore.id)}>
+                          <Button variant="outline" size="sm" className="bg-transparent border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300" onClick={() => handleDelete(chore.id)}>
                             Delete
                           </Button>
                         </div>
@@ -226,8 +230,8 @@ export default function ChoresPage({ params }: { params: Promise<{ tenantId: str
                 ))}
               </tbody>
             </table>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ) : (
         /* Kanban view */
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -236,7 +240,8 @@ export default function ChoresPage({ params }: { params: Promise<{ tenantId: str
             return (
               <div
                 key={column.status}
-                className={`bg-gray-50 rounded-lg border-t-4 ${column.color} p-4 min-h-48`}
+                className="rounded-lg p-4 min-h-48"
+                style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)', borderTop: `4px solid var(--column-${column.status}-color, rgba(8,145,178,0.5))` }}
                 onDragOver={(e) => e.preventDefault()}
                 onDrop={(e) => {
                   e.preventDefault();
@@ -246,9 +251,9 @@ export default function ChoresPage({ params }: { params: Promise<{ tenantId: str
                   }
                 }}
               >
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-sm font-semibold text-gray-700">{column.label}</h3>
-                  <span className="text-xs bg-white border border-gray-200 text-gray-600 rounded-full px-2 py-0.5">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-semibold text-white">{column.label}</h3>
+                  <span className="text-xs rounded-full px-2 py-0.5" style={{ background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}>
                     {columnChores.length}
                   </span>
                 </div>
