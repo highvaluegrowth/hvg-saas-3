@@ -90,7 +90,7 @@ function Field({
         />
       ) : as === 'select' ? (
         <select className={cls} value={value} onChange={(e) => onChange(name, e.target.value)} required={required}>
-          {options?.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+          {options?.map((o) => <option key={o.value} value={o.value} className="bg-[#0C1A2E] text-white">{o.label}</option>)}
         </select>
       ) : (
         <input
@@ -121,10 +121,10 @@ function StepIndicator({ steps, current }: { steps: typeof STEPS; current: Step 
             <div className="flex items-center space-x-2 shrink-0">
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${active
+                  ? 'bg-cyan-600 text-white'
+                  : done
                     ? 'bg-cyan-600 text-white'
-                    : done
-                      ? 'bg-cyan-600 text-white'
-                      : 'bg-white/10 text-white/50'
+                    : 'bg-white/10 text-white/50'
                   }`}
               >
                 {done ? (
