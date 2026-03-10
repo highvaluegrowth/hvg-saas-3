@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
-import { adminDb as db } from '@/lib/firebase/admin';
+import { adminDb as db, FieldValue } from '@/lib/firebase/admin';
 import type { ApplicationType } from '@/features/applications/types';
 
 export const dynamic = 'force-dynamic';
@@ -46,14 +46,18 @@ export async function POST(
             type,
             status: 'pending',
             applicantId,
+            userId: applicantId !== 'anonymous' ? applicantId : null,
             applicantName: tokenName ?? body.applicantName ?? '',
             applicantEmail: tokenEmail ?? body.applicantEmail ?? '',
             zipCode: body.zipCode ?? '',
             submittedAt: now,
-            createdAt: now,
-            updatedAt: now,
+            createdAt: FieldValue.serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp(),
             data: body.data ?? {},
         };
+
+        // We use set directly. To return the client a Date string, we could override createdAt/updatedAt
+        // but for now returning FieldValue is fine or we can omit it from the response.
 
         await docRef.set(application);
 

@@ -50,7 +50,7 @@ export const tenantApi = {
 
 // --- AI Chat ---
 export const chatApi = {
-  send: (body: { message: string; conversationId?: string }) =>
+  send: (body: { message: string; conversationId?: string; systemContext?: string }) =>
     api.post<{
       reply: string;
       conversationId: string;
@@ -71,6 +71,8 @@ export const applicationApi = {
     api.post<{ id: string; success: boolean }>('/api/applications/bed', body),
   submitStaff: (body: Record<string, unknown>) =>
     api.post<{ id: string; success: boolean }>('/api/applications/staff', body),
+  getUserApplications: () =>
+    api.get<{ applications: Record<string, unknown>[] }>('/api/applications/user'),
 };
 
 // --- Local types (mobile-specific response shapes) ---

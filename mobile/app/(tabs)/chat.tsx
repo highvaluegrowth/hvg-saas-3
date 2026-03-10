@@ -12,15 +12,18 @@ import {
   Linking,
   ScrollView,
 } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useChatSession } from '@/features/ai-chat/useChatSession';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { useTabBarHeight } from '@/lib/constants/layout';
+import { useContextStore, buildProactiveGreeting } from '@/lib/store/contextStore';
+import { buildContextSnapshot } from '@/lib/ai/contextEngine';
 import type { ChatMessage } from '@/lib/api/routes';
 
 // ─── Recovery-focused quick action suggestions ───────────────────────────────
 const SUGGESTIONS = [
   { icon: '🏆', text: 'How long have I been sober?' },
-  { icon: '💭', text: 'Log how I\'m feeling right now' },
+  { icon: '💭', text: "Log how I'm feeling right now" },
   { icon: '📋', text: 'What chores do I have today?' },
   { icon: '🗺️', text: 'Find an AA or NA meeting nearby' },
   { icon: '📅', text: "What's on my schedule this week?" },
@@ -31,11 +34,8 @@ const SUGGESTIONS = [
 
 function SobrietyCard({ data }: { data: unknown }) {
   const d = data as {
-    days?: number;
-    months?: number;
-    years?: number;
-    nextMilestone?: string;
-    daysUntilMilestone?: number;
+    days?: number; months?: number; years?: number;
+    nextMilestone?: string; daysUntilMilestone?: number;
   };
   const days = d?.days ?? 0;
   return (
@@ -48,9 +48,7 @@ function SobrietyCard({ data }: { data: unknown }) {
           {[
             d.years ? `${d.years} yr${d.years !== 1 ? 's' : ''}` : null,
             d.months ? `${d.months} mo${d.months !== 1 ? 's' : ''}` : null,
-          ]
-            .filter(Boolean)
-            .join(', ')}
+          ].filter(Boolean).join(', ')}
         </Text>
       ) : null}
       {d?.nextMilestone ? (
@@ -197,8 +195,50 @@ function JournalCard({ data }: { data: unknown }) {
   );
 }
 
-/** Renders the appropriate rich card for a given component name */
-function ComponentCard({ component, data }: { component: string; data: unknown }) {
+// ─── NEW: Ride Request Action Card ────────────────────────────────────────────
+function RideRequestCard({
+  data,
+  employmentGoal,
+}: {
+  data: unknown;
+  employmentGoal?: string;
+}) {
+  const router = useRouter();
+  const d = data as { destination?: string; suggestedDestination?: string };
+  const destination = d?.destination ?? d?.suggestedDestination ?? employmentGoal ?? '';
+
+  return (
+    <View style={cards.rideRequest}>
+      <Text style={cards.rideTitle}>🚗 Need a ride?</Text>
+      <Text style={cards.rideSub}>
+        {destination ? `To: ${destination}` : 'I can help you request transportation.'}
+      </Text>
+      <TouchableOpacity
+        style={cards.rideBtn}
+        onPress={() =>
+          router.push({
+            pathname: '/(tabs)',
+            params: { requestRide: 'true', destination },
+          })
+        }
+        activeOpacity={0.8}
+      >
+        <Text style={cards.rideBtnText}>Open Ride Request →</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+/** Renders the appropriate rich card */
+function ComponentCard({
+  component,
+  data,
+  employmentGoal,
+}: {
+  component: string;
+  data: unknown;
+  employmentGoal?: string;
+}) {
   switch (component) {
     case 'sobriety_stats':
     case 'get_sobriety_stats':
@@ -221,16 +261,19 @@ function ComponentCard({ component, data }: { component: string; data: unknown }
     case 'journal_entry':
     case 'create_journal_entry':
       return <JournalCard data={data} />;
+    case 'ride_request':
+    case 'request_ride':
+      return <RideRequestCard data={data} employmentGoal={employmentGoal} />;
     default:
       return null;
   }
 }
 
-// ─── Typing indicator dots ────────────────────────────────────────────────────
+// ─── Typing indicator ─────────────────────────────────────────────────────────
 function TypingDots() {
   return (
     <View style={styles.typingBubble}>
-      <ActivityIndicator size="small" color="#6366f1" />
+      <ActivityIndicator size="small" color="#0891B2" />
       <Text style={styles.typingText}>HVG Guide is thinking…</Text>
     </View>
   );
@@ -238,12 +281,30 @@ function TypingDots() {
 
 // ─── Main screen ──────────────────────────────────────────────────────────────
 export default function ChatScreen() {
-  const { appUser } = useAuth();
+  const { appUser, firebaseUser } = useAuth();
   const { messages, sendMessage, isSending, isLoadingHistory, error } = useChatSession();
   const [input, setInput] = useState('');
   const listRef = useRef<FlatList<ChatMessage>>(null);
   const tabBarHeight = useTabBarHeight();
 
+  const contextSnapshot = useContextStore((s) => s.snapshot);
+  const isContextLoading = useContextStore((s) => s.isLoading);
+
+  // ── Load context on mount ──────────────────────────────────────────────────
+  useEffect(() => {
+    const tenantId = appUser?.tenantIds?.[0];
+    if (!tenantId || !firebaseUser) return;
+
+    let cleanup: (() => void) | null = null;
+
+    buildContextSnapshot(tenantId, () => firebaseUser.getIdToken(true)).then(
+      (unsubscribe) => { cleanup = unsubscribe; }
+    );
+
+    return () => { cleanup?.(); };
+  }, [appUser?.tenantIds, firebaseUser]);
+
+  // ── Auto-scroll on new messages ────────────────────────────────────────────
   useEffect(() => {
     if (messages.length > 0) {
       setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 100);
@@ -258,6 +319,12 @@ export default function ChatScreen() {
   }
 
   const firstName = appUser?.displayName?.split(' ')[0] ?? 'there';
+  const employmentGoal = contextSnapshot?.employmentGoal;
+
+  // Build proactive greeting from context
+  const greeting = contextSnapshot
+    ? buildProactiveGreeting(contextSnapshot)
+    : `Hi, ${firstName}! I'm your HVG Guide — here to support your recovery journey. Ask me anything, log your mood, or just talk.`;
 
   return (
     <KeyboardAvoidingView
@@ -269,30 +336,59 @@ export default function ChatScreen() {
       <View style={styles.header}>
         <View>
           <Text style={styles.headerTitle}>HVG Guide</Text>
-          <Text style={styles.headerSub}>Powered by Gemini 2.5</Text>
+          <Text style={styles.headerSub}>
+            {isContextLoading ? 'Loading your context…' : 'Powered by Gemini 2.5'}
+          </Text>
         </View>
-        <View style={styles.onlineDot} />
+        <View style={[styles.onlineDot, isContextLoading && styles.loadingDot]} />
       </View>
 
       {/* ── History loading spinner ── */}
       {isLoadingHistory && messages.length === 0 ? (
         <View style={styles.historyLoading}>
-          <ActivityIndicator size="small" color="#6366f1" />
+          <ActivityIndicator size="small" color="#0891B2" />
           <Text style={styles.historyLoadingText}>Loading your conversation…</Text>
         </View>
       ) : messages.length === 0 ? (
-        /* ── Welcome / empty state ── */
+        /* ── Welcome / empty state — proactive greeting ── */
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={[styles.welcome, { paddingBottom: tabBarHeight + 16 }]}
           keyboardShouldPersistTaps="handled"
         >
           <Text style={styles.welcomeEmoji}>🌱</Text>
-          <Text style={styles.welcomeTitle}>Hi, {firstName}!</Text>
-          <Text style={styles.welcomeText}>
-            I'm your HVG Guide — here to support your recovery journey.
-            Ask me anything, log your mood, or just talk.
+          <Text style={styles.welcomeTitle}>
+            {contextSnapshot ? `Hey, ${firstName}!` : `Hi, ${firstName}!`}
           </Text>
+          <Text style={styles.welcomeText}>{greeting}</Text>
+
+          {/* Context Summary Pills */}
+          {contextSnapshot && (
+            <View style={styles.contextPills}>
+              {contextSnapshot.upcomingEvents.length > 0 && (
+                <View style={styles.pill}>
+                  <Text style={styles.pillText}>
+                    📅 {contextSnapshot.upcomingEvents.length} event{contextSnapshot.upcomingEvents.length > 1 ? 's' : ''} upcoming
+                  </Text>
+                </View>
+              )}
+              {contextSnapshot.chores.filter(c => c.status === 'pending').length > 0 && (
+                <View style={styles.pill}>
+                  <Text style={styles.pillText}>
+                    📋 {contextSnapshot.chores.filter(c => c.status === 'pending').length} chore{contextSnapshot.chores.filter(c => c.status === 'pending').length > 1 ? 's' : ''} pending
+                  </Text>
+                </View>
+              )}
+              {contextSnapshot.activeCourses.filter(c => c.progress > 0).length > 0 && (
+                <View style={[styles.pill, styles.pillCyan]}>
+                  <Text style={[styles.pillText, styles.pillCyanText]}>
+                    📚 {contextSnapshot.activeCourses.filter(c => c.progress > 0).length} course{contextSnapshot.activeCourses.filter(c => c.progress > 0).length > 1 ? 's' : ''} in progress
+                  </Text>
+                </View>
+              )}
+            </View>
+          )}
+
           <View style={styles.suggestions}>
             {SUGGESTIONS.map((s) => (
               <TouchableOpacity
@@ -328,7 +424,11 @@ export default function ChatScreen() {
                     <Text style={styles.aiText}>{m.content}</Text>
                   </View>
                   {m.component && m.componentData !== undefined ? (
-                    <ComponentCard component={m.component} data={m.componentData} />
+                    <ComponentCard
+                      component={m.component}
+                      data={m.componentData}
+                      employmentGoal={employmentGoal}
+                    />
                   ) : null}
                 </View>
               )}
@@ -348,7 +448,7 @@ export default function ChatScreen() {
       )}
 
       {/* ── Input bar ── */}
-      <View style={[styles.inputBar, { paddingBottom: 12 + (Platform.OS === 'ios' ? 0 : 0) }]}>
+      <View style={[styles.inputBar, { paddingBottom: 12 }]}>
         <TextInput
           style={styles.input}
           value={input}
@@ -376,7 +476,7 @@ export default function ChatScreen() {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0f172a' },
+  container: { flex: 1, backgroundColor: '#0C1A2E' },
 
   header: {
     flexDirection: 'row',
@@ -385,62 +485,57 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#1e293b',
+    borderBottomColor: '#0F2940',
   },
   headerTitle: { color: '#f8fafc', fontSize: 18, fontWeight: '700' },
   headerSub: { color: '#475569', fontSize: 12 },
   onlineDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 10, height: 10, borderRadius: 5,
     backgroundColor: '#22c55e',
     shadowColor: '#22c55e',
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 4,
-    elevation: 4,
+    shadowOpacity: 0.8, shadowRadius: 4, elevation: 4,
   },
+  loadingDot: { backgroundColor: '#0891B2', shadowColor: '#0891B2' },
 
   historyLoading: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
+    flex: 1, flexDirection: 'row', alignItems: 'center',
+    justifyContent: 'center', gap: 10,
   },
   historyLoadingText: { color: '#475569', fontSize: 14 },
 
-  welcome: {
-    padding: 24,
-    alignItems: 'center',
-  },
+  welcome: { padding: 24, alignItems: 'center' },
   welcomeEmoji: { fontSize: 52, marginBottom: 16 },
   welcomeTitle: {
-    color: '#f8fafc',
-    fontSize: 24,
-    fontWeight: '700',
-    marginBottom: 8,
+    color: '#f8fafc', fontSize: 24, fontWeight: '700', marginBottom: 8,
   },
   welcomeText: {
-    color: '#94a3b8',
-    fontSize: 15,
-    textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 28,
+    color: '#94a3b8', fontSize: 15, textAlign: 'center',
+    lineHeight: 22, marginBottom: 20,
   },
+
+  // Context pills
+  contextPills: {
+    flexDirection: 'row', flexWrap: 'wrap',
+    gap: 8, justifyContent: 'center', marginBottom: 20,
+  },
+  pill: {
+    backgroundColor: '#0F2940', borderRadius: 20,
+    paddingHorizontal: 12, paddingVertical: 6,
+    borderWidth: 1, borderColor: '#1E3A5F',
+  },
+  pillText: { color: '#94a3b8', fontSize: 12 },
+  pillCyan: { backgroundColor: '#0C2A36', borderColor: '#0891B240' },
+  pillCyanText: { color: '#0891B2' },
+
   suggestions: { width: '100%', gap: 10 },
   suggestion: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1e293b',
-    borderRadius: 12,
-    padding: 14,
-    gap: 12,
-    borderWidth: 1,
-    borderColor: '#334155',
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#0F2940', borderRadius: 12, padding: 14, gap: 12,
+    borderWidth: 1, borderColor: '#1E3A5F',
   },
   suggestionIcon: { fontSize: 20 },
-  suggestionText: { color: '#c7d2fe', fontSize: 14, flex: 1 },
+  suggestionText: { color: '#93c5fd', fontSize: 14, flex: 1 },
 
   messages: { padding: 16 },
 
@@ -448,70 +543,44 @@ const styles = StyleSheet.create({
   aiRow: { alignItems: 'flex-start', marginBottom: 8 },
 
   userBubble: {
-    backgroundColor: '#6366f1',
-    borderRadius: 18,
-    borderBottomRightRadius: 4,
-    padding: 12,
-    maxWidth: '80%',
+    backgroundColor: '#0891B2', borderRadius: 18,
+    borderBottomRightRadius: 4, padding: 12, maxWidth: '80%',
   },
   userText: { color: '#fff', fontSize: 15, lineHeight: 21 },
 
   aiGroup: { maxWidth: '88%', gap: 8 },
   aiBubble: {
-    backgroundColor: '#1e293b',
-    borderRadius: 18,
-    borderBottomLeftRadius: 4,
-    padding: 12,
+    backgroundColor: '#0F2940', borderRadius: 18,
+    borderBottomLeftRadius: 4, padding: 12,
+    borderWidth: 1, borderColor: '#1E3A5F',
   },
   aiText: { color: '#e2e8f0', fontSize: 15, lineHeight: 21 },
 
   typingBubble: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    gap: 8,
+    flexDirection: 'row', alignItems: 'center',
+    paddingHorizontal: 16, paddingVertical: 8, gap: 8,
   },
   typingText: { color: '#475569', fontSize: 13 },
 
   errorBar: {
-    backgroundColor: '#7f1d1d',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#991b1b',
+    backgroundColor: '#7f1d1d', paddingHorizontal: 16, paddingVertical: 8,
+    borderTopWidth: 1, borderTopColor: '#991b1b',
   },
   errorText: { color: '#fca5a5', fontSize: 13 },
 
   inputBar: {
-    flexDirection: 'row',
-    paddingHorizontal: 12,
-    paddingTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#1e293b',
-    alignItems: 'flex-end',
-    gap: 8,
-    backgroundColor: '#0f172a',
+    flexDirection: 'row', paddingHorizontal: 12, paddingTop: 10,
+    borderTopWidth: 1, borderTopColor: '#0F2940',
+    alignItems: 'flex-end', gap: 8, backgroundColor: '#0C1A2E',
   },
   input: {
-    flex: 1,
-    backgroundColor: '#1e293b',
-    color: '#f8fafc',
-    borderRadius: 22,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    fontSize: 15,
-    maxHeight: 120,
-    borderWidth: 1,
-    borderColor: '#334155',
+    flex: 1, backgroundColor: '#0F2940', color: '#f8fafc',
+    borderRadius: 22, paddingHorizontal: 16, paddingVertical: 10,
+    fontSize: 15, maxHeight: 120, borderWidth: 1, borderColor: '#1E3A5F',
   },
   sendBtn: {
-    backgroundColor: '#6366f1',
-    borderRadius: 22,
-    width: 44,
-    height: 44,
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: '#0891B2', borderRadius: 22, width: 44, height: 44,
+    justifyContent: 'center', alignItems: 'center',
   },
   sendBtnDisabled: { opacity: 0.35 },
   sendText: { color: '#fff', fontSize: 22, fontWeight: '700' },
@@ -521,98 +590,78 @@ const styles = StyleSheet.create({
 const cards = StyleSheet.create({
   // Sobriety
   sobriety: {
-    backgroundColor: '#134e4a',
-    borderRadius: 16,
-    padding: 16,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#0d9488',
+    backgroundColor: '#134e4a', borderRadius: 16, padding: 16,
+    alignItems: 'center', borderWidth: 1, borderColor: '#0d9488',
   },
   sobrietyLabel: { color: '#99f6e4', fontSize: 13, marginBottom: 4 },
   sobrietyDays: { color: '#f0fdf4', fontSize: 56, fontWeight: '800', lineHeight: 64 },
   sobrietyUnit: { color: '#6ee7b7', fontSize: 18, fontWeight: '600', marginBottom: 4 },
   sobrietyBreakdown: { color: '#99f6e4', fontSize: 14, marginBottom: 8 },
   sobrietyMilestone: {
-    backgroundColor: '#0f3d3a',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    marginTop: 4,
+    backgroundColor: '#0f3d3a', borderRadius: 10,
+    paddingHorizontal: 12, paddingVertical: 6, marginTop: 4,
   },
   sobrietyMilestoneText: { color: '#6ee7b7', fontSize: 13 },
 
   // Crisis
   crisis: {
-    backgroundColor: '#450a0a',
-    borderRadius: 16,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#dc2626',
-    gap: 10,
+    backgroundColor: '#450a0a', borderRadius: 16, padding: 16,
+    borderWidth: 1, borderColor: '#dc2626', gap: 10,
   },
   crisisTitle: { color: '#fca5a5', fontSize: 16, fontWeight: '700' },
   crisisSub: { color: '#f87171', fontSize: 13, marginTop: -4 },
   crisisRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 8,
-    paddingTop: 6,
-    borderTopWidth: 1,
-    borderTopColor: '#7f1d1d',
+    flexDirection: 'row', alignItems: 'center',
+    justifyContent: 'space-between', gap: 8,
+    paddingTop: 6, borderTopWidth: 1, borderTopColor: '#7f1d1d',
   },
   crisisName: { color: '#fee2e2', fontSize: 14, fontWeight: '600' },
   crisisDetail: { color: '#fca5a5', fontSize: 13, marginTop: 2 },
-  callBtn: {
-    backgroundColor: '#dc2626',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-  },
+  callBtn: { backgroundColor: '#dc2626', borderRadius: 8, paddingHorizontal: 12, paddingVertical: 6 },
   callBtnText: { color: '#fff', fontSize: 13, fontWeight: '700' },
 
   // Mood
   mood: {
-    backgroundColor: '#1e1b4b',
-    borderRadius: 16,
-    padding: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#4338ca',
-    gap: 4,
+    backgroundColor: '#0C1A2E', borderRadius: 16, padding: 14,
+    alignItems: 'center', borderWidth: 1, borderColor: '#0891B240', gap: 4,
   },
   moodEmoji: { fontSize: 36, marginBottom: 4 },
-  moodLabel: { color: '#c7d2fe', fontSize: 15, fontWeight: '600' },
-  moodNote: { color: '#a5b4fc', fontSize: 13, textAlign: 'center' },
+  moodLabel: { color: '#93c5fd', fontSize: 15, fontWeight: '600' },
+  moodNote: { color: '#60a5fa', fontSize: 13, textAlign: 'center' },
   moodCheck: { color: '#6ee7b7', fontSize: 12, marginTop: 4 },
 
   // Chores
   chore: {
-    backgroundColor: '#1c1917',
-    borderRadius: 16,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: '#44403c',
-    gap: 8,
+    backgroundColor: '#0F2940', borderRadius: 16, padding: 14,
+    borderWidth: 1, borderColor: '#1E3A5F', gap: 8,
   },
   choreTitle: { color: '#e7e5e4', fontSize: 15, fontWeight: '700' },
-  choreEmpty: { color: '#78716c', fontSize: 14 },
+  choreEmpty: { color: '#64748b', fontSize: 14 },
   choreRow: { flexDirection: 'row', alignItems: 'flex-start', gap: 10 },
   choreIcon: { fontSize: 18 },
   choreName: { color: '#d6d3d1', fontSize: 14, fontWeight: '500' },
-  choreDate: { color: '#78716c', fontSize: 12, marginTop: 1 },
+  choreDate: { color: '#64748b', fontSize: 12, marginTop: 1 },
 
   // Events
   event: {
-    backgroundColor: '#0c1a2e',
-    borderRadius: 16,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: '#1e40af',
-    gap: 8,
+    backgroundColor: '#0C1A2E', borderRadius: 16, padding: 14,
+    borderWidth: 1, borderColor: '#0891B230', gap: 8,
   },
-  eventTitle: { color: '#bfdbfe', fontSize: 15, fontWeight: '700' },
-  eventRow: { paddingTop: 6, borderTopWidth: 1, borderTopColor: '#1e3a5f' },
+  eventTitle: { color: '#93c5fd', fontSize: 15, fontWeight: '700' },
+  eventRow: { paddingTop: 6, borderTopWidth: 1, borderTopColor: '#0F2940' },
   eventName: { color: '#dbeafe', fontSize: 14, fontWeight: '500' },
-  eventTime: { color: '#60a5fa', fontSize: 12, marginTop: 2 },
+  eventTime: { color: '#0891B2', fontSize: 12, marginTop: 2 },
+
+  // Ride Request — NEW
+  rideRequest: {
+    backgroundColor: '#0C2A36', borderRadius: 16, padding: 16,
+    borderWidth: 1, borderColor: '#0891B240', gap: 8,
+  },
+  rideTitle: { color: '#93c5fd', fontSize: 15, fontWeight: '700' },
+  rideSub: { color: '#64748b', fontSize: 13 },
+  rideBtn: {
+    backgroundColor: '#0891B2', borderRadius: 10,
+    paddingVertical: 12, alignItems: 'center', marginTop: 4,
+  },
+  rideBtnText: { color: '#fff', fontSize: 14, fontWeight: '700' },
 });

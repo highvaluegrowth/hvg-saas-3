@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { applicationApi } from '@/lib/api/routes';
@@ -27,7 +28,6 @@ interface FormData {
 export default function StaffApplicationScreen() {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -58,28 +58,16 @@ export default function StaffApplicationScreen() {
           certifications: formData.certifications,
         },
       });
-      setSubmitted(true);
-    } catch (e) {
+      router.replace('/applications/status');
+    } catch (e: unknown) {
       console.error(e);
+      const errorMessage = e instanceof Error ? e.message : 'There was an issue submitting your application. Please try again.';
+      Alert.alert('Submission Failed', errorMessage);
     } finally {
       setSubmitting(false);
     }
   };
 
-  if (submitted) {
-    return (
-      <View style={styles.successContainer}>
-        <Text style={styles.successIcon}>✅</Text>
-        <Text style={styles.successTitle}>Application Submitted!</Text>
-        <Text style={styles.successSub}>
-          We'll review your application and be in touch.
-        </Text>
-        <TouchableOpacity style={styles.doneBtn} onPress={() => router.back()}>
-          <Text style={styles.doneBtnText}>Done</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
 
   return (
     <KeyboardAvoidingView
@@ -368,24 +356,7 @@ const styles = StyleSheet.create({
   submitBtnDisabled: { opacity: 0.6 },
   submitBtnText: { color: '#fff', fontWeight: '700', fontSize: 15 },
 
-  // Success screen
-  successContainer: {
-    flex: 1,
-    backgroundColor: '#0f172a',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 32,
-  },
-  successIcon: { fontSize: 64, marginBottom: 24 },
-  successTitle: { fontSize: 24, fontWeight: '700', color: '#f8fafc', marginBottom: 12, textAlign: 'center' },
-  successSub: { fontSize: 15, color: '#94a3b8', textAlign: 'center', lineHeight: 22, marginBottom: 40 },
-  doneBtn: {
-    backgroundColor: '#10b981',
-    borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 48,
-  },
-  doneBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+
 
   bottomSpacer: { height: 40 },
 });

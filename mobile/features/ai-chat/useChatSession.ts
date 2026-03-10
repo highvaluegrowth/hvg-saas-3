@@ -1,6 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { chatApi, type ChatMessage } from '@/lib/api/routes';
+import { buildAISystemContext, useContextStore } from '@/lib/store/contextStore';
+import { userAskedAboutMedical } from '@/lib/ai/contextEngine';
 
 export function useChatSession(initialConversationId?: string) {
   const [conversationId, setConversationId] = useState<string | undefined>(
@@ -9,6 +11,8 @@ export function useChatSession(initialConversationId?: string) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
+
+  const contextSnapshot = useContextStore((s) => s.snapshot);
 
   // Load most recent conversation history on mount
   useEffect(() => {
@@ -30,16 +34,22 @@ export function useChatSession(initialConversationId?: string) {
       }
     }
     loadHistory();
-  }, []);  
+  }, []);
 
   const mutation = useMutation({
-    mutationFn: (text: string) =>
-      chatApi.send({ message: text, conversationId }),
+    mutationFn: (text: string) => {
+      // Build system context — include medical only if user explicitly asks
+      const includesMedical = userAskedAboutMedical(text);
+      const systemContext = contextSnapshot
+        ? buildAISystemContext(contextSnapshot, includesMedical)
+        : undefined;
+
+      return chatApi.send({ message: text, conversationId, systemContext });
+    },
     onSuccess: (data) => {
       if (data.conversationId) {
         setConversationId(data.conversationId);
       }
-      // Append AI reply with optional rich card data
       setMessages((prev) => [
         ...prev,
         {
@@ -69,7 +79,6 @@ export function useChatSession(initialConversationId?: string) {
       const trimmed = text.trim();
       if (!trimmed) return;
       setErrorMessage(null);
-      // Optimistic update: show user message immediately
       setMessages((prev) => [
         ...prev,
         {
@@ -82,7 +91,7 @@ export function useChatSession(initialConversationId?: string) {
       mutation.mutate(trimmed);
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [conversationId]
+    [conversationId, contextSnapshot]
   );
 
   return {
