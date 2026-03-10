@@ -40,7 +40,7 @@ function SobrietyCard({ data }: { data: unknown }) {
   const days = d?.days ?? 0;
   return (
     <View style={cards.sobriety}>
-      <Text style={cards.sobrietyLabel}>🏆 You've been sober</Text>
+      <Text style={cards.sobrietyLabel}>🏆 You&apos;ve been sober</Text>
       <Text style={cards.sobrietyDays}>{days.toLocaleString()}</Text>
       <Text style={cards.sobrietyUnit}>days</Text>
       {(d?.years || d?.months) ? (
@@ -73,7 +73,7 @@ function CrisisCard({ data }: { data: unknown }) {
   return (
     <View style={cards.crisis}>
       <Text style={cards.crisisTitle}>🆘 Crisis Resources</Text>
-      <Text style={cards.crisisSub}>You're not alone. Help is available 24/7.</Text>
+      <Text style={cards.crisisSub}>You&apos;re not alone. Help is available 24/7.</Text>
       {resources.map((r, i) => (
         <View key={i} style={cards.crisisRow}>
           <View style={{ flex: 1 }}>

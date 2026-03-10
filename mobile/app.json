@@ -49,7 +49,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0f172a"
       },
-      "versionCode": 16
+      "versionCode": 19
     },
     "plugins": [
       "expo-router",
