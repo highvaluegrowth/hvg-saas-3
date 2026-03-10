@@ -73,10 +73,10 @@ function Field({
   rows?: number;
   options?: { value: string; label: string }[];
 }) {
-  const cls = 'mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500';
+  const cls = 'mt-1 block w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder-white/40 shadow-sm focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500';
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700">
+      <label className="block text-sm font-medium text-white/80">
         {label}{required && <span className="text-red-500 ml-1">*</span>}
       </label>
       {as === 'textarea' ? (
@@ -116,17 +116,16 @@ function StepIndicator({ steps, current }: { steps: typeof STEPS; current: Step 
         return (
           <React.Fragment key={step.id}>
             {idx > 0 && (
-              <div className={`flex-1 h-0.5 ${done ? 'bg-cyan-600' : 'bg-gray-200'}`} />
+              <div className={`flex-1 h-0.5 ${done ? 'bg-cyan-600' : 'bg-white/10'}`} />
             )}
             <div className="flex items-center space-x-2 shrink-0">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  active
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${active
                     ? 'bg-cyan-600 text-white'
                     : done
-                    ? 'bg-cyan-600 text-white'
-                    : 'bg-gray-200 text-gray-600'
-                }`}
+                      ? 'bg-cyan-600 text-white'
+                      : 'bg-white/10 text-white/50'
+                  }`}
               >
                 {done ? (
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -136,7 +135,7 @@ function StepIndicator({ steps, current }: { steps: typeof STEPS; current: Step 
                   idx + 1
                 )}
               </div>
-              <span className={`text-sm font-medium ${active ? 'text-cyan-600' : done ? 'text-gray-700' : 'text-gray-400'}`}>
+              <span className={`text-sm font-medium ${active ? 'text-cyan-400' : done ? 'text-white/80' : 'text-white/40'}`}>
                 {step.label}
               </span>
             </div>
@@ -238,8 +237,8 @@ export default function NewResidentPage({ params }: NewResidentPageProps) {
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Enroll New Resident</h1>
-        <p className="text-gray-500 mt-1 text-sm">
+        <h1 className="text-2xl font-bold text-white">Enroll New Resident</h1>
+        <p className="text-white/50 mt-1 text-sm">
           Create a resident profile and enroll them in your program.
         </p>
       </div>
@@ -247,14 +246,14 @@ export default function NewResidentPage({ params }: NewResidentPageProps) {
       <StepIndicator steps={STEPS} current={step} />
 
       {error && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-4">
-          <p className="text-sm text-red-700">{error}</p>
+        <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-4">
+          <p className="text-sm text-red-400">{error}</p>
         </div>
       )}
 
-      <Card>
+      <Card className="bg-white/5 border border-white/10">
         <CardHeader>
-          <CardTitle>{STEPS.find((s) => s.id === step)?.label}</CardTitle>
+          <CardTitle className="text-white">{STEPS.find((s) => s.id === step)?.label}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {step === 'identity' && (
@@ -316,9 +315,8 @@ export default function NewResidentPage({ params }: NewResidentPageProps) {
         </CardContent>
       </Card>
 
-      {/* Navigation */}
       <div className="flex items-center justify-between">
-        <Button variant="outline" onClick={step === 'identity' ? () => router.back() : back}>
+        <Button variant="outline" onClick={step === 'identity' ? () => router.back() : back} className="border-white/10 text-white/70 hover:bg-white/10 bg-transparent">
           {step === 'identity' ? 'Cancel' : 'Back'}
         </Button>
         {step !== 'emergency' ? (

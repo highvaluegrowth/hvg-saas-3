@@ -154,7 +154,7 @@ export default function NewEventPage({ params }: NewEventPageProps) {
                 value={formData.title}
                 onChange={(e) => handleChange('title', e.target.value)}
                 required
-                className="border-gray-300 focus:ring-cyan-500 focus:border-cyan-500"
+                className="bg-white/5 border-white/10 text-white placeholder-white/40 focus:ring-cyan-500 focus:border-cyan-500"
               />
             </div>
 
@@ -187,7 +187,7 @@ export default function NewEventPage({ params }: NewEventPageProps) {
                   value={formData.scheduledAt}
                   onChange={(e) => handleChange('scheduledAt', e.target.value)}
                   required
-                  className="border-gray-300 focus:ring-cyan-500 focus:border-cyan-500"
+                  className="bg-white/5 border-white/10 text-white placeholder-white/40 focus:ring-cyan-500 focus:border-cyan-500"
                 />
               </div>
               <div>
@@ -201,7 +201,7 @@ export default function NewEventPage({ params }: NewEventPageProps) {
                   value={formData.duration}
                   onChange={(e) => handleChange('duration', e.target.value)}
                   required
-                  className="border-gray-300 focus:ring-cyan-500 focus:border-cyan-500"
+                  className="bg-white/5 border-white/10 text-white placeholder-white/40 focus:ring-cyan-500 focus:border-cyan-500"
                 />
               </div>
             </div>
@@ -216,7 +216,7 @@ export default function NewEventPage({ params }: NewEventPageProps) {
                   placeholder="e.g. Main Lounge"
                   value={formData.location}
                   onChange={(e) => handleChange('location', e.target.value)}
-                  className="border-gray-300 focus:ring-cyan-500 focus:border-cyan-500"
+                  className="bg-white/5 border-white/10 text-white placeholder-white/40 focus:ring-cyan-500 focus:border-cyan-500"
                 />
               </div>
               <div>
@@ -228,7 +228,7 @@ export default function NewEventPage({ params }: NewEventPageProps) {
                   placeholder="e.g. John Smith"
                   value={formData.facilitator}
                   onChange={(e) => handleChange('facilitator', e.target.value)}
-                  className="border-gray-300 focus:ring-cyan-500 focus:border-cyan-500"
+                  className="bg-white/5 border-white/10 text-white placeholder-white/40 focus:ring-cyan-500 focus:border-cyan-500"
                 />
               </div>
             </div>

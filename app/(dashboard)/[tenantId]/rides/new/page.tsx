@@ -63,8 +63,8 @@ export default function NewRidePage({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to schedule ride');
       router.push(`/${tenantId}/rides`);
-    } catch (err: any) {
-      setError(err.message || 'Failed to schedule ride');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to schedule ride');
     } finally {
       setIsLoading(false);
     }
@@ -80,48 +80,48 @@ export default function NewRidePage({
   return (
     <div className="p-6 max-w-xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Schedule Ride</h1>
-        <p className="text-sm text-gray-500 mt-1">Create a new transportation request</p>
+        <h1 className="text-2xl font-bold text-white">Schedule Ride</h1>
+        <p className="text-sm text-white/50 mt-1">Create a new transportation request</p>
       </div>
 
-      {error && <div className="bg-red-50 text-red-800 px-4 py-3 rounded-md text-sm">{error}</div>}
+      {error && <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">{error}</div>}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <Card>
-          <CardHeader><CardTitle>Trip Details</CardTitle></CardHeader>
+        <Card className="bg-white/5 border border-white/10">
+          <CardHeader><CardTitle className="text-white">Trip Details</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date & Time *</label>
-              <Input {...f('scheduledAt')} type="datetime-local" required />
+              <label className="block text-sm font-medium text-white/80 mb-1">Date & Time *</label>
+              <Input {...f('scheduledAt')} type="datetime-local" required className="bg-white/5 border-white/10 text-white placeholder-white/40 scheme-dark" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Pickup Address *</label>
-              <Input {...f('pickupAddress')} placeholder="123 Main St, City, State" required />
+              <label className="block text-sm font-medium text-white/80 mb-1">Pickup Address *</label>
+              <Input {...f('pickupAddress')} placeholder="123 Main St, City, State" required className="bg-white/5 border-white/10 text-white placeholder-white/40 scheme-dark" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Dropoff Address *</label>
-              <Input {...f('dropoffAddress')} placeholder="456 Oak Ave, City, State" required />
+              <label className="block text-sm font-medium text-white/80 mb-1">Dropoff Address *</label>
+              <Input {...f('dropoffAddress')} placeholder="456 Oak Ave, City, State" required className="bg-white/5 border-white/10 text-white placeholder-white/40 scheme-dark" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Purpose</label>
-              <Input {...f('purpose')} placeholder="Doctor appointment, NA meeting, etc." />
+              <label className="block text-sm font-medium text-white/80 mb-1">Purpose</label>
+              <Input {...f('purpose')} placeholder="Doctor appointment, NA meeting, etc." className="bg-white/5 border-white/10 text-white placeholder-white/40 scheme-dark" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+              <label className="block text-sm font-medium text-white/80 mb-1">Notes</label>
               <textarea
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 disabled={isLoading}
                 rows={3}
                 placeholder="Any additional details..."
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none"
+                className="w-full rounded-md border border-white/10 bg-white/5 text-white placeholder-white/40 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-cyan-500 scheme-dark"
               />
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader><CardTitle>Passengers</CardTitle></CardHeader>
+        <Card className="bg-white/5 border border-white/10">
+          <CardHeader><CardTitle className="text-white">Passengers</CardTitle></CardHeader>
           <CardContent>
             <ResidentSelector
               tenantId={tenantId}
@@ -137,7 +137,7 @@ export default function NewRidePage({
           <Button type="submit" disabled={isLoading} className="flex-1">
             {isLoading ? 'Scheduling...' : 'Schedule Ride'}
           </Button>
-          <Button type="button" variant="outline" onClick={() => router.back()} disabled={isLoading}>
+          <Button type="button" variant="outline" onClick={() => router.back()} disabled={isLoading} className="border-white/10 text-white/70 hover:bg-white/10 bg-transparent">
             Cancel
           </Button>
         </div>

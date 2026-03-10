@@ -42,24 +42,24 @@ export default function CreateCoursePage({ params }: { params: Promise<{ tenantI
     return (
         <div className="p-6 max-w-2xl mx-auto space-y-6">
             <div>
-                <h1 className="text-2xl font-bold tracking-tight">Create New Course</h1>
-                <p className="text-muted-foreground mt-1">Configure the global settings for your new curriculum.</p>
+                <h1 className="text-2xl font-bold tracking-tight text-white">Create New Course</h1>
+                <p className="text-white/50 mt-1 text-sm">Configure the global settings for your new curriculum.</p>
             </div>
 
-            <form onSubmit={handleCreate} className="space-y-6 bg-card border border-border p-6 rounded-xl shadow-sm">
+            <form onSubmit={handleCreate} className="space-y-6 bg-white/5 border border-white/10 p-6 rounded-xl shadow-sm">
                 {error && (
-                    <div className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md p-3">
+                    <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-md p-3">
                         {error}
                     </div>
                 )}
 
                 <div className="space-y-2">
-                    <label htmlFor="title" className="text-sm font-medium">Course Title</label>
+                    <label htmlFor="title" className="text-sm font-medium text-white/80">Course Title</label>
                     <input
                         id="title"
                         required
                         type="text"
-                        className="w-full p-2 border border-border bg-background rounded-md"
+                        className="w-full p-2 border border-white/10 bg-white/5 text-white placeholder-white/40 rounded-md focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-colors"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
                         placeholder="e.g. 12-Step Foundations"
@@ -67,35 +67,35 @@ export default function CreateCoursePage({ params }: { params: Promise<{ tenantI
                 </div>
 
                 <div className="space-y-2">
-                    <label htmlFor="description" className="text-sm font-medium">Short Description</label>
+                    <label htmlFor="description" className="text-sm font-medium text-white/80">Short Description</label>
                     <textarea
                         id="description"
                         rows={3}
-                        className="w-full p-2 border border-border bg-background rounded-md resize-none"
+                        className="w-full p-2 border border-white/10 bg-white/5 text-white placeholder-white/40 rounded-md resize-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-colors"
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         placeholder="What will residents learn from this course?"
                     />
                 </div>
 
-                <div className="flex items-center gap-3 bg-secondary/30 p-4 rounded-lg border border-border">
+                <div className="flex items-center gap-3 bg-white/5 p-4 rounded-lg border border-white/10">
                     <input
                         id="public"
                         type="checkbox"
                         checked={isPublic}
                         onChange={(e) => setIsPublic(e.target.checked)}
-                        className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary"
+                        className="w-5 h-5 rounded border-white/20 bg-black/20 text-cyan-600 focus:ring-cyan-500 focus:ring-offset-gray-900"
                     />
                     <div>
-                        <label htmlFor="public" className="font-medium inline-block">Universal Access (Public)</label>
-                        <p className="text-sm text-muted-foreground">If checked, non-residents reading this app globally can enroll and take this course.</p>
+                        <label htmlFor="public" className="font-medium inline-block text-white/90">Universal Access (Public)</label>
+                        <p className="text-sm text-white/50">If checked, non-residents reading this app globally can enroll and take this course.</p>
                     </div>
                 </div>
 
                 <button
                     disabled={loading || !title}
                     type="submit"
-                    className="w-full bg-primary text-primary-foreground py-2 rounded-md font-medium disabled:opacity-50"
+                    className="w-full bg-cyan-600 hover:bg-cyan-700 text-white py-2 rounded-md font-medium disabled:opacity-50 transition-colors"
                 >
                     {loading ? 'Creating...' : 'Create & Open Builder'}
                 </button>

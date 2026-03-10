@@ -150,28 +150,28 @@ export default function NewStaffPage({ params }: NewStaffPageProps) {
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Add Staff Member</h1>
-        <p className="text-gray-600 mt-1">Create a new staff member record</p>
+        <h1 className="text-2xl font-bold text-white">Add Staff Member</h1>
+        <p className="text-white/50 mt-1">Create a new staff member record</p>
       </div>
 
       {apiError && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-4">
-          <p className="text-sm text-red-700">{apiError}</p>
+        <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-4">
+          <p className="text-sm text-red-400">{apiError}</p>
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Personal Information */}
-        <Card className="border-gray-200 bg-white">
+        <Card className="bg-white/5 border border-white/10">
           <CardHeader>
-            <CardTitle className="text-base font-semibold text-gray-900">
+            <CardTitle className="text-base font-semibold text-white">
               Personal Information
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white/80 mb-1">
                   First Name <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -179,14 +179,14 @@ export default function NewStaffPage({ params }: NewStaffPageProps) {
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="Jane"
                   disabled={submitting}
-                  className={errors.firstName ? 'border-red-500' : ''}
+                  className={errors.firstName ? 'bg-white/5 border-red-500 text-white placeholder-white/40' : 'bg-white/5 border-white/10 text-white placeholder-white/40'}
                 />
                 {errors.firstName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+                  <p className="mt-1 text-sm text-red-400">{errors.firstName}</p>
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white/80 mb-1">
                   Last Name <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -194,16 +194,16 @@ export default function NewStaffPage({ params }: NewStaffPageProps) {
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="Smith"
                   disabled={submitting}
-                  className={errors.lastName ? 'border-red-500' : ''}
+                  className={errors.lastName ? 'bg-white/5 border-red-500 text-white placeholder-white/40' : 'bg-white/5 border-white/10 text-white placeholder-white/40'}
                 />
                 {errors.lastName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
+                  <p className="mt-1 text-sm text-red-400">{errors.lastName}</p>
                 )}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-white/80 mb-1">
                 Email <span className="text-red-500">*</span>
               </label>
               <Input
@@ -212,16 +212,16 @@ export default function NewStaffPage({ params }: NewStaffPageProps) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="jane@example.com"
                 disabled={submitting}
-                className={errors.email ? 'border-red-500' : ''}
+                className={errors.email ? 'bg-white/5 border-red-500 text-white placeholder-white/40' : 'bg-white/5 border-white/10 text-white placeholder-white/40'}
               />
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                <p className="mt-1 text-sm text-red-400">{errors.email}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone <span className="text-gray-400 font-normal">(optional)</span>
+              <label className="block text-sm font-medium text-white/80 mb-1">
+                Phone <span className="text-white/40 font-normal">(optional)</span>
               </label>
               <Input
                 type="tel"
@@ -229,6 +229,7 @@ export default function NewStaffPage({ params }: NewStaffPageProps) {
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+1 555 000 0000"
                 disabled={submitting}
+                className="bg-white/5 border-white/10 text-white placeholder-white/40"
               />
             </div>
 
@@ -243,7 +244,7 @@ export default function NewStaffPage({ params }: NewStaffPageProps) {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-white/80 mb-1">
                 Firebase User ID <span className="text-red-500">*</span>
               </label>
               <Input
@@ -251,22 +252,21 @@ export default function NewStaffPage({ params }: NewStaffPageProps) {
                 onChange={(e) => setUserId(e.target.value)}
                 placeholder="abc123xyz..."
                 disabled={submitting}
-                className={errors.userId ? 'border-red-500' : ''}
+                className={errors.userId ? 'bg-white/5 border-red-500 text-white placeholder-white/40' : 'bg-white/5 border-white/10 text-white placeholder-white/40'}
               />
               {errors.userId && (
-                <p className="mt-1 text-sm text-red-600">{errors.userId}</p>
+                <p className="mt-1 text-sm text-red-400">{errors.userId}</p>
               )}
-              <p className="mt-1.5 text-sm text-gray-500">
+              <p className="mt-1.5 text-sm text-white/50">
                 The user must already have a Firebase account. Enter their Firebase UID.
               </p>
             </div>
           </CardContent>
         </Card>
 
-        {/* Schedule */}
-        <Card className="border-gray-200 bg-white">
+        <Card className="bg-white/5 border border-white/10">
           <CardHeader>
-            <CardTitle className="text-base font-semibold text-gray-900">
+            <CardTitle className="text-base font-semibold text-white">
               Weekly Schedule
             </CardTitle>
           </CardHeader>
@@ -275,7 +275,7 @@ export default function NewStaffPage({ params }: NewStaffPageProps) {
               const shift = schedule[key];
               return (
                 <div key={key} className="flex items-center gap-3">
-                  <div className="w-28 text-sm font-medium text-gray-700">{label}</div>
+                  <div className="w-28 text-sm font-medium text-white/80">{label}</div>
                   {shift === null ? (
                     <Button
                       type="button"
@@ -283,7 +283,7 @@ export default function NewStaffPage({ params }: NewStaffPageProps) {
                       size="sm"
                       onClick={() => enableDay(key)}
                       disabled={submitting}
-                      className="text-cyan-600 border-cyan-300 hover:bg-cyan-50"
+                      className="text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10 bg-transparent"
                     >
                       + Add shift
                     </Button>
@@ -294,21 +294,21 @@ export default function NewStaffPage({ params }: NewStaffPageProps) {
                         value={shift.start}
                         onChange={(e) => setShiftField(key, 'start', e.target.value)}
                         disabled={submitting}
-                        className="block px-3 py-1.5 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                        className="block px-3 py-1.5 border border-white/10 bg-white/5 rounded-md text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 scheme-dark"
                       />
-                      <span className="text-gray-500 text-sm">to</span>
+                      <span className="text-white/50 text-sm">to</span>
                       <input
                         type="time"
                         value={shift.end}
                         onChange={(e) => setShiftField(key, 'end', e.target.value)}
                         disabled={submitting}
-                        className="block px-3 py-1.5 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                        className="block px-3 py-1.5 border border-white/10 bg-white/5 rounded-md text-sm text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 scheme-dark"
                       />
                       <button
                         type="button"
                         onClick={() => clearDay(key)}
                         disabled={submitting}
-                        className="text-gray-400 hover:text-red-500 transition-colors ml-1"
+                        className="text-white/40 hover:text-red-400 transition-colors ml-1"
                         aria-label={`Remove ${label} shift`}
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -330,6 +330,7 @@ export default function NewStaffPage({ params }: NewStaffPageProps) {
             variant="outline"
             onClick={() => router.push(`/${tenantId}/staff`)}
             disabled={submitting}
+            className="border-white/10 text-white/70 hover:bg-white/10 bg-transparent"
           >
             Cancel
           </Button>

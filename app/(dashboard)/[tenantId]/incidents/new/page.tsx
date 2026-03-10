@@ -67,30 +67,30 @@ export default function NewIncidentPage({ params }: { params: Promise<{ tenantId
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Report Incident</h1>
-        <p className="text-gray-600 mt-1">Document an incident that occurred</p>
+        <h1 className="text-2xl font-bold text-white">Report Incident</h1>
+        <p className="text-white/50 mt-1">Document an incident that occurred</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {error && <div className="p-3 bg-red-50 border border-red-200 text-red-700 rounded-lg text-sm">{error}</div>}
+        {error && <div className="p-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg text-sm">{error}</div>}
 
-        <Card>
-          <CardHeader><CardTitle>Incident Details</CardTitle></CardHeader>
+        <Card className="bg-white/5 border border-white/10">
+          <CardHeader><CardTitle className="text-white">Incident Details</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
-              <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="Brief description of the incident" className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500" />
+              <label className="block text-sm font-medium text-white/80 mb-1">Title *</label>
+              <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} required placeholder="Brief description of the incident" className="w-full rounded-md border border-white/10 bg-white/5 text-white placeholder-white/40 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 scheme-dark" />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description *</label>
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} required placeholder="Detailed description of what happened..." className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500" />
+              <label className="block text-sm font-medium text-white/80 mb-1">Description *</label>
+              <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={4} required placeholder="Detailed description of what happened..." className="w-full rounded-md border border-white/10 bg-white/5 text-white placeholder-white/40 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 scheme-dark" />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
-                <select value={type} onChange={(e) => setType(e.target.value)} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                <label className="block text-sm font-medium text-white/80 mb-1">Type</label>
+                <select value={type} onChange={(e) => setType(e.target.value)} className="w-full rounded-md border border-white/10 bg-white/5 text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 scheme-dark">
                   <option value="medical">Medical</option>
                   <option value="behavioral">Behavioral</option>
                   <option value="property">Property</option>
@@ -99,8 +99,8 @@ export default function NewIncidentPage({ params }: { params: Promise<{ tenantId
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Severity</label>
-                <select value={severity} onChange={(e) => setSeverity(e.target.value)} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                <label className="block text-sm font-medium text-white/80 mb-1">Severity</label>
+                <select value={severity} onChange={(e) => setSeverity(e.target.value)} className="w-full rounded-md border border-white/10 bg-white/5 text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 scheme-dark">
                   <option value="low">Low</option>
                   <option value="medium">Medium</option>
                   <option value="high">High</option>
@@ -111,22 +111,22 @@ export default function NewIncidentPage({ params }: { params: Promise<{ tenantId
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">House (optional)</label>
-                <select value={houseId} onChange={(e) => setHouseId(e.target.value)} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                <label className="block text-sm font-medium text-white/80 mb-1">House (optional)</label>
+                <select value={houseId} onChange={(e) => setHouseId(e.target.value)} className="w-full rounded-md border border-white/10 bg-white/5 text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 scheme-dark">
                   <option value="">— Select house —</option>
                   {houses.map((h) => <option key={h.id} value={h.id}>{h.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date &amp; Time</label>
-                <input type="datetime-local" value={reportedAt} onChange={(e) => setReportedAt(e.target.value)} className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500" />
+                <label className="block text-sm font-medium text-white/80 mb-1">Date &amp; Time</label>
+                <input type="datetime-local" value={reportedAt} onChange={(e) => setReportedAt(e.target.value)} className="w-full rounded-md border border-white/10 bg-white/5 text-white placeholder-white/40 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 scheme-dark" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader><CardTitle>Involved People</CardTitle></CardHeader>
+        <Card className="bg-white/5 border border-white/10">
+          <CardHeader><CardTitle className="text-white">Involved People</CardTitle></CardHeader>
           <CardContent className="space-y-6">
             <ResidentSelector tenantId={tenantId} selectedIds={involvedResidentIds} onChange={setInvolvedResidentIds} label="Involved Residents" placeholder="Search residents..." />
             <StaffSelector tenantId={tenantId} selectedIds={involvedStaffIds} onChange={setInvolvedStaffIds} label="Involved Staff" placeholder="Search staff..." />
@@ -134,7 +134,7 @@ export default function NewIncidentPage({ params }: { params: Promise<{ tenantId
         </Card>
 
         <div className="flex items-center justify-end gap-3">
-          <Button type="button" variant="outline" onClick={() => router.push(`/${tenantId}/incidents`)}>Cancel</Button>
+          <Button type="button" variant="outline" onClick={() => router.push(`/${tenantId}/incidents`)} className="border-white/10 text-white/70 hover:bg-white/10 bg-transparent">Cancel</Button>
           <Button type="submit" disabled={submitting} className="bg-red-600 hover:bg-red-700 text-white">
             {submitting ? 'Reporting...' : 'Report Incident'}
           </Button>

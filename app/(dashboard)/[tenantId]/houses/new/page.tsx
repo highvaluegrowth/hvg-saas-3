@@ -157,79 +157,79 @@ export default function NewHousePage({ params }: NewHousePageProps) {
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Page header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Add New House</h1>
-        <p className="text-gray-500 mt-1 text-sm">
+        <h1 className="text-2xl font-bold text-white">Add New House</h1>
+        <p className="text-white/50 mt-1 text-sm">
           Fill in the details below to add a new sober-living house.
         </p>
       </div>
 
-      <Card>
+      <Card className="bg-white/5 border border-white/10">
         <CardHeader>
-          <CardTitle className="text-lg">House Details</CardTitle>
+          <CardTitle className="text-lg text-white">House Details</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-5">
             {errors.general && (
-              <div className="rounded-md bg-red-50 border border-red-200 p-3">
-                <p className="text-sm text-red-700">{errors.general}</p>
+              <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3">
+                <p className="text-sm text-red-400">{errors.general}</p>
               </div>
             )}
 
             {/* House Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-white/80 mb-1">
                 House Name <span className="text-red-500">*</span>
               </label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Sunrise Recovery House"
-                className={errors.name ? 'border-red-500' : ''}
+                className={errors.name ? 'bg-white/5 border-red-500 text-white placeholder-white/40' : 'bg-white/5 border-white/10 text-white placeholder-white/40'}
               />
-              {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name}</p>}
+              {errors.name && <p className="mt-1 text-sm text-red-400">{errors.name}</p>}
             </div>
 
             {/* Address */}
             <fieldset>
-              <legend className="text-sm font-medium text-gray-700 mb-2">Address</legend>
+              <legend className="text-sm font-medium text-white/80 mb-2">Address</legend>
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">
+                  <label className="block text-sm text-white/60 mb-1">
                     Street <span className="text-red-500">*</span>
                   </label>
                   <Input
                     value={street}
                     onChange={(e) => setStreet(e.target.value)}
                     placeholder="123 Main St"
-                    className={errors.street ? 'border-red-500' : ''}
+                    className={errors.street ? 'bg-white/5 border-red-500 text-white placeholder-white/40' : 'bg-white/5 border-white/10 text-white placeholder-white/40'}
                   />
-                  {errors.street && <p className="mt-1 text-sm text-red-600">{errors.street}</p>}
+                  {errors.street && <p className="mt-1 text-sm text-red-400">{errors.street}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm text-gray-600 mb-1">
+                    <label className="block text-sm text-white/60 mb-1">
                       City <span className="text-red-500">*</span>
                     </label>
                     <Input
                       value={city}
                       onChange={(e) => setCity(e.target.value)}
                       placeholder="Springfield"
-                      className={errors.city ? 'border-red-500' : ''}
+                      className={errors.city ? 'bg-white/5 border-red-500 text-white placeholder-white/40' : 'bg-white/5 border-white/10 text-white placeholder-white/40'}
                     />
-                    {errors.city && <p className="mt-1 text-sm text-red-600">{errors.city}</p>}
+                    {errors.city && <p className="mt-1 text-sm text-red-400">{errors.city}</p>}
                   </div>
                   <div>
-                    <label className="block text-sm text-gray-600 mb-1">
+                    <label className="block text-sm text-white/60 mb-1">
                       ZIP Code <span className="text-red-500">*</span>
                     </label>
                     <Input
                       value={zip}
                       onChange={(e) => setZip(e.target.value)}
                       placeholder="12345"
-                      className={errors.zip ? 'border-red-500' : ''}
+                      className={errors.zip ? 'bg-white/5 border-red-500 text-white placeholder-white/40' : 'bg-white/5 border-white/10 text-white placeholder-white/40'}
                     />
-                    {errors.zip && <p className="mt-1 text-sm text-red-600">{errors.zip}</p>}
+                    {errors.zip && <p className="mt-1 text-sm text-red-400">{errors.zip}</p>}
                   </div>
                 </div>
 
@@ -247,21 +247,22 @@ export default function NewHousePage({ params }: NewHousePageProps) {
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone Number <span className="text-gray-400 font-normal">(optional)</span>
+              <label className="block text-sm font-medium text-white/80 mb-1">
+                Phone Number <span className="text-white/40 font-normal">(optional)</span>
               </label>
               <Input
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="(555) 000-0000"
                 type="tel"
+                className="bg-white/5 border-white/10 text-white placeholder-white/40"
               />
             </div>
 
             {/* Capacity and Status */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white/80 mb-1">
                   Capacity <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -270,9 +271,9 @@ export default function NewHousePage({ params }: NewHousePageProps) {
                   placeholder="10"
                   type="number"
                   min="1"
-                  className={errors.capacity ? 'border-red-500' : ''}
+                  className={errors.capacity ? 'bg-white/5 border-red-500 text-white placeholder-white/40' : 'bg-white/5 border-white/10 text-white placeholder-white/40'}
                 />
-                {errors.capacity && <p className="mt-1 text-sm text-red-600">{errors.capacity}</p>}
+                {errors.capacity && <p className="mt-1 text-sm text-red-400">{errors.capacity}</p>}
               </div>
               <div>
                 <Select
@@ -286,8 +287,8 @@ export default function NewHousePage({ params }: NewHousePageProps) {
 
             {/* House Photo */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                House Photo <span className="text-gray-400 font-normal">(optional)</span>
+              <label className="block text-sm font-medium text-white/80 mb-1">
+                House Photo <span className="text-white/40 font-normal">(optional)</span>
               </label>
               <ImageUpload
                 storagePath={`tenants/${tenantId}/houses/new/photo`}
@@ -297,9 +298,9 @@ export default function NewHousePage({ params }: NewHousePageProps) {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-200">
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-white/10">
               <Link href={`/${tenantId}/houses`}>
-                <Button type="button" variant="outline" disabled={submitting}>
+                <Button type="button" variant="outline" disabled={submitting} className="border-white/10 text-white/70 hover:bg-white/10 bg-transparent">
                   Cancel
                 </Button>
               </Link>

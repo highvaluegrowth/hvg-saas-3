@@ -81,8 +81,8 @@ export default function NewVehiclePage({
       if (!response.ok) throw new Error(data.error || 'Failed to create vehicle');
 
       router.push(`/${tenantId}/vehicles`);
-    } catch (err: any) {
-      setError(err.message || 'Failed to create vehicle');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to create vehicle');
     } finally {
       setIsLoading(false);
     }
@@ -98,64 +98,64 @@ export default function NewVehiclePage({
   return (
     <div className="p-6 max-w-2xl mx-auto space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Add Vehicle</h1>
-        <p className="text-sm text-gray-500 mt-1">Add a new vehicle to your fleet</p>
+        <h1 className="text-2xl font-bold text-white">Add Vehicle</h1>
+        <p className="text-sm text-white/50 mt-1">Add a new vehicle to your fleet</p>
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-800 px-4 py-3 rounded-md text-sm">{error}</div>
+        <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">{error}</div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <Card>
-          <CardHeader><CardTitle>Vehicle Details</CardTitle></CardHeader>
+        <Card className="bg-white/5 border border-white/10">
+          <CardHeader><CardTitle className="text-white">Vehicle Details</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Make *</label>
-                <Input {...field('make')} placeholder="Ford" required />
+                <label className="block text-sm font-medium text-white/80 mb-1">Make *</label>
+                <Input {...field('make')} placeholder="Ford" required className="bg-white/5 border-white/10 text-white placeholder-white/40 scheme-dark" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Model *</label>
-                <Input {...field('model')} placeholder="Transit" required />
+                <label className="block text-sm font-medium text-white/80 mb-1">Model *</label>
+                <Input {...field('model')} placeholder="Transit" required className="bg-white/5 border-white/10 text-white placeholder-white/40 scheme-dark" />
               </div>
             </div>
             <div className="grid grid-cols-3 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Year *</label>
-                <Input {...field('year')} type="number" min="1900" required />
+                <label className="block text-sm font-medium text-white/80 mb-1">Year *</label>
+                <Input {...field('year')} type="number" min="1900" required className="bg-white/5 border-white/10 text-white placeholder-white/40 scheme-dark" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Color *</label>
-                <Input {...field('color')} placeholder="White" required />
+                <label className="block text-sm font-medium text-white/80 mb-1">Color *</label>
+                <Input {...field('color')} placeholder="White" required className="bg-white/5 border-white/10 text-white placeholder-white/40 scheme-dark" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Seats *</label>
-                <Input {...field('seats')} type="number" min="1" max="50" required />
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">License Plate *</label>
-                <Input {...field('licensePlate')} placeholder="ABC-1234" required />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">VIN</label>
-                <Input {...field('vin')} placeholder="Optional" />
+                <label className="block text-sm font-medium text-white/80 mb-1">Seats *</label>
+                <Input {...field('seats')} type="number" min="1" max="50" required className="bg-white/5 border-white/10 text-white placeholder-white/40 scheme-dark" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Current Mileage *</label>
-                <Input {...field('currentMileage')} type="number" min="0" required />
+                <label className="block text-sm font-medium text-white/80 mb-1">License Plate *</label>
+                <Input {...field('licensePlate')} placeholder="ABC-1234" required className="bg-white/5 border-white/10 text-white placeholder-white/40 scheme-dark" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                <label className="block text-sm font-medium text-white/80 mb-1">VIN</label>
+                <Input {...field('vin')} placeholder="Optional" className="bg-white/5 border-white/10 text-white placeholder-white/40 scheme-dark" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-white/80 mb-1">Current Mileage *</label>
+                <Input {...field('currentMileage')} type="number" min="0" required className="bg-white/5 border-white/10 text-white placeholder-white/40 scheme-dark" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-white/80 mb-1">Status</label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value as typeof formData.status })}
                   disabled={isLoading}
-                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  className="w-full rounded-md border border-white/10 bg-white/5 text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 scheme-dark"
                 >
                   <option value="active">Active</option>
                   <option value="maintenance">In Maintenance</option>
@@ -170,43 +170,43 @@ export default function NewVehiclePage({
                 checked={formData.wheelchairAccessible}
                 onChange={(e) => setFormData({ ...formData, wheelchairAccessible: e.target.checked })}
                 disabled={isLoading}
-                className="rounded"
+                className="rounded border-white/20 bg-black/20 text-cyan-500 focus:ring-cyan-500 focus:ring-offset-gray-900"
               />
-              <label htmlFor="wheelchairAccessible" className="text-sm font-medium text-gray-700">
+              <label htmlFor="wheelchairAccessible" className="text-sm font-medium text-white/90">
                 Wheelchair Accessible
               </label>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader><CardTitle>Insurance & Registration</CardTitle></CardHeader>
+        <Card className="bg-white/5 border border-white/10">
+          <CardHeader><CardTitle className="text-white">Insurance & Registration</CardTitle></CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Insurance Provider *</label>
-                <Input {...field('insuranceProvider')} placeholder="State Farm" required />
+                <label className="block text-sm font-medium text-white/80 mb-1">Insurance Provider *</label>
+                <Input {...field('insuranceProvider')} placeholder="State Farm" required className="bg-white/5 border-white/10 text-white placeholder-white/40 scheme-dark" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Policy Number *</label>
-                <Input {...field('insurancePolicyNumber')} placeholder="POL-123456" required />
+                <label className="block text-sm font-medium text-white/80 mb-1">Policy Number *</label>
+                <Input {...field('insurancePolicyNumber')} placeholder="POL-123456" required className="bg-white/5 border-white/10 text-white placeholder-white/40 scheme-dark" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Insurance Expires *</label>
-                <Input {...field('insuranceExpiresAt')} type="date" required />
+                <label className="block text-sm font-medium text-white/80 mb-1">Insurance Expires *</label>
+                <Input {...field('insuranceExpiresAt')} type="date" required className="bg-white/5 border-white/10 text-white placeholder-white/40 scheme-dark" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Registration Expires *</label>
-                <Input {...field('registrationExpiresAt')} type="date" required />
+                <label className="block text-sm font-medium text-white/80 mb-1">Registration Expires *</label>
+                <Input {...field('registrationExpiresAt')} type="date" required className="bg-white/5 border-white/10 text-white placeholder-white/40 scheme-dark" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader><CardTitle>Notes</CardTitle></CardHeader>
+        <Card className="bg-white/5 border border-white/10">
+          <CardHeader><CardTitle className="text-white">Notes</CardTitle></CardHeader>
           <CardContent>
             <textarea
               value={formData.notes}
@@ -214,7 +214,7 @@ export default function NewVehiclePage({
               disabled={isLoading}
               rows={3}
               placeholder="Any additional notes about this vehicle..."
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm resize-none"
+              className="w-full rounded-md border border-white/10 bg-white/5 text-white placeholder-white/40 px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-cyan-500 scheme-dark"
             />
           </CardContent>
         </Card>
@@ -228,6 +228,7 @@ export default function NewVehiclePage({
             variant="outline"
             onClick={() => router.back()}
             disabled={isLoading}
+            className="border-white/10 text-white/70 hover:bg-white/10 bg-transparent"
           >
             Cancel
           </Button>
