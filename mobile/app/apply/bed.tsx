@@ -11,7 +11,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { applicationApi } from '@/lib/api/routes';
 
 interface FormData {
@@ -28,6 +28,7 @@ interface FormData {
 
 export default function BedApplicationScreen() {
   const router = useRouter();
+  const { tenantId, houseId } = useLocalSearchParams<{ tenantId?: string; houseId?: string }>();
   const [step, setStep] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [formData, setFormData] = useState<FormData>({
@@ -49,6 +50,8 @@ export default function BedApplicationScreen() {
     setSubmitting(true);
     try {
       await applicationApi.submitBed({
+        requestedTenantId: tenantId || null,
+        requestedHouseId: houseId || null,
         applicantName: formData.name,
         applicantEmail: formData.email,
         zipCode: formData.zipCode,

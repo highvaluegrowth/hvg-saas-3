@@ -8,7 +8,7 @@ import Link from 'next/link';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type ApplicationType = 'bed' | 'staff' | 'course' | 'event' | 'tenant';
-type ApplicationStatus = 'pending' | 'assigned' | 'accepted' | 'rejected' | 'archived';
+type ApplicationStatus = 'pending' | 'pending_triage' | 'assigned_to_tenant' | 'assigned' | 'accepted' | 'rejected' | 'archived' | 'waitlisted';
 
 interface Application {
     id: string;
@@ -17,40 +17,50 @@ interface Application {
     applicantName: string;
     applicantEmail: string;
     zipCode: string;
+    requestedTenantId?: string | null;
+    requestedHouseId?: string | null;
     submittedAt: string | { _seconds: number };
     data: Record<string, unknown>;
 }
 
+interface Tenant {
+    id: string;
+    name: string;
+}
+
 // ─── Badge Helpers ────────────────────────────────────────────────────────────
 
-const TYPE_BADGE: Record<ApplicationType, string> = {
-    bed: 'bg-indigo-100 text-indigo-800',
-    staff: 'bg-violet-100 text-violet-800',
-    course: 'bg-teal-100 text-teal-800',
-    event: 'bg-orange-100 text-orange-800',
-    tenant: 'bg-emerald-100 text-emerald-800',
+const TYPE_BADGE: Record<string, string> = {
+    bed: 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30',
+    staff: 'bg-violet-500/20 text-violet-300 border border-violet-500/30',
+    course: 'bg-teal-500/20 text-teal-300 border border-teal-500/30',
+    event: 'bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30',
+    tenant: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
 };
 
-const STATUS_BADGE: Record<ApplicationStatus, string> = {
-    pending: 'bg-fuchsia-100 text-fuchsia-800',
-    assigned: 'bg-blue-100 text-blue-800',
-    accepted: 'bg-emerald-100 text-emerald-800',
-    rejected: 'bg-red-100 text-red-800',
-    archived: 'bg-slate-100 text-slate-600',
+const STATUS_BADGE: Record<string, string> = {
+    pending_triage: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
+    pending: 'bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30',
+    assigned_to_tenant: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
+    assigned: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
+    accepted: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
+    rejected: 'bg-red-500/20 text-red-300 border border-red-500/30',
+    archived: 'bg-slate-500/20 text-slate-300 border border-slate-500/30',
+    waitlisted: 'bg-purple-500/20 text-purple-300 border border-purple-500/30',
 };
 
-function TypeBadge({ type }: { type: ApplicationType }) {
+function TypeBadge({ type }: { type: string }) {
     return (
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${TYPE_BADGE[type] ?? 'bg-slate-100 text-slate-700'}`}>
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${TYPE_BADGE[type] ?? 'bg-white/10 text-slate-300 border border-white/20'}`}>
             {type}
         </span>
     );
 }
 
-function StatusBadge({ status }: { status: ApplicationStatus }) {
+function StatusBadge({ status }: { status: string }) {
     return (
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_BADGE[status] ?? 'bg-slate-100 text-slate-700'}`}>
-            {status}
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_BADGE[status] ?? 'bg-white/10 text-slate-300 border border-white/20'}`}>
+            {status.replace(/_/g, ' ')}
         </span>
     );
 }
@@ -63,7 +73,6 @@ function formatDate(value: string | { _seconds: number } | undefined): string {
         const d = new Date(value);
         return isNaN(d.getTime()) ? value : d.toLocaleDateString();
     }
-    // Firestore Timestamp-like object
     return new Date(value._seconds * 1000).toLocaleDateString();
 }
 
@@ -73,14 +82,14 @@ function TableSkeleton() {
     return (
         <div className="animate-pulse">
             {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex items-center space-x-4 px-6 py-4 border-b border-slate-100 last:border-0">
-                    <div className="h-5 w-16 bg-slate-200 rounded-full" />
-                    <div className="h-4 w-32 bg-slate-200 rounded" />
-                    <div className="h-4 w-40 bg-slate-200 rounded flex-1" />
-                    <div className="h-4 w-16 bg-slate-200 rounded" />
-                    <div className="h-4 w-20 bg-slate-200 rounded" />
-                    <div className="h-5 w-20 bg-slate-200 rounded-full" />
-                    <div className="h-8 w-16 bg-slate-200 rounded-lg" />
+                <div key={i} className="flex items-center space-x-4 px-6 py-4 border-b border-white/10 last:border-0">
+                    <div className="h-5 w-16 bg-white/5 rounded-full" />
+                    <div className="h-4 w-32 bg-white/5 rounded" />
+                    <div className="h-4 w-40 bg-white/5 rounded flex-1" />
+                    <div className="h-4 w-16 bg-white/5 rounded" />
+                    <div className="h-4 w-20 bg-white/5 rounded" />
+                    <div className="h-5 w-20 bg-white/5 rounded-full" />
+                    <div className="h-8 w-16 bg-white/5 rounded-lg" />
                 </div>
             ))}
         </div>
@@ -89,7 +98,7 @@ function TableSkeleton() {
 
 // ─── Filter Bar ───────────────────────────────────────────────────────────────
 
-const APPLICATION_TYPES: { label: string; value: ApplicationType | 'all' }[] = [
+const APPLICATION_TYPES = [
     { label: 'All', value: 'all' },
     { label: 'Bed', value: 'bed' },
     { label: 'Staff', value: 'staff' },
@@ -98,11 +107,13 @@ const APPLICATION_TYPES: { label: string; value: ApplicationType | 'all' }[] = [
     { label: 'Tenant', value: 'tenant' },
 ];
 
-const APPLICATION_STATUSES: { label: string; value: ApplicationStatus | 'all' }[] = [
+const APPLICATION_STATUSES = [
     { label: 'All', value: 'all' },
+    { label: 'Pending Triage', value: 'pending_triage' },
+    { label: 'Assigned', value: 'assigned_to_tenant' },
     { label: 'Pending', value: 'pending' },
-    { label: 'Assigned', value: 'assigned' },
     { label: 'Accepted', value: 'accepted' },
+    { label: 'Waitlisted', value: 'waitlisted' },
     { label: 'Rejected', value: 'rejected' },
 ];
 
@@ -112,37 +123,91 @@ export default function ApplicationsInboxPage() {
     const { user } = useAuth();
 
     const [applications, setApplications] = useState<Application[]>([]);
+    const [tenants, setTenants] = useState<Tenant[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     // Client-side filters
-    const [typeFilter, setTypeFilter] = useState<ApplicationType | 'all'>('all');
-    const [statusFilter, setStatusFilter] = useState<ApplicationStatus | 'all'>('all');
+    const [typeFilter, setTypeFilter] = useState<string>('all');
+    const [statusFilter, setStatusFilter] = useState<string>('pending_triage');
+
+    // Dispatching Modal State
+    const [dispatchApp, setDispatchApp] = useState<Application | null>(null);
+    const [selectedTenantId, setSelectedTenantId] = useState<string>('');
+    const [dispatching, setDispatching] = useState(false);
+
+    const fetchData = async () => {
+        if (!user) return;
+        setLoading(true);
+        try {
+            const token = await authService.getIdToken();
+
+            // Fetch apps and tenants parallel
+            const [appRes, tenantRes] = await Promise.all([
+                fetch('/api/admin/applications?limit=100', {
+                    headers: { Authorization: `Bearer ${token}` },
+                }),
+                fetch('/api/admin/tenants?status=active', { // assuming this gets active
+                    headers: { Authorization: `Bearer ${token}` },
+                })
+            ]);
+
+            if (appRes.ok) {
+                const data = await appRes.json();
+                setApplications(data.applications || []);
+            } else {
+                throw new Error('Failed to fetch applications');
+            }
+
+            if (tenantRes.ok) {
+                const data = await tenantRes.json();
+                setTenants(data.tenants || []);
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : String(err));
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        async function fetchApplications() {
-            if (!user) return;
-            try {
-                const token = await authService.getIdToken();
-                const res = await fetch('/api/admin/applications?limit=50', {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-
-                if (res.ok) {
-                    const data = await res.json();
-                    setApplications(data.applications || []);
-                } else {
-                    setError('Failed to fetch applications.');
-                }
-            } catch (err: any) {
-                setError(err.message);
-            } finally {
-                setLoading(false);
-            }
+        if (user) {
+            fetchData();
         }
-
-        fetchApplications();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
+
+    const handleDispatch = async () => {
+        if (!dispatchApp || !selectedTenantId) return;
+        setDispatching(true);
+        try {
+            const token = await authService.getIdToken();
+            const res = await fetch(`/api/admin/applications/${dispatchApp.id}/assign`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ tenantId: selectedTenantId }),
+            });
+
+            if (!res.ok) throw new Error('Failed to dispatch application');
+
+            // Remove from local state or update status
+            setApplications(prev => prev.map(a =>
+                a.id === dispatchApp.id
+                    ? { ...a, status: 'assigned_to_tenant', assignedTenantId: selectedTenantId }
+                    : a
+            ));
+
+            setDispatchApp(null);
+            setSelectedTenantId('');
+        } catch (err) {
+            alert(err instanceof Error ? err.message : String(err));
+        } finally {
+            setDispatching(false);
+        }
+    };
 
     // Apply client-side filters
     const filtered = applications.filter((app) => {
@@ -152,17 +217,17 @@ export default function ApplicationsInboxPage() {
     });
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 min-h-screen bg-[#0F071A] p-6 text-white rounded-xl">
             {/* Header */}
             <div className="flex justify-between items-start">
                 <div>
-                    <h2 className="text-2xl font-bold tracking-tight text-slate-900">Applications Inbox</h2>
-                    <p className="text-sm text-slate-500 mt-1">
-                        Review all incoming applications and assign them to tenants.
+                    <h2 className="text-2xl font-bold tracking-tight text-white">Central Triage Dashboard</h2>
+                    <p className="text-sm text-slate-400 mt-1">
+                        Review globally submitted applications and dispatch to appropriate organizations.
                     </p>
                 </div>
                 {!loading && !error && (
-                    <span className="text-sm text-slate-500 mt-1 pt-1">
+                    <span className="text-sm text-slate-400 mt-1 pt-1 bg-white/5 px-3 py-1 rounded-full border border-white/10">
                         {filtered.length} application{filtered.length !== 1 ? 's' : ''}
                     </span>
                 )}
@@ -171,14 +236,14 @@ export default function ApplicationsInboxPage() {
             {/* Filter Bar */}
             <div className="flex flex-wrap gap-4 items-center">
                 {/* Type Filter */}
-                <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-1">
+                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-lg p-1">
                     {APPLICATION_TYPES.map(({ label, value }) => (
                         <button
                             key={value}
-                            onClick={() => setTypeFilter(value as ApplicationType | 'all')}
+                            onClick={() => setTypeFilter(value)}
                             className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${typeFilter === value
-                                    ? 'bg-slate-900 text-white'
-                                    : 'text-slate-600 hover:bg-slate-100'
+                                ? 'bg-[#D946EF] text-white shadow-lg shadow-fuchsia-500/20'
+                                : 'text-slate-400 hover:bg-white/10 hover:text-white'
                                 }`}
                         >
                             {label}
@@ -187,14 +252,14 @@ export default function ApplicationsInboxPage() {
                 </div>
 
                 {/* Status Filter */}
-                <div className="flex items-center gap-1 bg-white border border-slate-200 rounded-lg p-1">
+                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-lg p-1">
                     {APPLICATION_STATUSES.map(({ label, value }) => (
                         <button
                             key={value}
-                            onClick={() => setStatusFilter(value as ApplicationStatus | 'all')}
+                            onClick={() => setStatusFilter(value)}
                             className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${statusFilter === value
-                                    ? 'bg-slate-900 text-white'
-                                    : 'text-slate-600 hover:bg-slate-100'
+                                ? 'bg-[#D946EF] text-white shadow-lg shadow-fuchsia-500/20'
+                                : 'text-slate-400 hover:bg-white/10 hover:text-white'
                                 }`}
                         >
                             {label}
@@ -204,18 +269,18 @@ export default function ApplicationsInboxPage() {
             </div>
 
             {/* Table Card */}
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="bg-white/5 rounded-xl border border-white/10 shadow-xl overflow-hidden backdrop-blur-sm">
                 {loading ? (
                     <TableSkeleton />
                 ) : error ? (
-                    <div className="p-10 text-center text-red-500">{error}</div>
+                    <div className="p-10 text-center text-red-400">{error}</div>
                 ) : filtered.length === 0 ? (
                     <div className="p-10 text-center">
-                        <svg className="mx-auto h-12 w-12 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="mx-auto h-12 w-12 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
-                        <h3 className="mt-2 text-sm font-medium text-slate-900">No applications</h3>
-                        <p className="mt-1 text-sm text-slate-500">
+                        <h3 className="mt-2 text-sm font-medium text-white">No applications</h3>
+                        <p className="mt-1 text-sm text-slate-400">
                             {typeFilter !== 'all' || statusFilter !== 'all'
                                 ? 'No applications match your current filters.'
                                 : 'There are currently no applications to review.'}
@@ -223,7 +288,7 @@ export default function ApplicationsInboxPage() {
                         {(typeFilter !== 'all' || statusFilter !== 'all') && (
                             <button
                                 onClick={() => { setTypeFilter('all'); setStatusFilter('all'); }}
-                                className="mt-3 text-sm text-emerald-600 hover:text-emerald-800 font-medium"
+                                className="mt-3 text-sm text-[#D946EF] hover:text-fuchsia-400 font-medium"
                             >
                                 Clear filters
                             </button>
@@ -231,49 +296,63 @@ export default function ApplicationsInboxPage() {
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-slate-200">
-                            <thead className="bg-slate-50">
+                        <table className="min-w-full divide-y divide-white/10">
+                            <thead className="bg-white/5">
                                 <tr>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Type</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Applicant Name</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Email</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Zip</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Submitted</th>
-                                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                                    <th scope="col" className="relative px-6 py-3"><span className="sr-only">Actions</span></th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Type</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Applicant Name</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Requested Org</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Zip Code</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Submitted</th>
+                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Status</th>
+                                    <th scope="col" className="relative px-6 py-4"><span className="sr-only">Actions</span></th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-slate-200">
+                            <tbody className="divide-y divide-white/10">
                                 {filtered.map((app) => (
-                                    <tr key={app.id} className="hover:bg-slate-50 transition-colors">
+                                    <tr key={app.id} className="hover:bg-white/5 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <TypeBadge type={app.type} />
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm font-medium text-slate-900">
+                                            <div className="text-sm font-medium text-white">
                                                 {app.applicantName || '—'}
+                                            </div>
+                                            <div className="text-xs text-slate-400">
+                                                {app.applicantEmail || ''}
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-slate-500">{app.applicantEmail || '—'}</div>
+                                            <div className="text-sm text-slate-300">
+                                                {app.requestedTenantId ? tenants.find(t => t.id === app.requestedTenantId)?.name || app.requestedTenantId : 'None'}
+                                            </div>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
                                             {app.zipCode || '—'}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
                                             {formatDate(app.submittedAt)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <StatusBadge status={app.status} />
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <Link
-                                                href={`/admin/applications/${app.id}`}
-                                                className="bg-slate-900 text-white rounded-lg px-4 py-2 text-xs font-medium hover:bg-slate-800 transition-colors"
-                                            >
-                                                Review
-                                                <span className="sr-only">, {app.applicantName}</span>
-                                            </Link>
+                                            <div className="flex justify-end gap-3">
+                                                {app.status === 'pending_triage' && (
+                                                    <button
+                                                        onClick={() => setDispatchApp(app)}
+                                                        className="text-[#D946EF] hover:text-fuchsia-300 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 px-3 py-1.5 rounded-lg transition-colors border border-[#D946EF]/30 hover:border-[#D946EF]/50"
+                                                    >
+                                                        Dispatch
+                                                    </button>
+                                                )}
+                                                <Link
+                                                    href={`/admin/applications/${app.id}`}
+                                                    className="bg-white/10 text-white rounded-lg px-4 py-1.5 text-xs font-medium hover:bg-white/20 transition-colors flex items-center border border-white/10"
+                                                >
+                                                    View
+                                                </Link>
+                                            </div>
                                         </td>
                                     </tr>
                                 ))}
@@ -282,6 +361,66 @@ export default function ApplicationsInboxPage() {
                     </div>
                 )}
             </div>
+
+            {/* Simple Native Dispatch Modal */}
+            {dispatchApp && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <div className="w-full max-w-md transform overflow-hidden rounded-2xl bg-[#1A0B2E] border border-white/10 p-6 text-left align-middle shadow-xl transition-all relative">
+                        {dispatching && (
+                            <div className="absolute inset-0 bg-black/50 z-10 flex items-center justify-center backdrop-blur-[2px] rounded-2xl">
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D946EF]"></div>
+                            </div>
+                        )}
+                        <h3 className="text-lg font-medium leading-6 text-white">
+                            Dispatch Application
+                        </h3>
+                        <div className="mt-4 text-sm text-slate-300">
+                            <p className="mb-4">Assign application from <strong>{dispatchApp?.applicantName}</strong> to an organization.</p>
+
+                            {dispatchApp?.requestedTenantId && (
+                                <div className="mb-4 p-3 bg-white/5 border border-white/10 rounded-lg">
+                                    <span className="text-xs text-slate-400 block mb-1">Applicant Requested:</span>
+                                    <span className="text-[#D946EF] font-medium">
+                                        {tenants.find(t => t.id === dispatchApp.requestedTenantId)?.name || dispatchApp.requestedTenantId}
+                                    </span>
+                                </div>
+                            )}
+
+                            <label className="block text-xs font-medium text-slate-400 mb-1">Select Destination Organization</label>
+                            <select
+                                value={selectedTenantId}
+                                onChange={(e) => setSelectedTenantId(e.target.value)}
+                                className="w-full bg-black/50 border border-white/20 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-[#D946EF] focus:border-transparent outline-none"
+                                disabled={dispatching}
+                            >
+                                <option value="" disabled>Select an organization...</option>
+                                {tenants.map(t => (
+                                    <option key={t.id} value={t.id}>{t.name}</option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="mt-6 flex justify-end gap-3">
+                            <button
+                                type="button"
+                                className="inline-flex justify-center rounded-lg border border-white/10 bg-transparent px-4 py-2 text-sm font-medium text-slate-300 hover:bg-white/5 focus:outline-none"
+                                onClick={() => setDispatchApp(null)}
+                                disabled={dispatching}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                className="inline-flex justify-center rounded-lg border border-transparent bg-[#D946EF] px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-fuchsia-500/20"
+                                onClick={handleDispatch}
+                                disabled={!selectedTenantId || dispatching}
+                            >
+                                Dispatch Application
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

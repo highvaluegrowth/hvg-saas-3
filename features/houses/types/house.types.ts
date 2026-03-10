@@ -10,6 +10,11 @@ export interface HouseAddress {
 export interface House extends BaseDocument {
   name: string;
   address: HouseAddress;
+  location?: {
+    lat: number;
+    lng: number;
+  };
+  geohash?: string;
   phone?: string;
   photoUrl?: string;
   capacity: number;
@@ -36,6 +41,11 @@ export interface Bed extends BaseDocument {
 export interface CreateHouseInput {
   name: string;
   address: HouseAddress;
+  location?: {
+    lat: number;
+    lng: number;
+  };
+  geohash?: string;
   phone?: string;
   photoUrl?: string;
   capacity: number;

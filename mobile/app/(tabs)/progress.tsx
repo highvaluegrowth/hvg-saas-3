@@ -27,8 +27,8 @@ function SobrietyRing({ days }: { days: number }) {
   // Format days into readable string
   const label =
     days >= 365 ? `${(days / 365).toFixed(1)}yr` :
-    days >= 30  ? `${Math.floor(days / 30)}mo` :
-    `${days}d`;
+      days >= 30 ? `${Math.floor(days / 30)}mo` :
+        `${days}d`;
 
   return (
     <View style={styles.ringContainer}>
@@ -87,7 +87,7 @@ function MoodSparkline({ moods }: { moods: MoodEntry[] }) {
   const getMoodColor = (score: number) => {
     if (score >= 4) return '#10b981';
     if (score >= 3) return '#6366f1';
-    if (score >= 2) return '#f59e0b';
+    if (score >= 2) return '#D946EF';
     return '#ef4444';
   };
 
@@ -131,7 +131,7 @@ function CourseProgressBar({ course }: { course: CourseProgress }) {
         <Text style={styles.courseTitle} numberOfLines={1}>{course.title}</Text>
         <Text style={[styles.courseStatus, { color }]}>
           {course.status === 'COMPLETED' ? '✓ Done' :
-           course.status === 'IN_PROGRESS' ? `${pct}%` : 'Enrolled'}
+            course.status === 'IN_PROGRESS' ? `${pct}%` : 'Enrolled'}
         </Text>
       </View>
       <View style={styles.progressTrack}>
@@ -214,7 +214,7 @@ export default function ProgressScreen() {
       <Section title="Courses">
         <View style={styles.statRow}>
           <StatCard label="Enrolled" value={courses.enrolled} accent="#6366f1" />
-          <StatCard label="In Progress" value={courses.inProgress} accent="#f59e0b" />
+          <StatCard label="In Progress" value={courses.inProgress} accent="#D946EF" />
           <StatCard label="Completed" value={courses.completed} accent="#10b981" />
         </View>
         {courses.items.length > 0 ? (
@@ -254,7 +254,7 @@ export default function ProgressScreen() {
             {[
               { label: 'Great', color: '#10b981' },
               { label: 'Good', color: '#6366f1' },
-              { label: 'Okay', color: '#f59e0b' },
+              { label: 'Okay', color: '#D946EF' },
               { label: 'Low', color: '#ef4444' },
             ].map(({ label, color }) => (
               <View key={label} style={styles.legendItem}>

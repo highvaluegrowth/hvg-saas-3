@@ -14,7 +14,7 @@ const STATUS_OPTIONS = ['pending', 'in_progress', 'done'] as const;
 type ChoreStatus = (typeof STATUS_OPTIONS)[number];
 
 const STATUS_COLORS: Record<string, string> = {
-  pending: '#f59e0b',
+  pending: '#D946EF',
   in_progress: '#6366f1',
   done: '#22c55e',
   overdue: '#ef4444',
@@ -126,6 +126,6 @@ const styles = StyleSheet.create({
   },
   badgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
   desc: { color: '#94a3b8', fontSize: 13, marginTop: 6 },
-  due: { color: '#f59e0b', fontSize: 12, marginTop: 4 },
+  due: { color: '#D946EF', fontSize: 12, marginTop: 4 },
   tap: { color: '#475569', fontSize: 11, marginTop: 8, fontStyle: 'italic' },
 });

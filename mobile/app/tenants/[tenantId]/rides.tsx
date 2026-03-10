@@ -15,7 +15,7 @@ import { tenantApi } from '@/lib/api/routes';
 import { format } from 'date-fns';
 
 const STATUS_COLORS: Record<string, string> = {
-  requested: '#f59e0b',
+  requested: '#D946EF',
   scheduled: '#6366f1',
   completed: '#22c55e',
   cancelled: '#ef4444',

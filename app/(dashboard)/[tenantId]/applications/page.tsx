@@ -5,12 +5,42 @@ import { authService } from '@/features/auth/services/authService';
 import type { Application, ApplicationStatus, ApplicationType } from '@/features/applications/types';
 
 const STATUS_CONFIG: Record<ApplicationStatus, { label: string; badge: React.CSSProperties }> = {
-  draft: { label: 'Draft', badge: { background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' } },
-  pending: { label: 'Pending', badge: { background: 'rgba(245,158,11,0.15)', color: '#FCD34D', border: '1px solid rgba(245,158,11,0.3)' } },
-  assigned: { label: 'Assigned', badge: { background: 'rgba(8,145,178,0.15)', color: '#67E8F9', border: '1px solid rgba(8,145,178,0.3)' } },
-  accepted: { label: 'Accepted', badge: { background: 'rgba(52,211,153,0.15)', color: '#6EE7B7', border: '1px solid rgba(52,211,153,0.3)' } },
-  rejected: { label: 'Rejected', badge: { background: 'rgba(239,68,68,0.15)', color: '#FCA5A5', border: '1px solid rgba(239,68,68,0.3)' } },
-  archived: { label: 'Archived', badge: { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)' } },
+  draft: {
+    label: 'Draft',
+    badge: { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.7)' }
+  },
+  pending: {
+    label: 'Submitted',
+    badge: { background: 'rgba(245,158,11,0.1)', color: '#FCD34D', border: '1px solid rgba(245,158,11,0.2)' }
+  },
+  pending_triage: {
+    label: 'Under Global Review',
+    badge: { background: 'rgba(6,182,212,0.1)', color: '#67E8F9', border: '1px solid rgba(6,182,212,0.2)' }
+  },
+  assigned_to_tenant: {
+    label: 'Assigned to Org',
+    badge: { background: 'rgba(59,130,246,0.1)', color: '#93C5FD', border: '1px solid rgba(59,130,246,0.2)' }
+  },
+  assigned: {
+    label: 'Assigned',
+    badge: { background: 'rgba(59,130,246,0.1)', color: '#93C5FD', border: '1px solid rgba(59,130,246,0.2)' }
+  },
+  accepted: {
+    label: 'Accepted',
+    badge: { background: 'rgba(16,185,129,0.1)', color: '#6EE7B7', border: '1px solid rgba(16,185,129,0.2)' }
+  },
+  waitlisted: {
+    label: 'Waitlisted',
+    badge: { background: 'rgba(139,92,246,0.1)', color: '#C4B5FD', border: '1px solid rgba(139,92,246,0.2)' }
+  },
+  rejected: {
+    label: 'Rejected',
+    badge: { background: 'rgba(239,68,68,0.1)', color: '#FCA5A5', border: '1px solid rgba(239,68,68,0.2)' }
+  },
+  archived: {
+    label: 'Archived',
+    badge: { background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.5)' }
+  }
 };
 
 const TYPE_CONFIG: Record<ApplicationType, { label: string; icon: string }> = {

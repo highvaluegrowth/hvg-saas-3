@@ -48,6 +48,12 @@ export const tenantApi = {
     api.post<{ rideId: string }>(`/api/mobile/tenants/${tenantId}/rides`, body),
 };
 
+// --- Search ---
+export const searchApi = {
+  getHousesWithinRadius: (lat: number, lng: number, radiusInKm: number) =>
+    api.get<{ houses: any[] }>(`/api/mobile/search/houses?lat=${lat}&lng=${lng}&radius=${radiusInKm}`),
+};
+
 // --- AI Chat ---
 export const chatApi = {
   send: (body: { message: string; conversationId?: string; systemContext?: string }) =>

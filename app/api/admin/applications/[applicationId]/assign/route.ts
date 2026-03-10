@@ -34,8 +34,9 @@ export async function POST(
         const appData = appDoc.data()!;
 
         await appRef.update({
-            status: 'assigned',
+            status: 'assigned_to_tenant',
             assignedTenantId: tenantId,
+            tenantId: tenantId, // Assigns the app to the tenant for security rules
             assignedAt: now,
             updatedAt: now,
         });
@@ -49,10 +50,10 @@ export async function POST(
             .set({
                 applicationId,
                 type: appData.type,
-                applicantName: appData.applicantName,
-                applicantEmail: appData.applicantEmail,
+                applicantName: appData.applicantName || null,
+                applicantEmail: appData.applicantEmail || null,
                 assignedAt: now,
-                status: 'assigned',
+                status: 'assigned_to_tenant',
             });
 
         return NextResponse.json({ success: true });

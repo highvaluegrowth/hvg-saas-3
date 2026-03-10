@@ -59,6 +59,7 @@ export default function ApplicationStatusScreen() {
             case 'denied':
                 return '#ef4444'; // Red
             case 'pending':
+            case 'pending_triage':
             case 'reviewing':
                 return '#0891b2'; // Cyan (replaced Amber to meet constraints)
             default:
@@ -141,7 +142,7 @@ export default function ApplicationStatusScreen() {
                                                 { color: getStatusColor(app.status) }
                                             ]}
                                         >
-                                            {app.status.toUpperCase()}
+                                            {app.status === 'pending_triage' ? 'UNDER GLOBAL REVIEW' : app.status.toUpperCase()}
                                         </Text>
                                     </View>
                                 </View>

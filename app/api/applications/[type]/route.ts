@@ -44,9 +44,12 @@ export async function POST(
         const application = {
             id: docRef.id,
             type,
-            status: 'pending',
+            status: 'pending_triage',
             applicantId,
             userId: applicantId !== 'anonymous' ? applicantId : null,
+            tenantId: null,
+            requestedTenantId: body.requestedTenantId ?? null,
+            requestedHouseId: body.requestedHouseId ?? null,
             applicantName: tokenName ?? body.applicantName ?? '',
             applicantEmail: tokenEmail ?? body.applicantEmail ?? '',
             zipCode: body.zipCode ?? '',

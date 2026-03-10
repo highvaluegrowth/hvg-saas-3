@@ -11,7 +11,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 const CATEGORIES: { id: GoalCategory; label: string; emoji: string; color: string }[] = [
     { id: 'recovery', label: 'Recovery', emoji: '🌿', color: '#10b981' },
-    { id: 'fitness', label: 'Fitness', emoji: '💪', color: '#f59e0b' },
+    { id: 'fitness', label: 'Fitness', emoji: '💪', color: '#D946EF' },
     { id: 'professional', label: 'Career', emoji: '💼', color: '#3b82f6' },
     { id: 'personal', label: 'Personal', emoji: '⭐', color: '#8b5cf6' },
 ];

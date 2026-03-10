@@ -141,7 +141,7 @@ function EmptyRow({ text }: { text: string }) {
 
 function StatusBadge({ status }: { status: string }) {
   const colors: Record<string, string> = {
-    pending: '#f59e0b',
+    pending: '#D946EF',
     in_progress: '#6366f1',
     done: '#22c55e',
   };

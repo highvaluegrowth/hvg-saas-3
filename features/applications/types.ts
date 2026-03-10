@@ -1,5 +1,5 @@
 export type ApplicationType = 'tenant' | 'bed' | 'staff' | 'course' | 'event';
-export type ApplicationStatus = 'draft' | 'pending' | 'assigned' | 'accepted' | 'rejected' | 'archived';
+export type ApplicationStatus = 'draft' | 'pending' | 'pending_triage' | 'assigned_to_tenant' | 'assigned' | 'accepted' | 'waitlisted' | 'rejected' | 'archived';
 
 export interface BaseApplication {
     id: string;
@@ -9,6 +9,9 @@ export interface BaseApplication {
     applicantName: string;
     applicantEmail: string;
     zipCode: string;
+    tenantId: string | null;
+    requestedTenantId: string | null;
+    requestedHouseId: string | null;
     submittedAt: string;
     createdAt: string;
     updatedAt: string;
