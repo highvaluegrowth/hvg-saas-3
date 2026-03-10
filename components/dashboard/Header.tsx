@@ -1,8 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import { authService } from '@/features/auth/services/authService';
 import { useAISidebarStore } from '@/lib/stores/aiSidebarStore';
 
 interface HeaderProps {
@@ -11,14 +8,7 @@ interface HeaderProps {
 }
 
 export function Header({ tenantName, onMenuClick }: HeaderProps) {
-  const router = useRouter();
-  const { user } = useAuth();
   const { isOpen, setOpen } = useAISidebarStore();
-
-  const handleLogout = async () => {
-    await authService.logout();
-    router.push('/login');
-  };
 
   return (
     <header
@@ -89,28 +79,6 @@ export function Header({ tenantName, onMenuClick }: HeaderProps) {
           style={{ width: 1, background: 'rgba(255,255,255,0.1)' }}
         />
 
-        {/* User info + logout */}
-        <div className="flex items-center space-x-3 pl-1">
-          <div className="hidden md:block text-right">
-            <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.85)' }}>
-              {user?.displayName || user?.email}
-            </p>
-            <p className="text-xs capitalize" style={{ color: 'rgba(255,255,255,0.4)' }}>
-              {user?.role?.replace('_', ' ')}
-            </p>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="text-sm font-medium px-3 py-1.5 rounded-lg transition-colors"
-            style={{
-              color: 'rgba(255,255,255,0.55)',
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.08)',
-            }}
-          >
-            Logout
-          </button>
-        </div>
       </div>
     </header>
   );

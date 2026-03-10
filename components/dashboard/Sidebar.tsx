@@ -1,9 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { authService } from '@/features/auth/services/authService';
 import { getNavigationForRole, iconPaths } from '@/lib/constants/navigation';
+import { LogOut } from 'lucide-react';
 
 interface SidebarProps {
   tenantId: string;
@@ -15,7 +17,13 @@ interface SidebarProps {
 
 export function Sidebar({ tenantId, isOpen = true, onClose, isCollapsed = false, onToggleCollapse }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { user } = useAuth();
+
+  const handleLogout = async () => {
+    await authService.logout();
+    router.push('/login');
+  };
 
   const navigationItems = getNavigationForRole(user?.role);
 
@@ -203,6 +211,19 @@ export function Sidebar({ tenantId, isOpen = true, onClose, isCollapsed = false,
                     {user?.role?.replace('_', ' ')}
                   </p>
                 </div>
+              )}
+
+              {!isCollapsed && (
+                <button
+                  onClick={handleLogout}
+                  title="Logout"
+                  className="p-2 ml-2 shrink-0 rounded-lg transition-colors hover:bg-white/5"
+                  style={{ color: 'rgba(255,255,255,0.4)' }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = '#ef4444'; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.4)'; }}
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
               )}
             </div>
           </div>

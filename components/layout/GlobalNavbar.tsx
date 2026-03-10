@@ -1,9 +1,8 @@
 'use client';
 
-import { useRouter, usePathname, useParams } from 'next/navigation';
+import { usePathname, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { authService } from '@/features/auth/services/authService';
 import { useAISidebarStore } from '@/lib/stores/aiSidebarStore';
 import { useInboxStore } from '@/lib/stores/inboxStore';
 import { GlobalSearch } from '@/components/search/GlobalSearch';
@@ -22,18 +21,12 @@ interface GlobalNavbarProps {
 }
 
 export function GlobalNavbar({ tenantName, onMenuClick }: GlobalNavbarProps) {
-    const router = useRouter();
     const pathname = usePathname();
     const params = useParams();
     const tenantId = params.tenantId as string;
     const { user } = useAuth();
     const { isOpen, setOpen } = useAISidebarStore();
     const { unreadCount } = useInboxStore();
-
-    const handleLogout = async () => {
-        await authService.logout();
-        router.push('/login');
-    };
 
     const isAdminRoute = pathname?.startsWith('/admin');
     const navLinks = isAdminRoute ? [
@@ -163,28 +156,7 @@ export function GlobalNavbar({ tenantName, onMenuClick }: GlobalNavbarProps) {
                     </Link>
                 )}
 
-                {/* User Profile & Logout */}
-                <div className="flex items-center space-x-3 pl-1">
-                    <div className="hidden lg:block text-right">
-                        <p className="text-sm font-medium" style={{ color: 'rgba(255,255,255,0.85)' }}>
-                            {user?.displayName || user?.email || 'User'}
-                        </p>
-                        <p className="text-xs capitalize" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                            {user?.role?.replace('_', ' ')}
-                        </p>
-                    </div>
-                    <button
-                        onClick={handleLogout}
-                        className="text-sm font-medium px-3 py-1.5 rounded-lg transition-colors hover:bg-white/5"
-                        style={{
-                            color: 'rgba(255,255,255,0.55)',
-                            background: 'rgba(255,255,255,0.03)',
-                            border: '1px solid rgba(255,255,255,0.08)',
-                        }}
-                    >
-                        Logout
-                    </button>
-                </div>
+                {/* Removed User Profile & Logout from Navbar per QA feedback */}
             </div>
         </header>
     );
