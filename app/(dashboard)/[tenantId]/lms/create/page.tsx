@@ -95,7 +95,7 @@ export default function CreateCoursePage({ params }: { params: Promise<{ tenantI
                 <button
                     disabled={loading || !title}
                     type="submit"
-                    className="w-full bg-cyan-600 hover:bg-cyan-700 text-white py-2 rounded-md font-medium disabled:opacity-50 transition-colors"
+                    className="w-full bg-cyan-600 hover:bg-cyan-700 text-white! py-2 rounded-md font-medium disabled:opacity-50 transition-colors"
                 >
                     {loading ? 'Creating...' : 'Create & Open Builder'}
                 </button>
