@@ -22,17 +22,20 @@ export default function SearchScreen() {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [results, setResults] = useState<SearchResultHouse[]>([]);
+    const [error, setError] = useState<string | null>(null);
     const [radius, setRadius] = useState<number>(10);
     const [searchQuery, setSearchQuery] = useState('');
     const locationRef = useRef<GeoLocation>(DEFAULT_LOCATION);
 
     const handleSearch = async (r: number, loc: GeoLocation) => {
         setLoading(true);
+        setError(null);
         try {
             const houses = await searchHousesWithinRadius(loc, r);
             setResults(houses);
-        } catch (error) {
-            console.warn('Failed to search houses:', error);
+        } catch (err: any) {
+            console.warn('Failed to search houses:', err);
+            setError(err?.message || 'Failed to load results. Please try again.');
             setResults([]);
         } finally {
             setLoading(false);
@@ -136,11 +139,25 @@ export default function SearchScreen() {
                     renderItem={renderHouse}
                     contentContainerStyle={styles.listContent}
                     ListEmptyComponent={
-                        <View style={styles.emptyContainer}>
-                            <Ionicons name="home-outline" size={48} color="#334155" />
-                            <Text style={styles.emptyText}>No programs found in this area.</Text>
-                            <Text style={styles.emptySubtext}>Try increasing your search radius.</Text>
-                        </View>
+                        error ? (
+                            <View style={styles.emptyContainer}>
+                                <Ionicons name="cloud-offline-outline" size={48} color="#ef4444" />
+                                <Text style={styles.emptyText}>Unable to load results</Text>
+                                <Text style={styles.emptySubtext}>{error}</Text>
+                                <TouchableOpacity
+                                    style={styles.retryButton}
+                                    onPress={() => handleSearch(radius, locationRef.current)}
+                                >
+                                    <Text style={styles.retryButtonText}>Try Again</Text>
+                                </TouchableOpacity>
+                            </View>
+                        ) : (
+                            <View style={styles.emptyContainer}>
+                                <Ionicons name="home-outline" size={48} color="#334155" />
+                                <Text style={styles.emptyText}>No programs found in this area.</Text>
+                                <Text style={styles.emptySubtext}>Try increasing your search radius.</Text>
+                            </View>
+                        )
                     }
                 />
             )}
@@ -302,5 +319,21 @@ const styles = StyleSheet.create({
         color: '#64748B',
         fontSize: 14,
         marginTop: 8,
+        textAlign: 'center',
+        paddingHorizontal: 24,
+    },
+    retryButton: {
+        marginTop: 20,
+        backgroundColor: 'rgba(8, 145, 178, 0.15)',
+        borderWidth: 1,
+        borderColor: '#0891B2',
+        paddingHorizontal: 28,
+        paddingVertical: 10,
+        borderRadius: 20,
+    },
+    retryButtonText: {
+        color: '#0891B2',
+        fontSize: 14,
+        fontWeight: '600',
     },
 });
