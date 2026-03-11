@@ -110,6 +110,19 @@ export default function HomeScreen() {
           </View>
           <Text style={styles.applyCardArrow}>→</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.applyCard}
+          onPress={() => router.push('/search')}
+          activeOpacity={0.75}
+        >
+          <Text style={styles.applyCardIcon}>🔍</Text>
+          <View style={styles.applyCardBody}>
+            <Text style={styles.applyCardTitle}>Search Houses</Text>
+            <Text style={styles.applyCardSub}>Browse sober living homes near you</Text>
+          </View>
+          <Text style={styles.applyCardArrow}>→</Text>
+        </TouchableOpacity>
       </Section>
 
       <TouchableOpacity

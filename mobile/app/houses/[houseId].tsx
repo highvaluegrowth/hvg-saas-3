@@ -11,38 +11,22 @@ export default function HouseDetailsScreen() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // In a real app we'd fetch the specific house details.
-        // We are simulating an API call or using a dummy fetch for now, 
-        // unless there's an existing endpoint like /api/mobile/tenants/{tenantId}/houses/{houseId}
         async function fetchHouse() {
             try {
-                // Since we don't have a dedicated public house detail endpoint built in the plan,
-                // we'll attempt to fetch it or fallback to generic data.
-                // const res = await api.get(`/api/mobile/houses/${houseId}`);
-                // setHouse(res.house);
-
-                // Simulating network delay for realistic UX
-                setTimeout(() => {
-                    setHouse({
-                        id: houseId,
-                        name: 'Serenity Sober Living',
-                        description: 'A structured, supportive environment dedicated to long-term recovery. We provide comfortable rooms, weekly check-ins, accountability, and a true sense of community.',
-                        address: '123 Recovery Way',
-                        city: 'Austin',
-                        state: 'TX',
-                        zipCode: '78701',
-                        rules: ['Curfew at 10 PM', 'Mandatory weekly meetings', 'Random drug testing'],
-                        amenities: ['Wi-Fi', 'Laundry onsite', 'Meals included', 'Fitness room'],
-                    });
-                    setLoading(false);
-                }, 600);
+                const res = await api.get(`/api/mobile/houses/${houseId}?tenantId=${tenantId}`);
+                setHouse(res.house);
             } catch (error) {
                 console.warn('Failed to fetch house:', error);
+            } finally {
                 setLoading(false);
             }
         }
-        fetchHouse();
-    }, [houseId]);
+        if (houseId && tenantId) {
+            fetchHouse();
+        } else {
+            setLoading(false);
+        }
+    }, [houseId, tenantId]);
 
     if (loading) {
         return (

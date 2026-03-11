@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
     View,
     Text,
@@ -11,29 +11,28 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import * as Location from 'expo-location';
 import { searchHousesWithinRadius, GeoLocation, SearchResultHouse } from '../../lib/features/search/geoService';
 
-// Fallback coordinates (e.g. Austin, TX)
+// Fallback coordinates (Austin, TX) — used only if location permission denied
 const DEFAULT_LOCATION: GeoLocation = { lat: 30.2672, lng: -97.7431 };
 const RADII_KM = [5, 10, 25, 50];
 
 export default function SearchScreen() {
     const router = useRouter();
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
     const [results, setResults] = useState<SearchResultHouse[]>([]);
     const [radius, setRadius] = useState<number>(10);
-    const [searchQuery, setSearchQuery] = useState(''); // Only used visually for now
+    const [searchQuery, setSearchQuery] = useState('');
+    const locationRef = useRef<GeoLocation>(DEFAULT_LOCATION);
 
-    const handleSearch = async (r: number) => {
+    const handleSearch = async (r: number, loc: GeoLocation) => {
         setLoading(true);
         try {
-            // In a real app we'd geocode the searchQuery or use device location.
-            // We'll stick to a default center but apply the selected radius.
-            const houses = await searchHousesWithinRadius(DEFAULT_LOCATION, r);
+            const houses = await searchHousesWithinRadius(loc, r);
             setResults(houses);
         } catch (error) {
             console.warn('Failed to search houses:', error);
-            // Fallback data for demonstration if the API isn't fully seeded
             setResults([]);
         } finally {
             setLoading(false);
@@ -41,7 +40,20 @@ export default function SearchScreen() {
     };
 
     useEffect(() => {
-        handleSearch(radius);
+        async function init() {
+            const { status } = await Location.requestForegroundPermissionsAsync();
+            if (status === 'granted') {
+                const pos = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.Balanced });
+                locationRef.current = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+            }
+            handleSearch(radius, locationRef.current);
+        }
+        init();
+    }, []);
+
+    useEffect(() => {
+        // Skip on initial mount — init() handles the first search
+        handleSearch(radius, locationRef.current);
     }, [radius]);
 
     const renderHouse = ({ item }: { item: SearchResultHouse }) => (
@@ -89,7 +101,7 @@ export default function SearchScreen() {
                         placeholderTextColor="#64748B"
                         value={searchQuery}
                         onChangeText={setSearchQuery}
-                        onSubmitEditing={() => handleSearch(radius)}
+                        onSubmitEditing={() => handleSearch(radius, locationRef.current)}
                     />
                 </View>
             </View>
