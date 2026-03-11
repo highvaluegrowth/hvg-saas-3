@@ -320,6 +320,16 @@ export default function ProfileScreen() {
         <Text style={styles.builderBtnSub}>Goals, Faith, Substances & more</Text>
       </TouchableOpacity>
 
+      {/* ── My Applications ── */}
+      <TouchableOpacity
+        style={styles.builderBtn}
+        onPress={() => router.push('/applications/status' as unknown as Href)}
+        activeOpacity={0.8}
+      >
+        <Text style={styles.builderBtnText}>📄 My Applications</Text>
+        <Text style={styles.builderBtnSub}>Track bed, staff & program applications</Text>
+      </TouchableOpacity>
+
       {/* ── AI Settings ── */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>HVG Guide — AI Settings</Text>
