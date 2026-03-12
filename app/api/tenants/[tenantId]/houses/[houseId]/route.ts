@@ -24,8 +24,14 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
     if (!house) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
     const rooms = await houseService.getRooms(houseId);
+    const roomsWithBeds = await Promise.all(
+      rooms.map(async (room) => ({
+        ...room,
+        beds: await houseService.getBeds(houseId, room.id),
+      }))
+    );
 
-    return NextResponse.json({ house, rooms });
+    return NextResponse.json({ house, rooms: roomsWithBeds });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: error.statusCode ?? 500 });
   }

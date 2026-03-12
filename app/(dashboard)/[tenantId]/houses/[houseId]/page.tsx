@@ -363,7 +363,7 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
         throw new Error(data.message || data.error || 'Failed to load house.');
       }
       const data = await res.json();
-      setHouse(data);
+      setHouse({ ...data.house, rooms: data.rooms });
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
     } finally {

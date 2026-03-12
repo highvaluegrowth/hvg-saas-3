@@ -93,7 +93,7 @@ export default function EditHousePage({ params }: EditHousePageProps) {
           const data = await res.json().catch(() => ({}));
           throw new Error(data.message || data.error || 'Failed to load house.');
         }
-        const house: House = await res.json();
+        const { house } = await res.json() as { house: House };
         setName(house.name);
         setStreet(house.address.street);
         setCity(house.address.city);
