@@ -12,12 +12,18 @@ import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { tenantApi, PublicTenant } from '@/lib/api/routes';
+import { AppHeader } from '@/components/AppHeader';
+import { ProfileDrawer } from '@/components/drawers/ProfileDrawer';
+import { SettingsDrawer } from '@/components/drawers/SettingsDrawer';
 
-const CATEGORIES = ['All', 'Houses', 'Programs', 'Staff Jobs', 'Events'] as const;
+const CATEGORIES = ['All', 'Houses', 'Programs', 'Staff Jobs', 'Events', 'Courses'] as const;
 type Category = (typeof CATEGORIES)[number];
 
 export default function ExploreScreen() {
   const [activeCategory, setActiveCategory] = useState<Category>('All');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const router = useRouter();
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
@@ -28,123 +34,153 @@ export default function ExploreScreen() {
 
   const listings: PublicTenant[] = data?.tenants ?? [];
 
-  return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.content}
-      refreshControl={
-        <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#6366f1" />
-      }
-    >
-      {/* Page title */}
-      <Text style={styles.pageTitle}>Explore</Text>
+  // Filter listings by search query
+  const filtered = listings.filter((t) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      t.name?.toLowerCase().includes(q) ||
+      t.city?.toLowerCase().includes(q) ||
+      t.state?.toLowerCase().includes(q) ||
+      t.description?.toLowerCase().includes(q)
+    );
+  });
 
-      {/* Category pills */}
+  return (
+    <View style={styles.root}>
+      <AppHeader
+        title="Explore"
+        searchMode={searchQuery.length > 0 || true}
+        searchValue={searchQuery}
+        onSearchChange={setSearchQuery}
+        searchPlaceholder="Search houses, programs, events, courses..."
+        onProfilePress={() => setProfileOpen(true)}
+        onSettingsPress={() => setSettingsOpen(true)}
+      />
+
       <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.pillsRow}
-        style={styles.pillsScroll}
+        style={styles.container}
+        contentContainerStyle={styles.content}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#6366f1" />
+        }
       >
-        {CATEGORIES.map((cat) => (
-          <TouchableOpacity
-            key={cat}
-            style={[styles.pill, activeCategory === cat && styles.pillActive]}
-            onPress={() => setActiveCategory(cat)}
-            activeOpacity={0.75}
-          >
-            <Text style={[styles.pillText, activeCategory === cat && styles.pillTextActive]}>
-              {cat}
+        {/* Category pills */}
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.pillsRow}
+          style={styles.pillsScroll}
+        >
+          {CATEGORIES.map((cat) => (
+            <TouchableOpacity
+              key={cat}
+              style={[styles.pill, activeCategory === cat && styles.pillActive]}
+              onPress={() => setActiveCategory(cat)}
+              activeOpacity={0.75}
+            >
+              <Text style={[styles.pillText, activeCategory === cat && styles.pillTextActive]}>
+                {cat}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* Quick-action cards */}
+        <View style={styles.quickRow}>
+          <QuickCard
+            icon="bed"
+            label="Find a Bed"
+            color="#6366f1"
+            onPress={() => router.push('/apply/bed')}
+          />
+          <QuickCard
+            icon="work-outline"
+            label="Staff Jobs"
+            color="#0891b2"
+            onPress={() => router.push('/apply/staff')}
+          />
+          <QuickCard
+            icon="calendar-today"
+            label="Events"
+            color="#10b981"
+            onPress={() => router.push('/(tabs)/schedule' as never)}
+          />
+          <QuickCard
+            icon="school"
+            label="Courses"
+            color="#D946EF"
+            onPress={() => router.push('/(tabs)/lms' as never)}
+          />
+        </View>
+
+        {/* House listings */}
+        <Text style={styles.sectionTitle}>
+          {searchQuery ? `Results for "${searchQuery}"` : 'Sober Living Houses'}
+        </Text>
+
+        {isLoading ? (
+          <View style={styles.centered}>
+            <ActivityIndicator color="#6366f1" />
+          </View>
+        ) : filtered.length === 0 ? (
+          <View style={styles.emptyState}>
+            <MaterialIcons name="search-off" size={40} color="#334155" />
+            <Text style={styles.emptyText}>
+              {searchQuery ? 'No results found' : 'No listings available'}
             </Text>
-          </TouchableOpacity>
-        ))}
+            <Text style={styles.emptySubtext}>
+              {searchQuery ? 'Try a different search term' : 'Check back soon for available houses'}
+            </Text>
+          </View>
+        ) : (
+          filtered.map((tenant) => (
+            <TouchableOpacity
+              key={tenant.id}
+              style={styles.houseCard}
+              onPress={() => router.push(`/tenants/${tenant.id}` as never)}
+              activeOpacity={0.8}
+            >
+              <View style={styles.houseCardInner}>
+                <View style={styles.houseIconWrap}>
+                  <MaterialIcons name="business" size={28} color="#6366f1" />
+                </View>
+                <View style={styles.houseBody}>
+                  <Text style={styles.houseName} numberOfLines={1}>
+                    {tenant.name}
+                  </Text>
+                  {tenant.city ? (
+                    <Text style={styles.houseLocation} numberOfLines={1}>
+                      {tenant.city}{tenant.state ? `, ${tenant.state}` : ''}
+                    </Text>
+                  ) : null}
+                  {tenant.description ? (
+                    <Text style={styles.houseDesc} numberOfLines={2}>
+                      {tenant.description}
+                    </Text>
+                  ) : null}
+                </View>
+                <MaterialIcons name="chevron-right" size={20} color="#475569" />
+              </View>
+            </TouchableOpacity>
+          ))
+        )}
+
+        {/* View all programs */}
+        <TouchableOpacity
+          style={styles.discoverBtn}
+          onPress={() => router.push('/tenants')}
+          activeOpacity={0.75}
+        >
+          <MaterialIcons name="business" size={18} color="#6366f1" />
+          <Text style={styles.discoverBtnText}>View All Programs</Text>
+          <MaterialIcons name="arrow-forward" size={16} color="#6366f1" />
+        </TouchableOpacity>
       </ScrollView>
 
-      {/* Quick-action cards */}
-      <View style={styles.quickRow}>
-        <QuickCard
-          icon="bed"
-          label="Find a Bed"
-          color="#6366f1"
-          onPress={() => router.push('/apply/bed')}
-        />
-        <QuickCard
-          icon="work-outline"
-          label="Staff Jobs"
-          color="#0891b2"
-          onPress={() => router.push('/apply/staff')}
-        />
-        <QuickCard
-          icon="calendar-today"
-          label="Events"
-          color="#10b981"
-          onPress={() => router.push('/(tabs)/schedule' as never)}
-        />
-        <QuickCard
-          icon="school"
-          label="Courses"
-          color="#D946EF"
-          onPress={() => router.push('/(tabs)/lms' as never)}
-        />
-      </View>
-
-      {/* House listings */}
-      <Text style={styles.sectionTitle}>Sober Living Houses</Text>
-
-      {isLoading ? (
-        <View style={styles.centered}>
-          <ActivityIndicator color="#6366f1" />
-        </View>
-      ) : listings.length === 0 ? (
-        <View style={styles.emptyState}>
-          <MaterialIcons name="home" size={40} color="#334155" />
-          <Text style={styles.emptyText}>No listings available</Text>
-          <Text style={styles.emptySubtext}>Check back soon for available houses</Text>
-        </View>
-      ) : (
-        listings.map((tenant) => (
-          <TouchableOpacity
-            key={tenant.id}
-            style={styles.houseCard}
-            onPress={() => router.push(`/tenants/${tenant.id}` as never)}
-            activeOpacity={0.8}
-          >
-            <View style={styles.houseCardInner}>
-              <View style={styles.houseIconWrap}>
-                <MaterialIcons name="business" size={28} color="#6366f1" />
-              </View>
-              <View style={styles.houseBody}>
-                <Text style={styles.houseName} numberOfLines={1}>
-                  {tenant.name}
-                </Text>
-                {tenant.city ? (
-                  <Text style={styles.houseLocation} numberOfLines={1}>
-                    {tenant.city}{tenant.state ? `, ${tenant.state}` : ''}
-                  </Text>
-                ) : null}
-                {tenant.description ? (
-                  <Text style={styles.houseDesc} numberOfLines={2}>
-                    {tenant.description}
-                  </Text>
-                ) : null}
-              </View>
-              <MaterialIcons name="chevron-right" size={20} color="#475569" />
-            </View>
-          </TouchableOpacity>
-        ))
-      )}
-
-      {/* Tenants / programs */}
-      <TouchableOpacity
-        style={styles.discoverBtn}
-        onPress={() => router.push('/tenants')}
-        activeOpacity={0.75}
-      >
-        <MaterialIcons name="business" size={18} color="#6366f1" />
-        <Text style={styles.discoverBtnText}>View All Programs</Text>
-        <MaterialIcons name="arrow-forward" size={16} color="#6366f1" />
-      </TouchableOpacity>
-    </ScrollView>
+      <ProfileDrawer visible={profileOpen} onClose={() => setProfileOpen(false)} />
+      <SettingsDrawer visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
+    </View>
   );
 }
 
@@ -171,25 +207,10 @@ function QuickCard({
   );
 }
 
-function Tag({ label, color }: { label: string; color: string }) {
-  return (
-    <View style={[styles.tag, { backgroundColor: color + '22', borderColor: color + '44' }]}>
-      <Text style={[styles.tagText, { color }]}>{label}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: '#0a0f1e' },
   container: { flex: 1, backgroundColor: '#0a0f1e' },
-  content: { paddingBottom: 120 },
-  pageTitle: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: '#f8fafc',
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    marginBottom: 16,
-  },
+  content: { paddingBottom: 120, paddingTop: 12 },
 
   // Pills
   pillsScroll: { marginBottom: 20 },
@@ -271,15 +292,6 @@ const styles = StyleSheet.create({
   houseName: { color: '#f8fafc', fontSize: 15, fontWeight: '600' },
   houseLocation: { color: '#64748b', fontSize: 13 },
   houseDesc: { color: '#94a3b8', fontSize: 12, marginTop: 2 },
-
-  // Tags
-  tag: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
-    borderWidth: 1,
-  },
-  tagText: { fontSize: 11, fontWeight: '600' },
 
   // States
   centered: { padding: 40, alignItems: 'center' },

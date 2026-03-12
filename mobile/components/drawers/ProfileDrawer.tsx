@@ -8,13 +8,14 @@ import {
   Modal,
   Pressable,
   Dimensions,
+  ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '@/lib/auth/AuthContext';
 
-const DRAWER_WIDTH = Dimensions.get('window').width * 0.78;
+const DRAWER_WIDTH = Dimensions.get('window').width * 0.90;
 
 interface ProfileDrawerProps {
   visible: boolean;
@@ -99,13 +100,12 @@ export function ProfileDrawer({ visible, onClose }: ProfileDrawerProps) {
           {
             width: DRAWER_WIDTH,
             paddingTop: insets.top + 16,
-            paddingBottom: insets.bottom + 16,
             transform: [{ translateX }],
           },
         ]}
       >
         {/* Avatar + name */}
-        <View style={styles.profile}>
+        <View style={[styles.profile, { paddingHorizontal: 20 }]}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>{initials}</Text>
           </View>
@@ -121,51 +121,113 @@ export function ProfileDrawer({ visible, onClose }: ProfileDrawerProps) {
 
         <View style={styles.divider} />
 
-        {/* Navigation items */}
-        <NavItem
-          icon="person"
-          label="Profile"
-          onPress={() => nav('/(dashboard)/profile')}
-        />
-        <NavItem
-          icon="assignment"
-          label="My Applications"
-          onPress={() => nav('/my-applications')}
-        />
-        <NavItem
-          icon="school"
-          label="My Courses"
-          onPress={() => nav('/(tabs)/lms')}
-        />
-        <NavItem
-          icon="trending-up"
-          label="My Progress"
-          onPress={() => nav('/(tabs)/progress')}
-        />
-        <NavItem
-          icon="calendar-today"
-          label="Schedule"
-          onPress={() => nav('/(tabs)/schedule')}
-        />
+        {/* Scrollable nav */}
+        <ScrollView
+          style={styles.navScroll}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={[
+            styles.navContent,
+            { paddingBottom: insets.bottom + 16 },
+          ]}
+        >
+          {/* ── My Profile ──────────────────────────── */}
+          <SectionHeader label="My Profile" />
+          <NavItem
+            icon="person"
+            label="Profile"
+            onPress={() => nav('/(dashboard)/profile')}
+          />
+          <NavItem
+            icon="assignment"
+            label="My Applications"
+            onPress={() => nav('/my-applications')}
+          />
+          <NavItem
+            icon="school"
+            label="My Courses"
+            onPress={() => nav('/(tabs)/lms')}
+          />
+          <NavItem
+            icon="calendar-today"
+            label="Schedule"
+            onPress={() => nav('/(tabs)/schedule')}
+          />
+          <NavItem
+            icon="bar-chart"
+            label="My Progress"
+            onPress={() => nav('/(tabs)/activity')}
+          />
 
-        <View style={styles.divider} />
+          <View style={styles.divider} />
 
-        <NavItem
-          icon="help-outline"
-          label="Support"
-          onPress={() => nav('/support')}
-        />
+          {/* ── Profile Builder ──────────────────────── */}
+          <SectionHeader label="Profile Builder" />
+          <NavItem
+            icon="emoji-events"
+            label="Sobriety Status"
+            onPress={() => nav('/profile-builder/sobriety')}
+          />
+          <NavItem
+            icon="flag"
+            label="Goals"
+            onPress={() => nav('/profile-builder/goals')}
+          />
+          <NavItem
+            icon="build"
+            label="Capabilities"
+            onPress={() => nav('/profile-builder/capabilities')}
+          />
+          <NavItem
+            icon="favorite"
+            label="Faith"
+            onPress={() => nav('/profile-builder/faith')}
+          />
+          <NavItem
+            icon="gavel"
+            label="Morals"
+            onPress={() => nav('/profile-builder/morals')}
+          />
+          <NavItem
+            icon="local-pharmacy"
+            label="Substances"
+            onPress={() => nav('/profile-builder/substances')}
+          />
+          <NavItem
+            icon="group"
+            label="Demographics"
+            onPress={() => nav('/profile-builder/demographics')}
+          />
 
-        <View style={{ flex: 1 }} />
+          <View style={styles.divider} />
 
-        {/* Sign out */}
-        <TouchableOpacity style={styles.signOutBtn} onPress={handleSignOut} activeOpacity={0.75}>
-          <MaterialIcons name="logout" size={20} color="#ef4444" />
-          <Text style={styles.signOutText}>Sign Out</Text>
-        </TouchableOpacity>
+          {/* ── Support ─────────────────────────────── */}
+          <NavItem
+            icon="help-outline"
+            label="Support"
+            onPress={() => nav('/support')}
+          />
+
+          <View style={styles.divider} />
+
+          {/* Sign Out */}
+          <TouchableOpacity
+            style={styles.signOutBtn}
+            onPress={handleSignOut}
+            activeOpacity={0.75}
+          >
+            <MaterialIcons name="logout" size={20} color="#ef4444" />
+            <Text style={styles.signOutText}>Sign Out</Text>
+          </TouchableOpacity>
+        </ScrollView>
       </Animated.View>
     </Modal>
   );
+}
+
+// ─── Sub-components ────────────────────────────────────────────────────────────
+
+function SectionHeader({ label }: { label: string }) {
+  return <Text style={styles.sectionHeader}>{label}</Text>;
 }
 
 function NavItem({
@@ -185,6 +247,8 @@ function NavItem({
   );
 }
 
+// ─── Styles ────────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
   overlay: {
     ...StyleSheet.absoluteFillObject,
@@ -198,7 +262,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#0a0f1e',
     borderRightWidth: 1,
     borderRightColor: '#1e293b',
-    paddingHorizontal: 20,
   },
   profile: {
     alignItems: 'flex-start',
@@ -240,28 +303,45 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: '#1e293b',
-    marginVertical: 12,
+    marginVertical: 8,
+    marginHorizontal: 20,
+  },
+  navScroll: {
+    flex: 1,
+  },
+  navContent: {
+    paddingHorizontal: 20,
+    paddingTop: 4,
+  },
+  sectionHeader: {
+    color: '#475569',
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    marginTop: 8,
+    marginBottom: 2,
   },
   navItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
+    paddingVertical: 12,
     gap: 14,
   },
   navLabel: {
     color: '#f8fafc',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '500',
   },
   signOutBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 14,
+    paddingVertical: 12,
     gap: 14,
   },
   signOutText: {
     color: '#ef4444',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
   },
 });
