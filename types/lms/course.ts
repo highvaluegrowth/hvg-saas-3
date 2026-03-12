@@ -61,7 +61,7 @@ export interface Course {
     title: string;
     description: string;
     thumbnailUrl?: string;
-    isPublic: boolean; // Accessible by non-residents
+    visibility: 'tenant' | 'universal'; // 'universal' = accessible by non-residents
     published: boolean;
     completionCriteria: {
         type: 'ALL_LESSONS_AND_QUIZZES' | 'MIN_SCORE' | 'WATCH_TIME';

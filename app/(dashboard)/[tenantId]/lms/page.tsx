@@ -68,8 +68,8 @@ export default function LMSDashboard({ params }: { params: Promise<{ tenantId: s
                         <div key={course.id} className="rounded-xl p-5 hover:bg-white/5 transition-all" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
                             <h3 className="font-semibold text-lg mb-2 text-white">{course.title}</h3>
                             <div className="flex gap-2 mb-4">
-                                <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={course.isPublic ? { background: 'rgba(8,145,178,0.25)', color: '#67E8F9' } : { background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}>
-                                    {course.isPublic ? 'Public' : 'Residents Only'}
+                                <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={course.visibility === 'universal' ? { background: 'rgba(8,145,178,0.25)', color: '#67E8F9' } : { background: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.7)' }}>
+                                    {course.visibility === 'universal' ? 'Public' : 'Tenant Only'}
                                 </span>
                                 <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={course.published ? { background: 'rgba(16,185,129,0.25)', color: '#6EE7B7' } : { background: 'rgba(245,158,11,0.25)', color: '#FCD34D' }}>
                                     {course.published ? 'Published' : 'Draft'}

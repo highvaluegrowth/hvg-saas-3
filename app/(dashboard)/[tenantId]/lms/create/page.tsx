@@ -9,7 +9,7 @@ export default function CreateCoursePage({ params }: { params: Promise<{ tenantI
     const resolvedParams = React.use(params);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [isPublic, setIsPublic] = useState(false);
+    const [visibility, setVisibility] = useState<'tenant' | 'universal'>('tenant');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -25,7 +25,7 @@ export default function CreateCoursePage({ params }: { params: Promise<{ tenantI
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ title, description, isPublic }),
+                body: JSON.stringify({ title, description, visibility }),
             });
             if (!res.ok) {
                 const data = await res.json();
@@ -78,18 +78,21 @@ export default function CreateCoursePage({ params }: { params: Promise<{ tenantI
                     />
                 </div>
 
-                <div className="flex items-center gap-3 bg-white/5 p-4 rounded-lg border border-white/10">
-                    <input
-                        id="public"
-                        type="checkbox"
-                        checked={isPublic}
-                        onChange={(e) => setIsPublic(e.target.checked)}
-                        className="w-5 h-5 rounded border-white/20 bg-black/20 text-cyan-600 focus:ring-cyan-500 focus:ring-offset-gray-900"
-                    />
-                    <div>
-                        <label htmlFor="public" className="font-medium inline-block text-white/90">Universal Access (Public)</label>
-                        <p className="text-sm text-white/50">If checked, non-residents reading this app globally can enroll and take this course.</p>
-                    </div>
+                <div className="space-y-2">
+                    <label className="text-sm font-medium text-white/80">Visibility</label>
+                    <select
+                        value={visibility}
+                        onChange={(e) => setVisibility(e.target.value as 'tenant' | 'universal')}
+                        className="w-full p-2 border border-white/10 bg-white/5 text-white rounded-md focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 outline-none transition-colors"
+                    >
+                        <option value="tenant" className="bg-gray-900">Tenant Only (default)</option>
+                        <option value="universal" className="bg-gray-900">Universal Access (Public)</option>
+                    </select>
+                    <p className="text-xs text-white/40">
+                        {visibility === 'universal'
+                            ? 'Non-residents globally can enroll and take this course.'
+                            : 'Only residents within your organization can access this course.'}
+                    </p>
                 </div>
 
                 <button

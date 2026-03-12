@@ -22,7 +22,7 @@ export interface CourseDoc {
   ownerTenantId: string;
   title: string;
   description: string;
-  isPublic: boolean;
+  visibility: 'tenant' | 'universal';
   published: boolean;
   curriculum: CurriculumModule[];
   createdBy: string;
@@ -35,7 +35,7 @@ function coursesRef(tenantId: string) {
 }
 
 export const courseService = {
-  async create(tenantId: string, uid: string, payload: { title: string; description: string; isPublic: boolean }): Promise<CourseDoc> {
+  async create(tenantId: string, uid: string, payload: { title: string; description: string; visibility: 'tenant' | 'universal' }): Promise<CourseDoc> {
     const now = new Date().toISOString();
     const docRef = coursesRef(tenantId).doc();
     const course: CourseDoc = {
@@ -43,7 +43,7 @@ export const courseService = {
       ownerTenantId: tenantId,
       title: payload.title,
       description: payload.description,
-      isPublic: payload.isPublic,
+      visibility: payload.visibility,
       published: false,
       curriculum: [],
       createdBy: uid,
@@ -72,7 +72,7 @@ export const courseService = {
     });
   },
 
-  async update(tenantId: string, courseId: string, updates: Partial<Pick<CourseDoc, 'title' | 'description' | 'isPublic' | 'published'>>): Promise<void> {
+  async update(tenantId: string, courseId: string, updates: Partial<Pick<CourseDoc, 'title' | 'description' | 'visibility' | 'published'>>): Promise<void> {
     await coursesRef(tenantId).doc(courseId).update({
       ...updates,
       updatedAt: new Date().toISOString(),

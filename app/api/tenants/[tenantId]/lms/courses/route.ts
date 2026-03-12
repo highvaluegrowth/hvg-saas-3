@@ -34,14 +34,15 @@ export async function POST(
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
         const body = await request.json();
-        const { title, description, isPublic } = body;
+        const { title, description, visibility } = body;
         if (!title || typeof title !== 'string') {
             return NextResponse.json({ error: 'title is required' }, { status: 400 });
         }
+        const resolvedVisibility: 'tenant' | 'universal' = visibility === 'universal' ? 'universal' : 'tenant';
         const course = await courseService.create(tenantId, token.uid, {
             title,
             description: description ?? '',
-            isPublic: Boolean(isPublic),
+            visibility: resolvedVisibility,
         });
         return NextResponse.json({ course }, { status: 201 });
     } catch (e) {
