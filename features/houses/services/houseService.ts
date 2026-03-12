@@ -64,6 +64,10 @@ class HouseService extends BaseRepository<House> {
     await adminDb.collection(this.roomsPath(houseId)).doc(roomId).delete();
   }
 
+  async deleteBed(houseId: string, roomId: string, bedId: string): Promise<void> {
+    await adminDb.collection(this.bedsPath(houseId, roomId)).doc(bedId).delete();
+  }
+
   // Beds
   private bedsPath(houseId: string, roomId: string) {
     return `tenants/${this.tenantId}/houses/${houseId}/rooms/${roomId}/beds`;

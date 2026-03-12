@@ -1,6 +1,6 @@
 'use client';
 
-import React, { use, useState, useEffect } from 'react';
+import React, { use, useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
@@ -8,8 +8,9 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { Modal } from '@/components/ui/Modal';
+import { Badge } from '@/components/ui/Badge';
 import { authService } from '@/features/auth/services/authService';
-import type { House } from '@/features/houses/types/house.types';
+import type { House, Room, Bed, BedStatus } from '@/features/houses/types/house.types';
 
 interface EditHousePageProps {
   params: Promise<{ tenantId: string; houseId: string }>;
@@ -24,6 +25,8 @@ interface FormErrors {
   capacity?: string;
   general?: string;
 }
+
+type RoomWithBeds = Room & { beds: Bed[] };
 
 const US_STATES = [
   { value: '', label: 'Select state...' },
@@ -59,6 +62,31 @@ const STATUS_OPTIONS = [
   { value: 'inactive', label: 'Inactive' },
 ];
 
+const BED_STATUS_OPTIONS = [
+  { value: 'available', label: 'Available' },
+  { value: 'occupied', label: 'Occupied' },
+  { value: 'reserved', label: 'Reserved' },
+  { value: 'unavailable', label: 'Unavailable' },
+];
+
+function bedStatusVariant(status: BedStatus): 'success' | 'danger' | 'warning' | 'default' {
+  switch (status) {
+    case 'available': return 'success';
+    case 'occupied': return 'danger';
+    case 'reserved': return 'warning';
+    case 'unavailable': return 'default';
+  }
+}
+
+function bedStatusLabel(status: BedStatus): string {
+  switch (status) {
+    case 'available': return 'Available';
+    case 'occupied': return 'Occupied';
+    case 'reserved': return 'Reserved';
+    case 'unavailable': return 'Unavailable';
+  }
+}
+
 export default function EditHousePage({ params }: EditHousePageProps) {
   const { tenantId, houseId } = use(params);
   const router = useRouter();
@@ -66,6 +94,7 @@ export default function EditHousePage({ params }: EditHousePageProps) {
   const [loadingHouse, setLoadingHouse] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
+  // House form fields
   const [name, setName] = useState('');
   const [street, setStreet] = useState('');
   const [city, setCity] = useState('');
@@ -75,42 +104,75 @@ export default function EditHousePage({ params }: EditHousePageProps) {
   const [capacity, setCapacity] = useState('');
   const [status, setStatus] = useState<'active' | 'inactive'>('active');
 
+  // Rooms data
+  const [rooms, setRooms] = useState<RoomWithBeds[]>([]);
+
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitting, setSubmitting] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  // Load existing house data
-  useEffect(() => {
-    async function fetchHouse() {
-      try {
-        const token = await authService.getIdToken();
-        const res = await fetch(`/api/tenants/${tenantId}/houses/${houseId}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) {
-          const data = await res.json().catch(() => ({}));
-          throw new Error(data.message || data.error || 'Failed to load house.');
-        }
-        const { house } = await res.json() as { house: House };
-        setName(house.name);
-        setStreet(house.address.street);
-        setCity(house.address.city);
-        setState(house.address.state);
-        setZip(house.address.zip);
-        setPhone(house.phone ?? '');
-        setCapacity(String(house.capacity));
-        setStatus(house.status);
-      } catch (err: unknown) {
-        setLoadError(err instanceof Error ? err.message : 'An unexpected error occurred.');
-      } finally {
-        setLoadingHouse(false);
-      }
-    }
+  // Edit Room modal
+  const [editRoomOpen, setEditRoomOpen] = useState(false);
+  const [editingRoom, setEditingRoom] = useState<Room | null>(null);
+  const [editRoomName, setEditRoomName] = useState('');
+  const [editRoomCapacity, setEditRoomCapacity] = useState('');
+  const [editRoomSaving, setEditRoomSaving] = useState(false);
+  const [editRoomError, setEditRoomError] = useState<string | null>(null);
 
-    fetchHouse();
+  // Delete Room modal
+  const [deleteRoomOpen, setDeleteRoomOpen] = useState(false);
+  const [deletingRoom, setDeletingRoom] = useState<Room | null>(null);
+  const [deleteRoomBusy, setDeleteRoomBusy] = useState(false);
+  const [deleteRoomError, setDeleteRoomError] = useState<string | null>(null);
+
+  // Edit Bed modal
+  const [editBedOpen, setEditBedOpen] = useState(false);
+  const [editingBed, setEditingBed] = useState<Bed | null>(null);
+  const [editingBedRoomId, setEditingBedRoomId] = useState('');
+  const [editBedLabel, setEditBedLabel] = useState('');
+  const [editBedStatus, setEditBedStatus] = useState<BedStatus>('available');
+  const [editBedSaving, setEditBedSaving] = useState(false);
+  const [editBedError, setEditBedError] = useState<string | null>(null);
+
+  // Delete Bed modal
+  const [deleteBedOpen, setDeleteBedOpen] = useState(false);
+  const [deletingBed, setDeletingBed] = useState<Bed | null>(null);
+  const [deletingBedRoomId, setDeletingBedRoomId] = useState('');
+  const [deleteBedBusy, setDeleteBedBusy] = useState(false);
+  const [deleteBedError, setDeleteBedError] = useState<string | null>(null);
+
+  const fetchHouse = useCallback(async () => {
+    try {
+      const token = await authService.getIdToken();
+      const res = await fetch(`/api/tenants/${tenantId}/houses/${houseId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || data.error || 'Failed to load house.');
+      }
+      const { house, rooms: fetchedRooms } = await res.json() as { house: House; rooms: RoomWithBeds[] };
+      setName(house.name);
+      setStreet(house.address.street);
+      setCity(house.address.city);
+      setState(house.address.state);
+      setZip(house.address.zip);
+      setPhone(house.phone ?? '');
+      setCapacity(String(house.capacity));
+      setStatus(house.status);
+      setRooms(fetchedRooms ?? []);
+    } catch (err: unknown) {
+      setLoadError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+    } finally {
+      setLoadingHouse(false);
+    }
   }, [tenantId, houseId]);
+
+  useEffect(() => {
+    fetchHouse();
+  }, [fetchHouse]);
 
   function validate(): FormErrors {
     const errs: FormErrors = {};
@@ -208,6 +270,152 @@ export default function EditHousePage({ params }: EditHousePageProps) {
     }
   }
 
+  // Room handlers
+  function openEditRoom(room: Room) {
+    setEditingRoom(room);
+    setEditRoomName(room.name);
+    setEditRoomCapacity(String(room.capacity));
+    setEditRoomError(null);
+    setEditRoomOpen(true);
+  }
+
+  async function handleEditRoom() {
+    if (!editingRoom) return;
+    setEditRoomSaving(true);
+    setEditRoomError(null);
+    try {
+      const token = await authService.getIdToken();
+      const res = await fetch(
+        `/api/tenants/${tenantId}/houses/${houseId}/rooms/${editingRoom.id}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ name: editRoomName.trim(), capacity: Number(editRoomCapacity) }),
+        }
+      );
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setEditRoomError(data.error || 'Failed to update room.');
+        return;
+      }
+      setEditRoomOpen(false);
+      setEditingRoom(null);
+      await fetchHouse();
+    } catch (err: unknown) {
+      setEditRoomError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+    } finally {
+      setEditRoomSaving(false);
+    }
+  }
+
+  function openDeleteRoom(room: Room) {
+    setDeletingRoom(room);
+    setDeleteRoomError(null);
+    setDeleteRoomOpen(true);
+  }
+
+  async function handleDeleteRoom() {
+    if (!deletingRoom) return;
+    setDeleteRoomBusy(true);
+    setDeleteRoomError(null);
+    try {
+      const token = await authService.getIdToken();
+      const res = await fetch(
+        `/api/tenants/${tenantId}/houses/${houseId}/rooms/${deletingRoom.id}`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setDeleteRoomError(data.error || 'Failed to delete room.');
+        return;
+      }
+      setDeleteRoomOpen(false);
+      setDeletingRoom(null);
+      await fetchHouse();
+    } catch (err: unknown) {
+      setDeleteRoomError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+    } finally {
+      setDeleteRoomBusy(false);
+    }
+  }
+
+  // Bed handlers
+  function openEditBed(bed: Bed, roomId: string) {
+    setEditingBed(bed);
+    setEditingBedRoomId(roomId);
+    setEditBedLabel(bed.label);
+    setEditBedStatus(bed.status);
+    setEditBedError(null);
+    setEditBedOpen(true);
+  }
+
+  async function handleEditBed() {
+    if (!editingBed) return;
+    setEditBedSaving(true);
+    setEditBedError(null);
+    try {
+      const token = await authService.getIdToken();
+      const res = await fetch(
+        `/api/tenants/${tenantId}/houses/${houseId}/rooms/${editingBedRoomId}/beds/${editingBed.id}`,
+        {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ label: editBedLabel.trim(), status: editBedStatus }),
+        }
+      );
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setEditBedError(data.error || 'Failed to update bed.');
+        return;
+      }
+      setEditBedOpen(false);
+      setEditingBed(null);
+      await fetchHouse();
+    } catch (err: unknown) {
+      setEditBedError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+    } finally {
+      setEditBedSaving(false);
+    }
+  }
+
+  function openDeleteBed(bed: Bed, roomId: string) {
+    setDeletingBed(bed);
+    setDeletingBedRoomId(roomId);
+    setDeleteBedError(null);
+    setDeleteBedOpen(true);
+  }
+
+  async function handleDeleteBed() {
+    if (!deletingBed) return;
+    setDeleteBedBusy(true);
+    setDeleteBedError(null);
+    try {
+      const token = await authService.getIdToken();
+      const res = await fetch(
+        `/api/tenants/${tenantId}/houses/${houseId}/rooms/${deletingBedRoomId}/beds/${deletingBed.id}`,
+        {
+          method: 'DELETE',
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setDeleteBedError(data.error || 'Failed to delete bed.');
+        return;
+      }
+      setDeleteBedOpen(false);
+      setDeletingBed(null);
+      await fetchHouse();
+    } catch (err: unknown) {
+      setDeleteBedError(err instanceof Error ? err.message : 'An unexpected error occurred.');
+    } finally {
+      setDeleteBedBusy(false);
+    }
+  }
+
   if (loadingHouse) {
     return (
       <div className="max-w-2xl mx-auto space-y-6 animate-pulse">
@@ -264,7 +472,7 @@ export default function EditHousePage({ params }: EditHousePageProps) {
 
             {/* House Name */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-white mb-1">
                 House Name <span className="text-red-500">*</span>
               </label>
               <Input
@@ -278,10 +486,10 @@ export default function EditHousePage({ params }: EditHousePageProps) {
 
             {/* Address */}
             <fieldset>
-              <legend className="text-sm font-medium text-gray-700 mb-2">Address</legend>
+              <legend className="text-sm font-medium text-white mb-2">Address</legend>
               <div className="space-y-3">
                 <div>
-                  <label className="block text-sm text-gray-600 mb-1">
+                  <label className="block text-sm text-white mb-1">
                     Street <span className="text-red-500">*</span>
                   </label>
                   <Input
@@ -295,7 +503,7 @@ export default function EditHousePage({ params }: EditHousePageProps) {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-sm text-gray-600 mb-1">
+                    <label className="block text-sm text-white mb-1">
                       City <span className="text-red-500">*</span>
                     </label>
                     <Input
@@ -307,7 +515,7 @@ export default function EditHousePage({ params }: EditHousePageProps) {
                     {errors.city && <p className="mt-1 text-sm text-red-600">{errors.city}</p>}
                   </div>
                   <div>
-                    <label className="block text-sm text-gray-600 mb-1">
+                    <label className="block text-sm text-white mb-1">
                       ZIP Code <span className="text-red-500">*</span>
                     </label>
                     <Input
@@ -334,7 +542,7 @@ export default function EditHousePage({ params }: EditHousePageProps) {
 
             {/* Phone */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-white mb-1">
                 Phone Number <span className="text-gray-400 font-normal">(optional)</span>
               </label>
               <Input
@@ -348,7 +556,7 @@ export default function EditHousePage({ params }: EditHousePageProps) {
             {/* Capacity and Status */}
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white mb-1">
                   Capacity <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -390,16 +598,94 @@ export default function EditHousePage({ params }: EditHousePageProps) {
         </CardContent>
       </Card>
 
+      {/* Rooms & Beds */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">Rooms &amp; Beds</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {rooms.length === 0 ? (
+            <p className="text-sm text-gray-500">No rooms have been added to this house yet.</p>
+          ) : (
+            <div className="space-y-6">
+              {rooms.map((room) => (
+                <div key={room.id} className="border border-gray-200 rounded-lg p-4 space-y-3">
+                  {/* Room header */}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">{room.name}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Capacity: {room.capacity}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="text-xs h-8 px-3"
+                        onClick={() => openEditRoom(room)}
+                      >
+                        Edit Room
+                      </Button>
+                      <Button
+                        type="button"
+                        className="text-xs h-8 px-3 bg-red-600 hover:bg-red-700 text-white"
+                        onClick={() => openDeleteRoom(room)}
+                      >
+                        Delete Room
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Beds */}
+                  {room.beds && room.beds.length > 0 ? (
+                    <div className="space-y-2 pl-4 border-l border-gray-100">
+                      {room.beds.map((bed) => (
+                        <div key={bed.id} className="flex items-center justify-between py-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-gray-800">{bed.label}</span>
+                            <Badge variant={bedStatusVariant(bed.status)}>
+                              {bedStatusLabel(bed.status)}
+                            </Badge>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="text-xs h-7 px-2"
+                              onClick={() => openEditBed(bed, room.id)}
+                            >
+                              Edit Bed
+                            </Button>
+                            <Button
+                              type="button"
+                              className="text-xs h-7 px-2 bg-red-600 hover:bg-red-700 text-white"
+                              onClick={() => openDeleteBed(bed, room.id)}
+                            >
+                              Delete Bed
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="pl-4 text-xs text-gray-400">No beds in this room.</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Danger Zone */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg text-red-700">Danger Zone</CardTitle>
+          <CardTitle className="text-lg text-white">Danger Zone</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-900">Delete this house</p>
-              <p className="text-sm text-gray-500 mt-0.5">
+              <p className="text-sm font-medium text-white">Delete this house</p>
+              <p className="text-sm text-white mt-0.5">
                 Permanently remove this house and all associated data. This cannot be undone.
               </p>
             </div>
@@ -407,7 +693,7 @@ export default function EditHousePage({ params }: EditHousePageProps) {
               type="button"
               variant="destructive"
               onClick={() => setDeleteModalOpen(true)}
-              className="ml-4 shrink-0"
+              className="ml-4 shrink-0 bg-red-600 hover:bg-red-700 text-white"
             >
               Delete House
             </Button>
@@ -415,7 +701,7 @@ export default function EditHousePage({ params }: EditHousePageProps) {
         </CardContent>
       </Card>
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete House Confirmation Modal */}
       <Modal
         isOpen={deleteModalOpen}
         onClose={() => {
@@ -456,8 +742,227 @@ export default function EditHousePage({ params }: EditHousePageProps) {
               variant="destructive"
               onClick={handleDelete}
               disabled={deleting}
+              className="bg-red-600 hover:bg-red-700 text-white"
             >
               {deleting ? 'Deleting...' : 'Yes, Delete House'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Edit Room Modal */}
+      <Modal
+        isOpen={editRoomOpen}
+        onClose={() => {
+          if (!editRoomSaving) {
+            setEditRoomOpen(false);
+            setEditingRoom(null);
+            setEditRoomError(null);
+          }
+        }}
+        title="Edit Room"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-white mb-1">Room Name</label>
+            <Input
+              value={editRoomName}
+              onChange={(e) => setEditRoomName(e.target.value)}
+              placeholder="e.g. Room A"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-white mb-1">Capacity</label>
+            <Input
+              value={editRoomCapacity}
+              onChange={(e) => setEditRoomCapacity(e.target.value)}
+              type="number"
+              min="1"
+              placeholder="4"
+            />
+          </div>
+          {editRoomError && (
+            <div className="rounded-md bg-red-50 border border-red-200 p-3">
+              <p className="text-sm text-red-700">{editRoomError}</p>
+            </div>
+          )}
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setEditRoomOpen(false);
+                setEditingRoom(null);
+                setEditRoomError(null);
+              }}
+              disabled={editRoomSaving}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleEditRoom}
+              disabled={editRoomSaving}
+              className="bg-cyan-600 hover:bg-cyan-700 text-white"
+            >
+              {editRoomSaving ? 'Saving...' : 'Save Room'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Delete Room Modal */}
+      <Modal
+        isOpen={deleteRoomOpen}
+        onClose={() => {
+          if (!deleteRoomBusy) {
+            setDeleteRoomOpen(false);
+            setDeletingRoom(null);
+            setDeleteRoomError(null);
+          }
+        }}
+        title="Delete Room"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-gray-700">
+            Are you sure you want to delete <strong>{deletingRoom?.name}</strong>? All beds in this
+            room will also be removed. This cannot be undone.
+          </p>
+          {deleteRoomError && (
+            <div className="rounded-md bg-red-50 border border-red-200 p-3">
+              <p className="text-sm text-red-700">{deleteRoomError}</p>
+            </div>
+          )}
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setDeleteRoomOpen(false);
+                setDeletingRoom(null);
+                setDeleteRoomError(null);
+              }}
+              disabled={deleteRoomBusy}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleDeleteRoom}
+              disabled={deleteRoomBusy}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {deleteRoomBusy ? 'Deleting...' : 'Yes, Delete Room'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Edit Bed Modal */}
+      <Modal
+        isOpen={editBedOpen}
+        onClose={() => {
+          if (!editBedSaving) {
+            setEditBedOpen(false);
+            setEditingBed(null);
+            setEditBedError(null);
+          }
+        }}
+        title="Edit Bed"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-white mb-1">Bed Label</label>
+            <Input
+              value={editBedLabel}
+              onChange={(e) => setEditBedLabel(e.target.value)}
+              placeholder="e.g. Bed 1"
+            />
+          </div>
+          <div>
+            <Select
+              label="Status"
+              value={editBedStatus}
+              onChange={(e) => setEditBedStatus(e.target.value as BedStatus)}
+              options={BED_STATUS_OPTIONS}
+            />
+          </div>
+          {editBedError && (
+            <div className="rounded-md bg-red-50 border border-red-200 p-3">
+              <p className="text-sm text-red-700">{editBedError}</p>
+            </div>
+          )}
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setEditBedOpen(false);
+                setEditingBed(null);
+                setEditBedError(null);
+              }}
+              disabled={editBedSaving}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleEditBed}
+              disabled={editBedSaving}
+              className="bg-cyan-600 hover:bg-cyan-700 text-white"
+            >
+              {editBedSaving ? 'Saving...' : 'Save Bed'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Delete Bed Modal */}
+      <Modal
+        isOpen={deleteBedOpen}
+        onClose={() => {
+          if (!deleteBedBusy) {
+            setDeleteBedOpen(false);
+            setDeletingBed(null);
+            setDeleteBedError(null);
+          }
+        }}
+        title="Delete Bed"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <p className="text-sm text-gray-700">
+            Are you sure you want to delete bed <strong>{deletingBed?.label}</strong>? This cannot
+            be undone.
+          </p>
+          {deleteBedError && (
+            <div className="rounded-md bg-red-50 border border-red-200 p-3">
+              <p className="text-sm text-red-700">{deleteBedError}</p>
+            </div>
+          )}
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setDeleteBedOpen(false);
+                setDeletingBed(null);
+                setDeleteBedError(null);
+              }}
+              disabled={deleteBedBusy}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleDeleteBed}
+              disabled={deleteBedBusy}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {deleteBedBusy ? 'Deleting...' : 'Yes, Delete Bed'}
             </Button>
           </div>
         </div>

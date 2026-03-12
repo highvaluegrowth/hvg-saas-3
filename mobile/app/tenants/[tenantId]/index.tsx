@@ -28,6 +28,12 @@ export default function TenantDetailScreen() {
     queryFn: userApi.getEnrollments,
   });
 
+  const { data: housesData } = useQuery({
+    queryKey: ['tenant-houses', tenantId],
+    queryFn: () => tenantApi.getHouses(tenantId),
+    enabled: !!tenantId,
+  });
+
   const alreadyEnrolled = enrollData?.enrollments.some(
     (e) => e.tenantId === tenantId
   );
@@ -68,6 +74,27 @@ export default function TenantDetailScreen() {
       {tenantData.description ? (
         <View style={styles.section}>
           <Text style={styles.description}>{tenantData.description}</Text>
+        </View>
+      ) : null}
+
+      {/* Houses section */}
+      {housesData && housesData.houses.length > 0 ? (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Houses</Text>
+          {housesData.houses.map((house) => {
+            const addr = house.address;
+            const addressLine = addr
+              ? [addr.street, addr.city, addr.state].filter(Boolean).join(', ')
+              : null;
+            return (
+              <View key={house.id} style={styles.houseCard}>
+                <Text style={styles.houseName}>{house.name}</Text>
+                {addressLine ? (
+                  <Text style={styles.houseAddress}>{addressLine}</Text>
+                ) : null}
+              </View>
+            );
+          })}
         </View>
       ) : null}
 
@@ -115,6 +142,15 @@ const styles = StyleSheet.create({
   location: { color: '#94a3b8', fontSize: 14, marginTop: 4 },
   section: { paddingHorizontal: 24, paddingBottom: 16 },
   description: { color: '#94a3b8', fontSize: 15, lineHeight: 22 },
+  sectionTitle: { color: '#f8fafc', fontSize: 16, fontWeight: '700', marginBottom: 10 },
+  houseCard: {
+    backgroundColor: '#1e293b',
+    borderRadius: 10,
+    padding: 14,
+    marginBottom: 8,
+  },
+  houseName: { color: '#f8fafc', fontSize: 15, fontWeight: '600' },
+  houseAddress: { color: '#94a3b8', fontSize: 13, marginTop: 3 },
   enrolled: {
     margin: 24,
     backgroundColor: '#134e4a',

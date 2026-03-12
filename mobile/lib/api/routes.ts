@@ -46,6 +46,8 @@ export const tenantApi = {
     api.get<{ rides: MobileRide[] }>(`/api/mobile/tenants/${tenantId}/rides`),
   requestRide: (tenantId: string, body: { destination: string; requestedAt: string; notes?: string }) =>
     api.post<{ rideId: string }>(`/api/mobile/tenants/${tenantId}/rides`, body),
+  getHouses: (tenantId: string) =>
+    api.get<{ houses: TenantHouse[] }>(`/api/mobile/tenants/${tenantId}/houses`),
 };
 
 // --- Search ---
@@ -89,6 +91,21 @@ export interface PublicTenant {
   state: string;
   description?: string;
   logoURL?: string;
+}
+
+export interface TenantHouse {
+  id: string;
+  name: string;
+  address?: {
+    street?: string;
+    city?: string;
+    state?: string;
+    zip?: string;
+  } | null;
+  phone?: string | null;
+  capacity: number;
+  status: string;
+  managerId?: string | null;
 }
 
 export interface Enrollment {
@@ -226,4 +243,26 @@ export interface ProgressData {
     streak: number; // consecutive weeks with at least 1 meeting
   };
   moods: MoodEntry[]; // last 7 entries
+}
+
+// --- Houses ---
+export const houseApi = {
+  houseDetail: (houseId: string, tenantId: string) =>
+    api.get<{ house: HouseDetail }>(`/api/mobile/houses/${houseId}?tenantId=${tenantId}`),
+};
+
+export interface HouseDetail {
+  id: string;
+  name: string;
+  address: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  description?: string;
+  amenities?: string[];
+  rules?: string[];
+  capacity?: number;
+  availableBeds?: number;
+  imageUrl?: string;
+  tenantId?: string;
 }

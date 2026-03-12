@@ -31,3 +31,21 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
     return NextResponse.json({ error: error.message }, { status: error.statusCode ?? 500 });
   }
 }
+
+export async function DELETE(request: NextRequest, { params }: { params: Params }) {
+  try {
+    const token = await verifyAuthToken(request);
+    const { tenantId, houseId, roomId, bedId } = await params;
+
+    if (token.tenant_id !== tenantId && token.role !== 'super_admin') {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const houseService = createHouseService(tenantId);
+    await houseService.deleteBed(houseId, roomId, bedId);
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: error.statusCode ?? 500 });
+  }
+}

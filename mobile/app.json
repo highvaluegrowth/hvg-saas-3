@@ -21,6 +21,7 @@
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSFaceIDUsageDescription": "High Value Growth uses Face ID to securely authenticate your account.",
+        "NSLocationWhenInUseUsageDescription": "HVG uses your location to find sober living houses near you.",
         "CFBundleLocalizations": [
           "en"
         ]
