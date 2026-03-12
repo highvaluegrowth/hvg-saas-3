@@ -11,10 +11,20 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useRouter } from 'expo-router';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { tenantApi, PublicTenant } from '@/lib/api/routes';
+import {
+  tenantApi,
+  houseApi,
+  courseApi,
+  eventsApi,
+  PublicTenant,
+  GlobalHouse,
+  UniversalCourse,
+  UniversalEvent,
+} from '@/lib/api/routes';
 import { AppHeader } from '@/components/AppHeader';
 import { ProfileDrawer } from '@/components/drawers/ProfileDrawer';
 import { SettingsDrawer } from '@/components/drawers/SettingsDrawer';
+import { format } from 'date-fns';
 
 const CATEGORIES = ['All', 'Houses', 'Programs', 'Staff Jobs', 'Events', 'Courses'] as const;
 type Category = (typeof CATEGORIES)[number];
@@ -26,16 +36,45 @@ export default function ExploreScreen() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const router = useRouter();
 
-  const { data, isLoading, refetch, isRefetching } = useQuery({
+  // Tenant query — used for All, Programs, Staff Jobs
+  const tenantQuery = useQuery({
     queryKey: ['explore', 'tenants'],
     queryFn: tenantApi.list,
     staleTime: 5 * 60 * 1000,
+    enabled: activeCategory === 'All' || activeCategory === 'Programs' || activeCategory === 'Staff Jobs',
   });
 
-  const listings: PublicTenant[] = data?.tenants ?? [];
+  // Houses query — used for Houses pill
+  const housesQuery = useQuery({
+    queryKey: ['explore', 'houses'],
+    queryFn: houseApi.listAll,
+    staleTime: 5 * 60 * 1000,
+    enabled: activeCategory === 'Houses',
+  });
 
-  // Filter listings by search query
-  const filtered = listings.filter((t) => {
+  // Events query — used for Events pill
+  const eventsQuery = useQuery({
+    queryKey: ['explore', 'events'],
+    queryFn: eventsApi.listUniversal,
+    staleTime: 5 * 60 * 1000,
+    enabled: activeCategory === 'Events',
+  });
+
+  // Courses query — used for Courses pill
+  const coursesQuery = useQuery({
+    queryKey: ['explore', 'courses'],
+    queryFn: courseApi.listUniversal,
+    staleTime: 5 * 60 * 1000,
+    enabled: activeCategory === 'Courses',
+  });
+
+  const tenants: PublicTenant[] = tenantQuery.data?.tenants ?? [];
+  const houses: GlobalHouse[] = housesQuery.data?.houses ?? [];
+  const events: UniversalEvent[] = eventsQuery.data?.events ?? [];
+  const courses: UniversalCourse[] = coursesQuery.data?.courses ?? [];
+
+  // Filter tenants by search query
+  const filteredTenants = tenants.filter((t) => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
@@ -45,6 +84,82 @@ export default function ExploreScreen() {
       t.description?.toLowerCase().includes(q)
     );
   });
+
+  // Filter houses by search query
+  const filteredHouses = houses.filter((h) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      h.name?.toLowerCase().includes(q) ||
+      h.city?.toLowerCase().includes(q) ||
+      h.state?.toLowerCase().includes(q) ||
+      h.tenantName?.toLowerCase().includes(q)
+    );
+  });
+
+  // Filter events by search query
+  const filteredEvents = events.filter((e) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      e.title?.toLowerCase().includes(q) ||
+      e.tenantName?.toLowerCase().includes(q) ||
+      e.location?.toLowerCase().includes(q) ||
+      e.description?.toLowerCase().includes(q)
+    );
+  });
+
+  // Filter courses by search query
+  const filteredCourses = courses.filter((c) => {
+    if (!searchQuery) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      c.title?.toLowerCase().includes(q) ||
+      c.description?.toLowerCase().includes(q) ||
+      c.tenantName?.toLowerCase().includes(q)
+    );
+  });
+
+  // Derive loading + refetch for current pill
+  const isLoading =
+    activeCategory === 'Houses'
+      ? housesQuery.isLoading
+      : activeCategory === 'Events'
+      ? eventsQuery.isLoading
+      : activeCategory === 'Courses'
+      ? coursesQuery.isLoading
+      : tenantQuery.isLoading;
+
+  const isRefetching =
+    activeCategory === 'Houses'
+      ? housesQuery.isRefetching
+      : activeCategory === 'Events'
+      ? eventsQuery.isRefetching
+      : activeCategory === 'Courses'
+      ? coursesQuery.isRefetching
+      : tenantQuery.isRefetching;
+
+  const refetch =
+    activeCategory === 'Houses'
+      ? housesQuery.refetch
+      : activeCategory === 'Events'
+      ? eventsQuery.refetch
+      : activeCategory === 'Courses'
+      ? coursesQuery.refetch
+      : tenantQuery.refetch;
+
+  // Section title per category
+  const sectionTitle = () => {
+    if (searchQuery) return `Results for "${searchQuery}"`;
+    switch (activeCategory) {
+      case 'Houses': return 'Sober Living Houses';
+      case 'Events': return 'Upcoming Events';
+      case 'Courses': return 'Available Courses';
+      case 'Programs': return 'Sober Living Programs';
+      case 'Staff Jobs': return 'Staff Positions';
+      default: return 'Sober Living Houses';
+    }
+  };
 
   return (
     <View style={styles.root}>
@@ -114,56 +229,158 @@ export default function ExploreScreen() {
           />
         </View>
 
-        {/* House listings */}
-        <Text style={styles.sectionTitle}>
-          {searchQuery ? `Results for "${searchQuery}"` : 'Sober Living Houses'}
-        </Text>
+        {/* Section title */}
+        <Text style={styles.sectionTitle}>{sectionTitle()}</Text>
 
         {isLoading ? (
           <View style={styles.centered}>
             <ActivityIndicator color="#6366f1" />
           </View>
-        ) : filtered.length === 0 ? (
-          <View style={styles.emptyState}>
-            <MaterialIcons name="search-off" size={40} color="#334155" />
-            <Text style={styles.emptyText}>
-              {searchQuery ? 'No results found' : 'No listings available'}
-            </Text>
-            <Text style={styles.emptySubtext}>
-              {searchQuery ? 'Try a different search term' : 'Check back soon for available houses'}
-            </Text>
-          </View>
         ) : (
-          filtered.map((tenant) => (
-            <TouchableOpacity
-              key={tenant.id}
-              style={styles.houseCard}
-              onPress={() => router.push(`/tenants/${tenant.id}` as never)}
-              activeOpacity={0.8}
-            >
-              <View style={styles.houseCardInner}>
-                <View style={styles.houseIconWrap}>
-                  <MaterialIcons name="business" size={28} color="#6366f1" />
-                </View>
-                <View style={styles.houseBody}>
-                  <Text style={styles.houseName} numberOfLines={1}>
-                    {tenant.name}
-                  </Text>
-                  {tenant.city ? (
-                    <Text style={styles.houseLocation} numberOfLines={1}>
-                      {tenant.city}{tenant.state ? `, ${tenant.state}` : ''}
-                    </Text>
-                  ) : null}
-                  {tenant.description ? (
-                    <Text style={styles.houseDesc} numberOfLines={2}>
-                      {tenant.description}
-                    </Text>
-                  ) : null}
-                </View>
-                <MaterialIcons name="chevron-right" size={20} color="#475569" />
-              </View>
-            </TouchableOpacity>
-          ))
+          <>
+            {/* Houses pill content */}
+            {activeCategory === 'Houses' && (
+              filteredHouses.length === 0 ? (
+                <EmptyState searchQuery={searchQuery} emptyLabel="No houses available" />
+              ) : (
+                filteredHouses.map((house) => (
+                  <TouchableOpacity
+                    key={house.id}
+                    style={styles.houseCard}
+                    activeOpacity={0.8}
+                  >
+                    <View style={styles.houseCardInner}>
+                      <View style={[styles.houseIconWrap, { backgroundColor: '#6366f122' }]}>
+                        <MaterialIcons name="home" size={28} color="#6366f1" />
+                      </View>
+                      <View style={styles.houseBody}>
+                        <Text style={styles.houseName} numberOfLines={1}>
+                          {house.name}
+                        </Text>
+                        {(house.city || house.address?.city) ? (
+                          <Text style={styles.houseLocation} numberOfLines={1}>
+                            {house.city ?? house.address?.city}
+                            {(house.state ?? house.address?.state) ? `, ${house.state ?? house.address?.state}` : ''}
+                          </Text>
+                        ) : null}
+                        <Text style={styles.houseDesc} numberOfLines={1}>
+                          {house.tenantName}
+                        </Text>
+                      </View>
+                      <MaterialIcons name="chevron-right" size={20} color="#475569" />
+                    </View>
+                  </TouchableOpacity>
+                ))
+              )
+            )}
+
+            {/* Events pill content */}
+            {activeCategory === 'Events' && (
+              filteredEvents.length === 0 ? (
+                <EmptyState searchQuery={searchQuery} emptyLabel="No events available" />
+              ) : (
+                filteredEvents.map((event) => (
+                  <TouchableOpacity
+                    key={event.id}
+                    style={styles.houseCard}
+                    activeOpacity={0.8}
+                  >
+                    <View style={styles.houseCardInner}>
+                      <View style={[styles.houseIconWrap, { backgroundColor: '#10b98122' }]}>
+                        <MaterialIcons name="event" size={28} color="#10b981" />
+                      </View>
+                      <View style={styles.houseBody}>
+                        <Text style={styles.houseName} numberOfLines={1}>
+                          {event.title}
+                        </Text>
+                        <Text style={styles.houseLocation} numberOfLines={1}>
+                          {format(new Date(event.scheduledAt), 'EEE, MMM d · h:mm a')}
+                        </Text>
+                        <Text style={styles.houseDesc} numberOfLines={1}>
+                          {event.tenantName}
+                          {event.location ? ` · ${event.location}` : ''}
+                        </Text>
+                      </View>
+                      <MaterialIcons name="chevron-right" size={20} color="#475569" />
+                    </View>
+                  </TouchableOpacity>
+                ))
+              )
+            )}
+
+            {/* Courses pill content */}
+            {activeCategory === 'Courses' && (
+              filteredCourses.length === 0 ? (
+                <EmptyState searchQuery={searchQuery} emptyLabel="No courses available" />
+              ) : (
+                filteredCourses.map((course) => (
+                  <TouchableOpacity
+                    key={course.id}
+                    style={styles.houseCard}
+                    activeOpacity={0.8}
+                  >
+                    <View style={styles.houseCardInner}>
+                      <View style={[styles.houseIconWrap, { backgroundColor: '#D946EF22' }]}>
+                        <MaterialIcons name="school" size={28} color="#D946EF" />
+                      </View>
+                      <View style={styles.houseBody}>
+                        <Text style={styles.houseName} numberOfLines={1}>
+                          {course.title}
+                        </Text>
+                        {course.description ? (
+                          <Text style={styles.houseDesc} numberOfLines={2}>
+                            {course.description}
+                          </Text>
+                        ) : null}
+                        <Text style={styles.houseLocation} numberOfLines={1}>
+                          {course.tenantName} · {course.totalLessons} lessons
+                        </Text>
+                      </View>
+                      <MaterialIcons name="chevron-right" size={20} color="#475569" />
+                    </View>
+                  </TouchableOpacity>
+                ))
+              )
+            )}
+
+            {/* Tenant cards — All, Programs, Staff Jobs */}
+            {(activeCategory === 'All' || activeCategory === 'Programs' || activeCategory === 'Staff Jobs') && (
+              filteredTenants.length === 0 ? (
+                <EmptyState searchQuery={searchQuery} emptyLabel="No listings available" />
+              ) : (
+                filteredTenants.map((tenant) => (
+                  <TouchableOpacity
+                    key={tenant.id}
+                    style={styles.houseCard}
+                    onPress={() => router.push(`/tenants/${tenant.id}` as never)}
+                    activeOpacity={0.8}
+                  >
+                    <View style={styles.houseCardInner}>
+                      <View style={styles.houseIconWrap}>
+                        <MaterialIcons name="business" size={28} color="#6366f1" />
+                      </View>
+                      <View style={styles.houseBody}>
+                        <Text style={styles.houseName} numberOfLines={1}>
+                          {tenant.name}
+                        </Text>
+                        {tenant.city ? (
+                          <Text style={styles.houseLocation} numberOfLines={1}>
+                            {tenant.city}{tenant.state ? `, ${tenant.state}` : ''}
+                          </Text>
+                        ) : null}
+                        {tenant.description ? (
+                          <Text style={styles.houseDesc} numberOfLines={2}>
+                            {tenant.description}
+                          </Text>
+                        ) : null}
+                      </View>
+                      <MaterialIcons name="chevron-right" size={20} color="#475569" />
+                    </View>
+                  </TouchableOpacity>
+                ))
+              )
+            )}
+          </>
         )}
 
         {/* View all programs */}
@@ -180,6 +397,20 @@ export default function ExploreScreen() {
 
       <ProfileDrawer visible={profileOpen} onClose={() => setProfileOpen(false)} />
       <SettingsDrawer visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
+    </View>
+  );
+}
+
+function EmptyState({ searchQuery, emptyLabel }: { searchQuery: string; emptyLabel: string }) {
+  return (
+    <View style={styles.emptyState}>
+      <MaterialIcons name="search-off" size={40} color="#334155" />
+      <Text style={styles.emptyText}>
+        {searchQuery ? 'No results found' : emptyLabel}
+      </Text>
+      <Text style={styles.emptySubtext}>
+        {searchQuery ? 'Try a different search term' : 'Check back soon'}
+      </Text>
     </View>
   );
 }
@@ -264,7 +495,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 
-  // House cards
+  // House cards (shared style for all card types)
   houseCard: {
     marginHorizontal: 20,
     marginBottom: 10,
