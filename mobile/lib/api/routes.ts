@@ -25,6 +25,13 @@ export const lmsApi = {
     api.get<{ courses: MobileCourse[] }>(`/api/mobile/tenants/${tenantId}/courses`),
   getCourse: (tenantId: string, courseId: string) =>
     api.get<{ course: MobileCourseDetail }>(`/api/mobile/tenants/${tenantId}/courses/${courseId}`),
+  enroll: (tenantId: string, courseId: string) =>
+    api.post<{ success: boolean }>(`/api/mobile/tenants/${tenantId}/courses/${courseId}/enroll`, {}),
+  completeLesson: (tenantId: string, courseId: string, lessonId: string) =>
+    api.post<{ success: boolean }>(
+      `/api/mobile/tenants/${tenantId}/courses/${courseId}/lessons/${lessonId}/complete`,
+      {}
+    ),
 };
 
 // --- Tenants ---
@@ -249,7 +256,21 @@ export interface ProgressData {
 export const houseApi = {
   houseDetail: (houseId: string, tenantId: string) =>
     api.get<{ house: HouseDetail }>(`/api/mobile/houses/${houseId}?tenantId=${tenantId}`),
+  listAll: () =>
+    api.get<{ houses: GlobalHouse[] }>('/api/mobile/houses'),
 };
+
+export interface GlobalHouse {
+  id: string;
+  tenantId: string;
+  tenantName: string;
+  name: string;
+  address?: { street?: string; city?: string; state?: string; zip?: string } | null;
+  city?: string | null;
+  state?: string | null;
+  capacity: number;
+  status: string;
+}
 
 export interface HouseDetail {
   id: string;
@@ -266,3 +287,37 @@ export interface HouseDetail {
   imageUrl?: string;
   tenantId?: string;
 }
+
+export interface UniversalCourse {
+  id: string;
+  tenantId: string;
+  tenantName: string;
+  title: string;
+  description: string;
+  totalLessons: number;
+  moduleCount: number;
+  visibility: 'tenant' | 'universal';
+}
+
+export const courseApi = {
+  listUniversal: () =>
+    api.get<{ courses: UniversalCourse[] }>('/api/mobile/courses'),
+};
+
+export interface UniversalEvent {
+  id: string;
+  tenantId: string;
+  tenantName: string;
+  title: string;
+  description?: string;
+  scheduledAt: string;
+  duration?: number;
+  location?: string;
+  type?: string;
+  visibility: 'universal';
+}
+
+export const eventsApi = {
+  listUniversal: () =>
+    api.get<{ events: UniversalEvent[] }>('/api/mobile/events'),
+};
