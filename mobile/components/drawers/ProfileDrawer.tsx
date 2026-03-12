@@ -165,7 +165,7 @@ export function ProfileDrawer({ visible, onClose }: ProfileDrawerProps) {
           <NavItem
             icon="emoji-events"
             label="Sobriety Status"
-            onPress={() => nav('/profile-builder/sobriety')}
+            onPress={() => nav('/profile-builder/sobriety-status')}
           />
           <NavItem
             icon="flag"
