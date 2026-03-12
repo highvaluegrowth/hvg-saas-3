@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { userApi } from '@/lib/api/routes';
+import { userApi, tenantApi, TenantHouse } from '@/lib/api/routes';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { format } from 'date-fns';
 import { AppHeader } from '@/components/AppHeader';
@@ -17,6 +17,7 @@ import { ProfileDrawer } from '@/components/drawers/ProfileDrawer';
 import { SettingsDrawer } from '@/components/drawers/SettingsDrawer';
 import { TAB_BAR_BASE_HEIGHT } from '@/lib/constants/layout';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 export default function HomeScreen() {
   const { appUser } = useAuth();
@@ -30,6 +31,30 @@ export default function HomeScreen() {
     queryKey: ['feed'],
     queryFn: userApi.getFeed,
   });
+
+  // Fetch enrollments to determine if user is enrolled in a tenant
+  const { data: enrollmentsData } = useQuery({
+    queryKey: ['enrollments'],
+    queryFn: userApi.getEnrollments,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  // Find first active/approved enrollment
+  const activeEnrollment = enrollmentsData?.enrollments?.find(
+    (e) => e.status === 'active' || e.status === 'approved'
+  ) ?? null;
+
+  const enrolledTenantId = activeEnrollment?.tenantId ?? null;
+
+  // Fetch houses for the enrolled tenant
+  const { data: housesData } = useQuery({
+    queryKey: ['myHouses', enrolledTenantId],
+    queryFn: () => tenantApi.getHouses(enrolledTenantId!),
+    enabled: !!enrolledTenantId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const myHouses: TenantHouse[] = housesData?.houses ?? [];
 
   const events = data?.events ?? [];
   const chores = data?.chores ?? [];
@@ -69,6 +94,45 @@ export default function HomeScreen() {
             </View>
           )}
         </View>
+
+        {/* My Houses — shown only when enrolled */}
+        {enrolledTenantId && myHouses.length > 0 && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>My Houses</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.housesRow}
+            >
+              {myHouses.map((house) => (
+                <TouchableOpacity
+                  key={house.id}
+                  style={styles.houseCard}
+                  activeOpacity={0.8}
+                  onPress={() =>
+                    router.push(
+                      `/tenants/${enrolledTenantId}/houses/${house.id}` as never
+                    )
+                  }
+                >
+                  <View style={styles.houseIconWrap}>
+                    <MaterialIcons name="home" size={24} color="#6366f1" />
+                  </View>
+                  <Text style={styles.houseName} numberOfLines={2}>
+                    {house.name}
+                  </Text>
+                  {(house.address?.city || house.address?.state) ? (
+                    <Text style={styles.houseLocation} numberOfLines={1}>
+                      {house.address?.city}
+                      {house.address?.city && house.address?.state ? ', ' : ''}
+                      {house.address?.state}
+                    </Text>
+                  ) : null}
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          </View>
+        )}
 
         <Section title="Upcoming Events">
           {isLoading ? (
@@ -255,4 +319,29 @@ const styles = StyleSheet.create({
     borderColor: '#334155',
   },
   discoverBtnText: { color: '#6366f1', fontWeight: '600', fontSize: 15 },
+
+  // My Houses horizontal scroll
+  housesRow: {
+    paddingRight: 16,
+    gap: 12,
+  },
+  houseCard: {
+    width: 140,
+    backgroundColor: '#1e293b',
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: '#334155',
+    gap: 8,
+  },
+  houseIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    backgroundColor: '#6366f122',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  houseName: { color: '#f8fafc', fontSize: 13, fontWeight: '600' },
+  houseLocation: { color: '#64748b', fontSize: 11 },
 });
