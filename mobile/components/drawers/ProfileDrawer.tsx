@@ -165,37 +165,37 @@ export function ProfileDrawer({ visible, onClose }: ProfileDrawerProps) {
           <NavItem
             icon="emoji-events"
             label="Sobriety Status"
-            onPress={() => nav('/profile-builder/sobriety-status')}
+            onPress={() => nav('/(profile-builder)/sobriety-status')}
           />
           <NavItem
             icon="flag"
             label="Goals"
-            onPress={() => nav('/profile-builder/goals')}
+            onPress={() => nav('/(profile-builder)/goals')}
           />
           <NavItem
             icon="build"
             label="Capabilities"
-            onPress={() => nav('/profile-builder/capabilities')}
+            onPress={() => nav('/(profile-builder)/capabilities')}
           />
           <NavItem
             icon="favorite"
             label="Faith"
-            onPress={() => nav('/profile-builder/faith')}
+            onPress={() => nav('/(profile-builder)/faith')}
           />
           <NavItem
             icon="gavel"
             label="Morals"
-            onPress={() => nav('/profile-builder/morals')}
+            onPress={() => nav('/(profile-builder)/morals')}
           />
           <NavItem
             icon="local-pharmacy"
             label="Substances"
-            onPress={() => nav('/profile-builder/substances')}
+            onPress={() => nav('/(profile-builder)/substances')}
           />
           <NavItem
             icon="group"
             label="Demographics"
-            onPress={() => nav('/profile-builder/demographics')}
+            onPress={() => nav('/(profile-builder)/demographics')}
           />
 
           <View style={styles.divider} />
