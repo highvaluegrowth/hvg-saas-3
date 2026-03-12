@@ -106,7 +106,7 @@ export function AIRecoverySection() {
                                 <span className="text-xs text-white/40 font-medium">9:41 AM</span>
                                 <div className="flex gap-1.5 items-center">
                                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                                    <span className="text-xs text-emerald-400 font-semibold">HVG Guide</span>
+                                    <span className="text-xs text-emerald-400 font-semibold">HVG Outlet</span>
                                 </div>
                             </div>
 
@@ -117,7 +117,7 @@ export function AIRecoverySection() {
                                     🤖
                                 </div>
                                 <div>
-                                    <div className="text-sm font-semibold text-white">HVG Guide</div>
+                                    <div className="text-sm font-semibold text-white">HVG Outlet</div>
                                     <div className="text-xs text-emerald-400">● online — always</div>
                                 </div>
                             </div>

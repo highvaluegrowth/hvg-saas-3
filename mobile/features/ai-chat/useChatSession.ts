@@ -67,7 +67,7 @@ export function useChatSession(initialConversationId?: string) {
       const msg =
         err instanceof Error
           ? err.message
-          : 'Failed to reach HVG Guide. Check your connection and try again.';
+          : 'Failed to reach HVG Outlet. Check your connection and try again.';
       setErrorMessage(msg);
       // Roll back the optimistic user message so user can retry
       setMessages((prev) => prev.slice(0, -1));

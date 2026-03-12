@@ -253,7 +253,7 @@ export default function ProfileScreen() {
         </View>
         <Text style={styles.medicalNote}>
           This information is stored securely and never shared with the AI assistant
-          unless you explicitly ask your HVG Guide about it.
+          unless you explicitly ask your HVG Outlet about it.
         </Text>
 
         {editing ? (
@@ -332,7 +332,7 @@ export default function ProfileScreen() {
 
       {/* ── AI Settings ── */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>HVG Guide — AI Settings</Text>
+        <Text style={styles.sectionTitle}>HVG Outlet — AI Settings</Text>
         <View style={styles.field}>
           <Text style={styles.fieldLabel}>Gemini API Key (optional)</Text>
           <Text style={[styles.fieldValue, { fontSize: 12, color: '#64748b', marginBottom: 8 }]}>

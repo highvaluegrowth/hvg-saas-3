@@ -166,7 +166,7 @@ export function buildProactiveGreeting(snap: ContextSnapshot): string {
     }
 
     if (parts.length === 0) {
-        return `Hi, ${name}! I'm your HVG Guide — here to support your recovery journey. Ask me anything!`;
+        return `Hi, ${name}! I'm your HVG Outlet — here to support your recovery journey. Ask me anything!`;
     }
 
     const joined = parts.length === 1

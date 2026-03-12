@@ -83,7 +83,7 @@ export default function DemographicsScreen() {
                     </View>
                     <Text style={s.title}>Tell us about yourself</Text>
                     <Text style={s.subtitle}>
-                        This helps your HVG Guide personalise your experience and
+                        This helps your HVG Outlet personalise your experience and
                         ensures the team can reach you in an emergency.
                     </Text>
                 </View>

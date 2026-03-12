@@ -274,7 +274,7 @@ function TypingDots() {
   return (
     <View style={styles.typingBubble}>
       <ActivityIndicator size="small" color="#0891B2" />
-      <Text style={styles.typingText}>HVG Guide is thinking…</Text>
+      <Text style={styles.typingText}>HVG Outlet is thinking…</Text>
     </View>
   );
 }
@@ -324,7 +324,7 @@ export default function ChatScreen() {
   // Build proactive greeting from context
   const greeting = contextSnapshot
     ? buildProactiveGreeting(contextSnapshot)
-    : `Hi, ${firstName}! I'm your HVG Guide — here to support your recovery journey. Ask me anything, log your mood, or just talk.`;
+    : `Hi, ${firstName}! I'm your HVG Outlet — here to support your recovery journey. Ask me anything, log your mood, or just talk.`;
 
   return (
     <KeyboardAvoidingView
@@ -335,7 +335,7 @@ export default function ChatScreen() {
       {/* ── Header ── */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>HVG Guide</Text>
+          <Text style={styles.headerTitle}>HVG Outlet</Text>
           <Text style={styles.headerSub}>
             {isContextLoading ? 'Loading your context…' : 'Powered by Gemini 2.5'}
           </Text>
@@ -453,7 +453,7 @@ export default function ChatScreen() {
           style={styles.input}
           value={input}
           onChangeText={setInput}
-          placeholder="Ask your HVG Guide…"
+          placeholder="Ask your HVG Outlet…"
           placeholderTextColor="#475569"
           multiline
           maxLength={500}

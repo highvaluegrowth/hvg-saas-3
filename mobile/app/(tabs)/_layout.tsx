@@ -45,65 +45,65 @@ export default function TabsLayout() {
         headerTintColor: '#f8fafc',
       }}
     >
+      {/* ── Visible tabs ─────────────────────────────── */}
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarLabel: 'Home',
+          title: 'Dashboard',
+          tabBarLabel: 'Dashboard',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="home" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="lms"
+        name="explore"
         options={{
-          title: 'Courses',
-          tabBarLabel: 'Courses',
+          title: 'Explore',
+          tabBarLabel: 'Explore',
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="school" size={size} color={color} />
+            <MaterialIcons name="explore" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
         name="chat"
         options={{
-          title: 'HVG Guide',
+          title: 'HVG Outlet',
           tabBarLabel: '',
           tabBarIcon: ({ focused }) => <ChatTabIcon focused={focused} />,
         }}
       />
       <Tabs.Screen
-        name="schedule"
+        name="activity"
         options={{
-          title: 'Schedule',
-          tabBarLabel: 'Schedule',
+          title: 'Activity',
+          tabBarLabel: 'Activity',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="event" size={size} color={color} />
+            <MaterialIcons name="bar-chart" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="progress"
+        name="inbox"
         options={{
-          title: 'Progress',
-          tabBarLabel: 'Progress',
+          title: 'Inbox',
+          tabBarLabel: 'Inbox',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="trending-up" size={size} color={color} />
+            <MaterialIcons name="inbox" size={size} color={color} />
           ),
         }}
       />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarLabel: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="person" size={size} color={color} />
-          ),
-        }}
-      />
+
+      {/* ── Hidden tabs (accessible via router.push) ─── */}
+      <Tabs.Screen name="lms"      options={{ href: null }} />
+      <Tabs.Screen name="schedule" options={{ href: null }} />
+      <Tabs.Screen name="progress" options={{ href: null }} />
+      <Tabs.Screen name="profile"  options={{ href: null }} />
     </Tabs>
   );
 }

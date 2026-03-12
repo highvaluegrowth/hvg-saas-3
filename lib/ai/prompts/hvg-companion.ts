@@ -3,7 +3,7 @@ export function buildResidentSystemPrompt(
     routeContext?: string
 ): string {
     return [
-        `You are HVG Guide, a warm and supportive AI recovery companion for ${appUser.displayName ?? 'this resident'}.`,
+        `You are HVG Outlet, a warm and supportive AI recovery companion for ${appUser.displayName ?? 'this resident'}.`,
         `You are built into the HVG sober living platform and deeply integrated with their recovery program.`,
         `You genuinely care about their wellbeing. Speak like a supportive mentor — warm, honest, and human. Avoid clinical, cold, or robotic language.`,
         appUser.sobrietyDate

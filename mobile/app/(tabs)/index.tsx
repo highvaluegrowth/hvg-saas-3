@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   ScrollView,
@@ -11,10 +12,19 @@ import { useRouter } from 'expo-router';
 import { userApi } from '@/lib/api/routes';
 import { useAuth } from '@/lib/auth/AuthContext';
 import { format } from 'date-fns';
+import { AppHeader } from '@/components/AppHeader';
+import { ProfileDrawer } from '@/components/drawers/ProfileDrawer';
+import { SettingsDrawer } from '@/components/drawers/SettingsDrawer';
+import { TAB_BAR_BASE_HEIGHT } from '@/lib/constants/layout';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
   const { appUser } = useAuth();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
+
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['feed'],
@@ -25,113 +35,134 @@ export default function HomeScreen() {
   const chores = data?.chores ?? [];
 
   const sobrietyDays = appUser?.sobrietyDate
-    ? Math.floor((Date.now() - new Date(appUser.sobrietyDate as unknown as string).getTime()) / 86400000)
+    ? Math.floor(
+        (Date.now() - new Date(appUser.sobrietyDate as unknown as string).getTime()) /
+          86400000,
+      )
     : null;
 
+  const bottomPad = TAB_BAR_BASE_HEIGHT + insets.bottom + 16;
+
   return (
-    <ScrollView
-      style={styles.container}
-      refreshControl={
-        <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#6366f1" />
-      }
-    >
-      <View style={styles.header}>
-        <Text style={styles.greeting}>
-          Hi, {appUser?.displayName?.split(' ')[0] ?? 'there'} 👋
-        </Text>
-        {sobrietyDays !== null && (
-          <Text style={styles.sobriety}>{sobrietyDays} days sober</Text>
-        )}
-      </View>
+    <View style={styles.root}>
+      <AppHeader
+        title="Dashboard"
+        onProfilePress={() => setProfileOpen(true)}
+        onSettingsPress={() => setSettingsOpen(true)}
+      />
 
-      <Section title="Upcoming Events">
-        {isLoading ? (
-          <LoadingRow />
-        ) : events.length === 0 ? (
-          <EmptyRow text="No upcoming events" />
-        ) : (
-          events.slice(0, 5).map((e) => (
-            <View key={e.id} style={styles.card}>
-              <Text style={styles.cardTitle}>{e.title}</Text>
-              <Text style={styles.cardSub}>
-                {format(new Date(e.scheduledAt), 'EEE, MMM d · h:mm a')}
-              </Text>
-              {e.location ? <Text style={styles.cardMeta}>{e.location}</Text> : null}
-            </View>
-          ))
-        )}
-      </Section>
-
-      <Section title="My Chores">
-        {isLoading ? (
-          <LoadingRow />
-        ) : chores.length === 0 ? (
-          <EmptyRow text="No pending chores" />
-        ) : (
-          chores.map((c) => (
-            <View key={c.id} style={styles.card}>
-              <View style={styles.choreRow}>
-                <Text style={styles.cardTitle}>{c.title}</Text>
-                <StatusBadge status={c.status} />
-              </View>
-              {c.dueDate ? (
-                <Text style={styles.cardSub}>
-                  Due {format(new Date(c.dueDate), 'MMM d')}
-                </Text>
-              ) : null}
-            </View>
-          ))
-        )}
-      </Section>
-
-      <Section title="Get Started">
-        <TouchableOpacity
-          style={styles.applyCard}
-          onPress={() => router.push('/apply/bed')}
-          activeOpacity={0.75}
-        >
-          <Text style={styles.applyCardIcon}>🛏️</Text>
-          <View style={styles.applyCardBody}>
-            <Text style={styles.applyCardTitle}>Find a Bed</Text>
-            <Text style={styles.applyCardSub}>Apply for sober living placement</Text>
-          </View>
-          <Text style={styles.applyCardArrow}>→</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.applyCard}
-          onPress={() => router.push('/apply/staff')}
-          activeOpacity={0.75}
-        >
-          <Text style={styles.applyCardIcon}>💼</Text>
-          <View style={styles.applyCardBody}>
-            <Text style={styles.applyCardTitle}>Staff Positions</Text>
-            <Text style={styles.applyCardSub}>Apply to work at a sober living house</Text>
-          </View>
-          <Text style={styles.applyCardArrow}>→</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.applyCard}
-          onPress={() => router.push('/search')}
-          activeOpacity={0.75}
-        >
-          <Text style={styles.applyCardIcon}>🔍</Text>
-          <View style={styles.applyCardBody}>
-            <Text style={styles.applyCardTitle}>Search Houses</Text>
-            <Text style={styles.applyCardSub}>Browse sober living homes near you</Text>
-          </View>
-          <Text style={styles.applyCardArrow}>→</Text>
-        </TouchableOpacity>
-      </Section>
-
-      <TouchableOpacity
-        style={styles.discoverBtn}
-        onPress={() => router.push('/tenants')}
+      <ScrollView
+        style={styles.container}
+        contentContainerStyle={{ paddingBottom: bottomPad }}
+        refreshControl={
+          <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor="#6366f1" />
+        }
       >
-        <Text style={styles.discoverBtnText}>Discover Programs →</Text>
-      </TouchableOpacity>
-    </ScrollView>
+        {/* Greeting */}
+        <View style={styles.greeting}>
+          <Text style={styles.greetingText}>
+            Hi, {appUser?.displayName?.split(' ')[0] ?? 'there'} 👋
+          </Text>
+          {sobrietyDays !== null && (
+            <View style={styles.sobrietyPill}>
+              <Text style={styles.sobrietyText}>{sobrietyDays} days sober</Text>
+            </View>
+          )}
+        </View>
+
+        <Section title="Upcoming Events">
+          {isLoading ? (
+            <LoadingRow />
+          ) : events.length === 0 ? (
+            <EmptyRow text="No upcoming events" />
+          ) : (
+            events.slice(0, 5).map((e) => (
+              <View key={e.id} style={styles.card}>
+                <Text style={styles.cardTitle}>{e.title}</Text>
+                <Text style={styles.cardSub}>
+                  {format(new Date(e.scheduledAt), 'EEE, MMM d · h:mm a')}
+                </Text>
+                {e.location ? <Text style={styles.cardMeta}>{e.location}</Text> : null}
+              </View>
+            ))
+          )}
+        </Section>
+
+        <Section title="My Chores">
+          {isLoading ? (
+            <LoadingRow />
+          ) : chores.length === 0 ? (
+            <EmptyRow text="No pending chores" />
+          ) : (
+            chores.map((c) => (
+              <View key={c.id} style={styles.card}>
+                <View style={styles.choreRow}>
+                  <Text style={styles.cardTitle}>{c.title}</Text>
+                  <StatusBadge status={c.status} />
+                </View>
+                {c.dueDate ? (
+                  <Text style={styles.cardSub}>
+                    Due {format(new Date(c.dueDate), 'MMM d')}
+                  </Text>
+                ) : null}
+              </View>
+            ))
+          )}
+        </Section>
+
+        <Section title="Get Started">
+          <TouchableOpacity
+            style={styles.applyCard}
+            onPress={() => router.push('/apply/bed')}
+            activeOpacity={0.75}
+          >
+            <Text style={styles.applyCardIcon}>🛏️</Text>
+            <View style={styles.applyCardBody}>
+              <Text style={styles.applyCardTitle}>Find a Bed</Text>
+              <Text style={styles.applyCardSub}>Apply for sober living placement</Text>
+            </View>
+            <Text style={styles.applyCardArrow}>→</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.applyCard}
+            onPress={() => router.push('/apply/staff')}
+            activeOpacity={0.75}
+          >
+            <Text style={styles.applyCardIcon}>💼</Text>
+            <View style={styles.applyCardBody}>
+              <Text style={styles.applyCardTitle}>Staff Positions</Text>
+              <Text style={styles.applyCardSub}>Apply to work at a sober living house</Text>
+            </View>
+            <Text style={styles.applyCardArrow}>→</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.applyCard}
+            onPress={() => router.push('/search')}
+            activeOpacity={0.75}
+          >
+            <Text style={styles.applyCardIcon}>🔍</Text>
+            <View style={styles.applyCardBody}>
+              <Text style={styles.applyCardTitle}>Search Houses</Text>
+              <Text style={styles.applyCardSub}>Browse sober living homes near you</Text>
+            </View>
+            <Text style={styles.applyCardArrow}>→</Text>
+          </TouchableOpacity>
+        </Section>
+
+        <TouchableOpacity
+          style={styles.discoverBtn}
+          onPress={() => router.push('/tenants')}
+        >
+          <Text style={styles.discoverBtnText}>Discover Programs →</Text>
+        </TouchableOpacity>
+      </ScrollView>
+
+      {/* Drawers */}
+      <ProfileDrawer visible={profileOpen} onClose={() => setProfileOpen(false)} />
+      <SettingsDrawer visible={settingsOpen} onClose={() => setSettingsOpen(false)} />
+    </View>
   );
 }
 
@@ -166,10 +197,21 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 const styles = StyleSheet.create({
+  root: { flex: 1, backgroundColor: '#0a0f1e' },
   container: { flex: 1, backgroundColor: '#0f172a' },
-  header: { padding: 24, paddingBottom: 8 },
-  greeting: { fontSize: 24, fontWeight: '700', color: '#f8fafc' },
-  sobriety: { fontSize: 14, color: '#6366f1', marginTop: 4, fontWeight: '600' },
+  greeting: { paddingHorizontal: 20, paddingTop: 20, paddingBottom: 4 },
+  greetingText: { fontSize: 22, fontWeight: '700', color: '#f8fafc' },
+  sobrietyPill: {
+    marginTop: 6,
+    alignSelf: 'flex-start',
+    backgroundColor: '#1e293b',
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderWidth: 1,
+    borderColor: '#6366f1',
+  },
+  sobrietyText: { fontSize: 13, color: '#6366f1', fontWeight: '600' },
   section: { padding: 16 },
   sectionTitle: {
     fontSize: 16,

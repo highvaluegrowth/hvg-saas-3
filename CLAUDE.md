@@ -10,7 +10,7 @@ High Value Growth (HVG) is a multi-tenant SaaS platform for managing sober-livin
 - Auth + RBAC (custom claims), multi-tenant routing + Firestore isolation
 - Dashboard: Houses, Residents, Staff, Incidents, Chores, Vehicles, Events
 - LMS: course builder, 10 quiz types, analytics
-- AI: HVG Partner (16 saas-tools), HVG Guide (13 mobile-tools), Gemini 2.5 Flash
+- AI: HVG Partner (16 saas-tools), HVG Outlet (13 mobile-tools), Gemini 2.5 Flash
 - News Feed, Contracts + e-signature (pdf-lib + signature_pad), Blog
 - Tenant Directory + promos, Kanban board, Contacts page
 - Application system (bed/staff/course/event/tenant), SuperAdmin queue
@@ -18,7 +18,7 @@ High Value Growth (HVG) is a multi-tenant SaaS platform for managing sober-livin
 
 **Mobile (Expo 52, React Native, Expo Router 4):**
 - Firebase Auth + SecureStore token management (Firebase-first flow)
-- HVG Guide AI chat with optimistic updates + error handling
+- HVG Outlet AI chat with optimistic updates + error handling
 - Bundle: iOS `com.hvgsaas3.mobile`, Android `com.hvg_saas_3.mobile`
 
 ## Next Steps
@@ -81,7 +81,7 @@ All tenant data scoped under `/tenants/{tenantId}/` in Firestore. Custom claims 
 
 **AI:**
 - `app/api/ai/saas/chat/route.ts` - HVG Partner (SaaS)
-- `app/api/ai/mobile/chat/route.ts` - HVG Guide (mobile)
+- `app/api/ai/mobile/chat/route.ts` - HVG Outlet (mobile)
 - `lib/ai/tools/saas-tools.ts` - 16 operator tools
 - `lib/ai/tools/mobile-tools.ts` - 13 resident tools
 
@@ -103,7 +103,7 @@ All tenant data scoped under `/tenants/{tenantId}/` in Firestore. Custom claims 
 - **zsh glob brackets** — `git add` paths with `[tenantId]` must be quoted: `git add "app/(dashboard)/[tenantId]/..."`
 - **`export const dynamic = 'force-dynamic'`** — required on any route using `request.headers` or cookies
 - **Firestore reaction toggle** — read array, add/remove uid, delete key entirely when array empties (not set to `[]`)
-- **AI persona names** — mobile = **HVG Guide**, web/SaaS = **HVG Partner** (never "Companion")
+- **AI persona names** — mobile = **HVG Outlet**, web/SaaS = **HVG Partner** (never "Companion")
 
 ## Development Guidelines
 
