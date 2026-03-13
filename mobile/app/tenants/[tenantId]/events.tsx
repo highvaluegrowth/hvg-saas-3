@@ -7,12 +7,13 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { tenantApi } from '@/lib/api/routes';
 import { format } from 'date-fns';
 
 export default function TenantEventsScreen() {
   const { tenantId } = useLocalSearchParams<{ tenantId: string }>();
+  const router = useRouter();
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ['events', tenantId],
@@ -40,7 +41,11 @@ export default function TenantEventsScreen() {
         <Text style={styles.empty}>No upcoming events</Text>
       }
       renderItem={({ item: e }) => (
-        <View style={styles.card}>
+        <TouchableOpacity
+          style={styles.card}
+          onPress={() => router.push(`/${tenantId}/events/${e.id}` as never)}
+          activeOpacity={0.75}
+        >
           <Text style={styles.title}>{e.title}</Text>
           <Text style={styles.time}>
             {format(new Date(e.scheduledAt), 'EEE, MMM d · h:mm a')}
@@ -50,13 +55,13 @@ export default function TenantEventsScreen() {
             <Text style={styles.attendees}>{e.attendeeCount} attending</Text>
             <TouchableOpacity
               style={styles.attendBtn}
-              onPress={() => attendMutation.mutate(e.id)}
+              onPress={(ev) => { ev.stopPropagation?.(); attendMutation.mutate(e.id); }}
               disabled={attendMutation.isPending}
             >
               <Text style={styles.attendBtnText}>RSVP</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </TouchableOpacity>
       )}
     />
   );

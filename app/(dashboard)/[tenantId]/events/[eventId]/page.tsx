@@ -130,8 +130,8 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
         setEvent({
           ...found,
           scheduledAt: new Date(found.scheduledAt),
-          createdAt: new Date(found.createdAt),
-          updatedAt: new Date(found.updatedAt),
+          createdAt: found.createdAt ? new Date(found.createdAt) : new Date(),
+          updatedAt: found.updatedAt ? new Date(found.updatedAt) : new Date(),
         });
       } catch (err: unknown) {
         setError(err instanceof Error ? err.message : 'Failed to load event.');
