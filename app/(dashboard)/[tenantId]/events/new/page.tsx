@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { authService } from '@/features/auth/services/authService';
 import { ImageUpload } from '@/components/ui/ImageUpload';
-import { ProgramEventType } from '@/features/events/types/event.types';
+import { ProgramEventType, EventVisibility, RecurrenceFrequency, RecurrenceEndType, RecurrenceDay } from '@/features/events/types/event.types';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
@@ -32,6 +32,28 @@ const EVENT_TYPE_OPTIONS: Array<{ value: string; label: string }> = [
   { value: 'other', label: 'Other' },
 ];
 
+const FREQUENCY_OPTIONS: Array<{ value: RecurrenceFrequency; label: string }> = [
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'biweekly', label: 'Bi-weekly' },
+  { value: 'monthly', label: 'Monthly' },
+];
+
+const DAYS_OF_WEEK: Array<{ value: RecurrenceDay; label: string }> = [
+  { value: 'mon', label: 'Mon' },
+  { value: 'tue', label: 'Tue' },
+  { value: 'wed', label: 'Wed' },
+  { value: 'thu', label: 'Thu' },
+  { value: 'fri', label: 'Fri' },
+  { value: 'sat', label: 'Sat' },
+  { value: 'sun', label: 'Sun' },
+];
+
+interface HouseOption {
+  id: string;
+  name: string;
+}
+
 interface FormData {
   title: string;
   description: string;
@@ -40,9 +62,13 @@ interface FormData {
   duration: string;
   location: string;
   facilitator: string;
+  visibility: EventVisibility;
+  houseId: string;
+  recurrenceFrequency: RecurrenceFrequency;
+  recurrenceEndType: RecurrenceEndType;
+  recurrenceEndAfter: string;
+  recurrenceEndDate: string;
 }
-
-// Separate state for cover image (not part of FormData to avoid input handling)
 
 const DEFAULT_FORM: FormData = {
   title: '',
@@ -52,6 +78,12 @@ const DEFAULT_FORM: FormData = {
   duration: '60',
   location: '',
   facilitator: '',
+  visibility: 'tenant',
+  houseId: '',
+  recurrenceFrequency: 'weekly',
+  recurrenceEndType: 'never',
+  recurrenceEndAfter: '',
+  recurrenceEndDate: '',
 };
 
 export default function NewEventPage({ params }: NewEventPageProps) {
@@ -62,8 +94,45 @@ export default function NewEventPage({ params }: NewEventPageProps) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Recurrence state
+  const [repeats, setRepeats] = useState(false);
+  const [recurrenceDays, setRecurrenceDays] = useState<RecurrenceDay[]>([]);
+  const [showAdvancedRecurrence, setShowAdvancedRecurrence] = useState(false);
+
+  // House dropdown state
+  const [houses, setHouses] = useState<HouseOption[]>([]);
+  const [loadingHouses, setLoadingHouses] = useState(false);
+
   function handleChange(field: keyof FormData, value: string) {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  }
+
+  async function loadHouses() {
+    if (houses.length > 0) return;
+    setLoadingHouses(true);
+    try {
+      const token = await authService.getIdToken();
+      const res = await fetch(`/api/tenants/${tenantId}/houses`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const data = await res.json();
+      setHouses(data.houses ?? []);
+    } finally {
+      setLoadingHouses(false);
+    }
+  }
+
+  function handleVisibilityChange(v: EventVisibility) {
+    handleChange('visibility', v);
+    if (v === 'house') {
+      void loadHouses();
+    }
+  }
+
+  function toggleRecurrenceDay(day: RecurrenceDay) {
+    setRecurrenceDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+    );
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -81,6 +150,10 @@ export default function NewEventPage({ params }: NewEventPageProps) {
     const durationNum = parseInt(formData.duration, 10);
     if (isNaN(durationNum) || durationNum < 1) {
       setError('Duration must be a positive number of minutes.');
+      return;
+    }
+    if (formData.visibility === 'house' && !formData.houseId) {
+      setError('Please select a house for House Only visibility.');
       return;
     }
 
@@ -102,6 +175,23 @@ export default function NewEventPage({ params }: NewEventPageProps) {
           location: formData.location.trim() || undefined,
           facilitator: formData.facilitator.trim() || undefined,
           coverImageUrl: coverImageUrl || undefined,
+          visibility: formData.visibility,
+          houseId: formData.visibility === 'house' ? formData.houseId : undefined,
+          recurrence: repeats
+            ? {
+                frequency: formData.recurrenceFrequency,
+                days: recurrenceDays.length > 0 ? recurrenceDays : undefined,
+                endType: formData.recurrenceEndType,
+                endAfter:
+                  formData.recurrenceEndType === 'after' && formData.recurrenceEndAfter
+                    ? parseInt(formData.recurrenceEndAfter, 10)
+                    : undefined,
+                endDate:
+                  formData.recurrenceEndType === 'on_date'
+                    ? formData.recurrenceEndDate
+                    : undefined,
+              }
+            : undefined,
         }),
       });
 
@@ -243,6 +333,195 @@ export default function NewEventPage({ params }: NewEventPageProps) {
                 onUpload={(url) => setCoverImageUrl(url)}
                 currentUrl={coverImageUrl || undefined}
               />
+            </div>
+
+            {/* Visibility */}
+            <div>
+              <label className="block text-sm font-medium text-white/80 mb-2">
+                Visibility
+              </label>
+              <div className="grid grid-cols-3 gap-2">
+                {(
+                  [
+                    { value: 'universal', label: 'Universal Access', desc: 'All tenants' },
+                    { value: 'tenant', label: 'Tenant Only', desc: 'Your organization' },
+                    { value: 'house', label: 'House Only', desc: 'One house' },
+                  ] as Array<{ value: EventVisibility; label: string; desc: string }>
+                ).map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => handleVisibilityChange(opt.value)}
+                    className={`flex flex-col items-center gap-1 rounded-lg border p-3 text-center transition-colors ${
+                      formData.visibility === opt.value
+                        ? 'border-cyan-500 bg-cyan-500/10 text-cyan-400'
+                        : 'border-white/10 bg-white/5 text-white/60 hover:border-white/20 hover:bg-white/10'
+                    }`}
+                  >
+                    <span className="text-xs font-semibold">{opt.label}</span>
+                    <span className="text-[10px] text-white/40">{opt.desc}</span>
+                  </button>
+                ))}
+              </div>
+
+              {formData.visibility === 'house' && (
+                <div className="mt-3">
+                  <label className="block text-sm font-medium text-white/80 mb-1">
+                    Select House <span className="text-red-500">*</span>
+                  </label>
+                  {loadingHouses ? (
+                    <p className="text-sm text-white/50">Loading houses...</p>
+                  ) : (
+                    <select
+                      value={formData.houseId}
+                      onChange={(e) => handleChange('houseId', e.target.value)}
+                      className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                      required
+                    >
+                      <option value="" className="bg-gray-900">-- Select a house --</option>
+                      {houses.map((h) => (
+                        <option key={h.id} value={h.id} className="bg-gray-900">
+                          {h.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Recurrence */}
+            <div>
+              <div className="flex items-center justify-between">
+                <label className="block text-sm font-medium text-white/80">
+                  Repeating Event
+                </label>
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={repeats}
+                  onClick={() => setRepeats((prev) => !prev)}
+                  className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-gray-900 ${
+                    repeats ? 'bg-cyan-600' : 'bg-white/20'
+                  }`}
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition-transform ${
+                      repeats ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
+              </div>
+
+              {repeats && (
+                <div className="mt-3 space-y-4 rounded-lg border border-white/10 bg-white/5 p-4">
+                  {/* Frequency */}
+                  <div>
+                    <label className="block text-sm font-medium text-white/80 mb-1">
+                      Frequency
+                    </label>
+                    <select
+                      value={formData.recurrenceFrequency}
+                      onChange={(e) => handleChange('recurrenceFrequency', e.target.value)}
+                      className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                    >
+                      {FREQUENCY_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value} className="bg-gray-900">
+                          {opt.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Advanced toggle */}
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvancedRecurrence((prev) => !prev)}
+                    className="text-xs text-cyan-400 hover:text-cyan-300 transition-colors"
+                  >
+                    {showAdvancedRecurrence ? 'Hide advanced options' : 'Show advanced options'}
+                  </button>
+
+                  {showAdvancedRecurrence && (
+                    <div className="space-y-4">
+                      {/* Days of week */}
+                      <div>
+                        <label className="block text-sm font-medium text-white/80 mb-2">
+                          Days of Week
+                        </label>
+                        <div className="flex flex-wrap gap-2">
+                          {DAYS_OF_WEEK.map((day) => (
+                            <button
+                              key={day.value}
+                              type="button"
+                              onClick={() => toggleRecurrenceDay(day.value)}
+                              className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
+                                recurrenceDays.includes(day.value)
+                                  ? 'border-cyan-500 bg-cyan-500/10 text-cyan-400'
+                                  : 'border-white/10 bg-white/5 text-white/60 hover:border-white/20 hover:bg-white/10'
+                              }`}
+                            >
+                              {day.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* End condition */}
+                      <div>
+                        <label className="block text-sm font-medium text-white/80 mb-2">
+                          End Condition
+                        </label>
+                        <div className="space-y-2">
+                          {(
+                            [
+                              { value: 'never', label: 'Never' },
+                              { value: 'after', label: 'After N occurrences' },
+                              { value: 'on_date', label: 'On date' },
+                            ] as Array<{ value: RecurrenceEndType; label: string }>
+                          ).map((opt) => (
+                            <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                              <input
+                                type="radio"
+                                name="recurrenceEndType"
+                                value={opt.value}
+                                checked={formData.recurrenceEndType === opt.value}
+                                onChange={() => handleChange('recurrenceEndType', opt.value)}
+                                className="accent-cyan-500"
+                              />
+                              <span className="text-sm text-white/70">{opt.label}</span>
+                            </label>
+                          ))}
+                        </div>
+
+                        {formData.recurrenceEndType === 'after' && (
+                          <div className="mt-2">
+                            <Input
+                              type="number"
+                              min="1"
+                              placeholder="e.g. 10"
+                              value={formData.recurrenceEndAfter}
+                              onChange={(e) => handleChange('recurrenceEndAfter', e.target.value)}
+                              className="bg-white/5 border-white/10 text-white placeholder-white/40 focus:ring-cyan-500 focus:border-cyan-500"
+                            />
+                          </div>
+                        )}
+
+                        {formData.recurrenceEndType === 'on_date' && (
+                          <div className="mt-2">
+                            <Input
+                              type="date"
+                              value={formData.recurrenceEndDate}
+                              onChange={(e) => handleChange('recurrenceEndDate', e.target.value)}
+                              className="bg-white/5 border-white/10 text-white placeholder-white/40 focus:ring-cyan-500 focus:border-cyan-500"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex items-center justify-end gap-3 pt-2">
