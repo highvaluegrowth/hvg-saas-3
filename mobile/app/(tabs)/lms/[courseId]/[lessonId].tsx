@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ScrollView,
   View,
@@ -11,7 +11,7 @@ import {
   FlatList,
   Image,
 } from 'react-native';
-import { useLocalSearchParams, Stack } from 'expo-router';
+import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { lmsApi } from '@/lib/api/routes';
 import { useAuth } from '@/lib/auth/AuthContext';
 
@@ -248,6 +248,8 @@ export default function LessonViewerScreen() {
   const { courseId, lessonId } = useLocalSearchParams<{ courseId: string; lessonId: string }>();
   const { appUser } = useAuth();
   const tenantId = appUser?.tenantIds?.[0];
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
   // Fetch the full course to find this lesson
   const { data, isLoading, error } = useQuery({
@@ -255,6 +257,14 @@ export default function LessonViewerScreen() {
     queryFn: () => lmsApi.getCourse(tenantId!, courseId!),
     enabled: !!tenantId && !!courseId,
     staleTime: 5 * 60 * 1000,
+  });
+
+  const completeMutation = useMutation({
+    mutationFn: () => lmsApi.completeLesson(tenantId!, courseId!, lessonId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lms', 'courses'] });
+      router.back();
+    },
   });
 
   // Find the specific lesson across all modules
@@ -304,6 +314,18 @@ export default function LessonViewerScreen() {
         {lesson.type === 'QUIZ' && (
           <QuizLesson questions={lesson.questions as QuizQuestion[] | undefined} />
         )}
+
+        {/* Mark Complete button */}
+        <TouchableOpacity
+          style={[styles.completeBtn, completeMutation.isPending && styles.completeBtnDisabled]}
+          onPress={() => completeMutation.mutate()}
+          disabled={completeMutation.isPending}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.completeBtnText}>
+            {completeMutation.isPending ? 'Saving…' : '✓ Mark Complete'}
+          </Text>
+        </TouchableOpacity>
       </ScrollView>
     </>
   );
@@ -317,6 +339,7 @@ const TEXT = '#f8fafc';
 const MUTED = '#94a3b8';
 const BORDER = '#334155';
 const INDIGO = '#6366f1';
+const CYAN = '#06b6d4';
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: BG },
@@ -414,4 +437,13 @@ const styles = StyleSheet.create({
     paddingVertical: 14, alignItems: 'center',
   },
   submittedText: { fontSize: 15, fontWeight: '700', color: '#10b981' },
+
+  // Mark Complete
+  completeBtn: {
+    backgroundColor: '#0f172a', borderRadius: 14,
+    paddingVertical: 15, alignItems: 'center',
+    borderWidth: 1, borderColor: CYAN,
+  },
+  completeBtnDisabled: { opacity: 0.5 },
+  completeBtnText: { fontSize: 16, fontWeight: '700', color: CYAN },
 });

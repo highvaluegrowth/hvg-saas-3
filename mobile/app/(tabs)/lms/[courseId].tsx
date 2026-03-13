@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   ScrollView,
   View,
@@ -84,6 +84,23 @@ function ModuleSection({
   );
 }
 
+// ─── Progress Bar ─────────────────────────────────────────────────────────────
+
+function ProgressBar({ progress }: { progress: number }) {
+  const pct = Math.min(100, Math.max(0, progress));
+  return (
+    <View style={styles.progressWrapper}>
+      <View style={styles.progressLabelRow}>
+        <Text style={styles.progressLabel}>Progress</Text>
+        <Text style={styles.progressPct}>{Math.round(pct)}%</Text>
+      </View>
+      <View style={styles.progressTrack}>
+        <View style={[styles.progressFill, { width: `${pct}%` }]} />
+      </View>
+    </View>
+  );
+}
+
 // ─── Main Screen ──────────────────────────────────────────────────────────────
 
 export default function CourseDetailScreen() {
@@ -91,7 +108,9 @@ export default function CourseDetailScreen() {
   const router = useRouter();
   const { appUser } = useAuth();
   const tenantId = appUser?.tenantIds?.[0];
+  const queryClient = useQueryClient();
 
+  // Fetch full course detail (modules + lessons)
   const { data, isLoading, error } = useQuery({
     queryKey: ['mobile-course', tenantId, courseId],
     queryFn: () => lmsApi.getCourse(tenantId!, courseId!),
@@ -99,7 +118,25 @@ export default function CourseDetailScreen() {
     staleTime: 5 * 60 * 1000,
   });
 
+  // Fetch courses list to get enrolled + progress for this course
+  const { data: coursesData } = useQuery({
+    queryKey: ['lms', 'courses', tenantId],
+    queryFn: () => lmsApi.getCourses(tenantId!),
+    enabled: !!tenantId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const enrollMutation = useMutation({
+    mutationFn: () => lmsApi.enroll(tenantId!, courseId!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['lms', 'courses'] });
+    },
+  });
+
   const course = data?.course;
+  const courseListItem = coursesData?.courses.find((c) => c.id === courseId);
+  const enrolled = courseListItem?.enrolled ?? false;
+  const progress = courseListItem?.progress ?? 0;
   const totalLessons = course?.modules.reduce((s, m) => s + m.lessons.length, 0) ?? 0;
 
   if (isLoading) {
@@ -135,6 +172,25 @@ export default function CourseDetailScreen() {
           </View>
         </View>
 
+        {/* Progress bar (only when enrolled and progress > 0) */}
+        {enrolled && progress > 0 && (
+          <ProgressBar progress={progress} />
+        )}
+
+        {/* Enroll Now button (only when not yet enrolled) */}
+        {!enrolled && (
+          <TouchableOpacity
+            style={[styles.enrollBtn, enrollMutation.isPending && styles.enrollBtnDisabled]}
+            onPress={() => enrollMutation.mutate()}
+            disabled={enrollMutation.isPending}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.enrollBtnText}>
+              {enrollMutation.isPending ? 'Enrolling…' : 'Enroll Now'}
+            </Text>
+          </TouchableOpacity>
+        )}
+
         {/* Modules + Lessons */}
         {course.modules.map((mod) => (
           <ModuleSection
@@ -164,6 +220,7 @@ const SURFACE = '#1e293b';
 const TEXT = '#f8fafc';
 const MUTED = '#94a3b8';
 const BORDER = '#334155';
+const CYAN = '#06b6d4';
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: BG },
@@ -184,6 +241,29 @@ const styles = StyleSheet.create({
     backgroundColor: '#1e1b4b', paddingHorizontal: 10, paddingVertical: 4,
     borderRadius: 20,
   },
+
+  // Progress bar
+  progressWrapper: {
+    backgroundColor: SURFACE, borderRadius: 14, padding: 16, gap: 8,
+    borderWidth: 1, borderColor: BORDER,
+  },
+  progressLabelRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  progressLabel: { fontSize: 13, fontWeight: '600', color: MUTED },
+  progressPct: { fontSize: 13, fontWeight: '700', color: CYAN },
+  progressTrack: {
+    height: 8, backgroundColor: '#0f172a', borderRadius: 4, overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%', backgroundColor: CYAN, borderRadius: 4,
+  },
+
+  // Enroll button
+  enrollBtn: {
+    backgroundColor: CYAN, borderRadius: 14,
+    paddingVertical: 15, alignItems: 'center',
+  },
+  enrollBtnDisabled: { opacity: 0.5 },
+  enrollBtnText: { fontSize: 16, fontWeight: '700', color: '#0a0f1e' },
 
   moduleContainer: {
     backgroundColor: SURFACE, borderRadius: 14, overflow: 'hidden',
