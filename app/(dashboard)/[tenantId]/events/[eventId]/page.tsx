@@ -120,7 +120,9 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
         if (!response.ok) {
           throw new Error(`Failed to load events (status ${response.status})`);
         }
-        const data: Array<ProgramEvent & { scheduledAt: string; createdAt: string; updatedAt: string }> = await response.json();
+        const json = await response.json();
+        const data: Array<ProgramEvent & { scheduledAt: string; createdAt: string; updatedAt: string }> =
+          Array.isArray(json) ? json : (json.events ?? []);
         const found = data.find((e) => e.id === eventId);
         if (!found) {
           throw new Error('Event not found.');

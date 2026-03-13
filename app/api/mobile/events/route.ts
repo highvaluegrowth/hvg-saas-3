@@ -1,13 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { adminDb } from '@/lib/firebase/admin';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
-    await verifyAuthToken(request);
-
     const now = new Date();
     const tenantsSnap = await adminDb.collection('tenants').get();
 
