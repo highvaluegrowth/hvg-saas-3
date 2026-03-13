@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { lessonService } from '@/features/lms/services/lessonService';
+import { courseService } from '@/features/lms/services/courseService';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,6 +37,25 @@ export async function PUT(request: NextRequest, { params }: { params: Params }) 
     }
     const body = await request.json();
     const lesson = await lessonService.upsert(tenantId, courseId, lessonId, body);
+
+    // Sync the lesson title back into the course's curriculum array (best-effort)
+    if (body.title) {
+      try {
+        const course = await courseService.get(tenantId, courseId);
+        if (course) {
+          const updatedCurriculum = course.curriculum.map(mod => ({
+            ...mod,
+            lessons: mod.lessons.map(l =>
+              l.id === lessonId ? { ...l, title: body.title } : l
+            ),
+          }));
+          await courseService.saveCurriculum(tenantId, courseId, updatedCurriculum);
+        }
+      } catch {
+        // Non-fatal — lesson content is saved; curriculum title sync failed silently
+      }
+    }
+
     return NextResponse.json({ lesson });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Server error';

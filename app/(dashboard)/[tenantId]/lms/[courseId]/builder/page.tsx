@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { SortableList, SortableItemType } from '@/components/lms/SortableList';
 import Link from 'next/link';
 import { authService } from '@/features/auth/services/authService';
@@ -28,8 +28,14 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ tenant
     const [saveError, setSaveError] = useState<string | null>(null);
     const [loadError, setLoadError] = useState<string | null>(null);
 
+    // Refs to guard auto-save: don't fire during initial load or concurrent saves
+    const hasLoadedRef = useRef(false);
+    const autoSaveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const savingRef = useRef(false);
+
     // Load course curriculum from Firestore on mount
     useEffect(() => {
+        hasLoadedRef.current = false;
         let cancelled = false;
         async function loadCourse() {
             try {
@@ -59,6 +65,11 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ tenant
                 }
             } catch (err) {
                 if (!cancelled) setLoadError(err instanceof Error ? err.message : String(err));
+            } finally {
+                if (!cancelled) {
+                    // Small delay so the setModules state update settles before we enable auto-save
+                    setTimeout(() => { hasLoadedRef.current = true; }, 300);
+                }
             }
         }
         loadCourse();
@@ -99,10 +110,14 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ tenant
         setModules(modules.map(m => m.id === modId ? { ...m, title: newTitle } : m));
     };
 
-    const handleSave = async () => {
-        setSaving(true);
-        setSaveError(null);
-        setSaved(false);
+    const handleSave = useCallback(async (isAutoSave = false) => {
+        if (savingRef.current) return;
+        savingRef.current = true;
+        if (!isAutoSave) {
+            setSaving(true);
+            setSaveError(null);
+            setSaved(false);
+        }
         try {
             const token = await authService.getIdToken();
             const curriculum = modules.map((m, i) => ({
@@ -134,11 +149,24 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ tenant
             setSaved(true);
             setTimeout(() => setSaved(false), 2000);
         } catch (err) {
-            setSaveError(err instanceof Error ? err.message : String(err));
+            if (!isAutoSave) setSaveError(err instanceof Error ? err.message : String(err));
         } finally {
-            setSaving(false);
+            savingRef.current = false;
+            if (!isAutoSave) setSaving(false);
         }
-    };
+    }, [modules, resolvedParams.tenantId, resolvedParams.courseId]);
+
+    // Auto-save curriculum 1.5 s after any change (debounced), but only after initial load
+    useEffect(() => {
+        if (!hasLoadedRef.current) return;
+        if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+        autoSaveTimerRef.current = setTimeout(() => {
+            handleSave(true);
+        }, 1500);
+        return () => {
+            if (autoSaveTimerRef.current) clearTimeout(autoSaveTimerRef.current);
+        };
+    }, [modules, handleSave]);
 
     // Convert our nested state to the generic format the SortableList expects
     const sortableItems: SortableItemType[] = modules.map(mod => ({
