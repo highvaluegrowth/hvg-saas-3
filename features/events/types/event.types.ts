@@ -1,24 +1,22 @@
 import { BaseDocument } from '@/lib/firestore/types';
 
 export type ProgramEventType =
-  | 'group_meeting'
-  | 'house_meeting'
-  | 'class'
-  | 'course'
-  | 'na_meeting'
-  | 'aa_meeting'
-  | 'church'
-  | 'bible_study'
-  | 'therapy_session'
-  | 'job_training'
-  | 'community_service'
-  | 'outing'
-  | 'other';
+  | 'group_meeting' | 'house_meeting' | 'class' | 'course'
+  | 'na_meeting' | 'aa_meeting' | 'church' | 'bible_study'
+  | 'therapy_session' | 'job_training' | 'community_service' | 'outing' | 'other';
+
+export type EventVisibility = 'universal' | 'tenant' | 'house';
+
+export type RecurrenceFrequency = 'daily' | 'weekly' | 'biweekly' | 'monthly' | 'custom';
+export type RecurrenceDay = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun';
+export type RecurrenceEndType = 'never' | 'after' | 'on_date';
 
 export interface EventRecurrence {
-  pattern: 'daily' | 'weekly' | 'monthly';
-  daysOfWeek?: number[]; // 0=Sun, 6=Sat
-  endsAt?: Date;
+  frequency: RecurrenceFrequency;
+  days?: RecurrenceDay[];
+  endType: RecurrenceEndType;
+  endAfter?: number;
+  endDate?: string;
 }
 
 export interface ProgramEvent extends BaseDocument {
@@ -27,13 +25,16 @@ export interface ProgramEvent extends BaseDocument {
   description?: string;
   type: ProgramEventType;
   houseIds: string[];
+  visibility: EventVisibility;
+  houseId?: string;
   scheduledAt: Date;
-  duration: number; // minutes
+  duration: number;
   location?: string;
   facilitator?: string;
   recurrence?: EventRecurrence;
   attendeeIds: string[];
   createdBy: string;
+  coverImageUrl?: string;
 }
 
 export interface CreateProgramEventInput {
@@ -41,11 +42,14 @@ export interface CreateProgramEventInput {
   description?: string;
   type: ProgramEventType;
   houseIds?: string[];
+  visibility?: EventVisibility;
+  houseId?: string;
   scheduledAt: Date;
   duration: number;
   location?: string;
   facilitator?: string;
   recurrence?: EventRecurrence;
+  coverImageUrl?: string;
 }
 
 export interface UpdateProgramEventInput {
@@ -53,6 +57,8 @@ export interface UpdateProgramEventInput {
   description?: string;
   type?: ProgramEventType;
   houseIds?: string[];
+  visibility?: EventVisibility;
+  houseId?: string;
   scheduledAt?: Date;
   duration?: number;
   location?: string;
