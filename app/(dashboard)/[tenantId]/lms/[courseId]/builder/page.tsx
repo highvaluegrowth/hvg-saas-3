@@ -268,7 +268,7 @@ export default function CourseBuilderPage({ params }: { params: Promise<{ tenant
                         <span className="text-sm text-destructive">{saveError}</span>
                     )}
                     <button
-                        onClick={handleSave}
+                        onClick={() => handleSave(false)}
                         disabled={saving}
                         className="bg-primary text-primary-foreground px-4 py-2 rounded-md font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
                     >
