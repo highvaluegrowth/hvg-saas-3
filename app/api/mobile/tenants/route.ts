@@ -5,12 +5,20 @@ export const dynamic = 'force-dynamic';
 
 
 // Public route — no auth required. Residents browse tenants before joining.
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const snap = await adminDb
+    const { searchParams } = new URL(request.url);
+    const tag = searchParams.get('tag');
+
+    let query = adminDb
       .collection('tenants')
-      .where('status', '==', 'active')
-      .get();
+      .where('status', '==', 'active');
+
+    if (tag) {
+      query = query.where('tags', 'array-contains', tag);
+    }
+
+    const snap = await query.get();
 
     const tenants = snap.docs.map(doc => {
       const data = doc.data();
@@ -21,6 +29,7 @@ export async function GET() {
         state: data.state,
         description: data.description,
         logoURL: data.logoURL,
+        tags: data.tags || [],
       };
     });
 

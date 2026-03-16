@@ -36,7 +36,7 @@ export const lmsApi = {
 
 // --- Tenants ---
 export const tenantApi = {
-  list: () => api.get<{ tenants: PublicTenant[] }>('/api/mobile/tenants'),
+  list: (tag?: string) => api.get<{ tenants: PublicTenant[] }>(`/api/mobile/tenants${tag ? `?tag=${tag}` : ''}`),
   requestJoin: (tenantId: string, body: { message?: string }) =>
     api.post<{ success: boolean }>(`/api/mobile/tenants/${tenantId}/request-join`, body),
   getEvents: (tenantId: string) =>
@@ -90,7 +90,18 @@ export const applicationApi = {
     api.get<{ applications: Record<string, unknown>[] }>('/api/applications/user'),
 };
 
+// --- Inbox & Messaging ---
+export const inboxApi = {
+  getChats: () => api.get<{ chats: Chat[] }>('/api/mobile/inbox/chats'),
+  getMessages: (chatId: string) => api.get<{ messages: ChatMessage[] }>(`/api/mobile/inbox/chats/${chatId}/messages`),
+  sendMessage: (chatId: string, content: string, type: 'text' | 'image' = 'text') => 
+    api.post<{ success: boolean; message: ChatMessage }>(`/api/mobile/inbox/chats/${chatId}/messages`, { content, type }),
+  getParticipants: (chatId: string) => api.get<{ participants: ChatParticipantProfile[] }>(`/api/mobile/inbox/chats/${chatId}/participants`),
+};
+
 // --- Local types (mobile-specific response shapes) ---
+export type { Chat, ChatMessage, ChatParticipantProfile } from '@shared/types/chat';
+
 export interface PublicTenant {
   id: string;
   name: string;
@@ -98,6 +109,7 @@ export interface PublicTenant {
   state: string;
   description?: string;
   logoURL?: string;
+  tags?: string[];
 }
 
 export interface TenantHouse {

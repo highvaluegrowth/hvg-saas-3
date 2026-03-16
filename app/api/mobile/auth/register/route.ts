@@ -21,16 +21,36 @@ export async function POST(request: NextRequest) {
 
     const { email, password, displayName, photoURL } = parsed.data;
 
-    // Create Firebase Auth user
-    const userRecord = await adminAuth.createUser({ email, password, displayName });
+    let userRecord;
+    let isExisting = false;
 
-    // Set resident role claim (no tenant_id — enrollment-based)
-    await adminAuth.setCustomUserClaims(userRecord.uid, { role: 'resident' });
+    try {
+      userRecord = await adminAuth.getUserByEmail(email);
+      isExisting = true;
+    } catch {
+      // Create Firebase Auth user
+      userRecord = await adminAuth.createUser({ email, password, displayName });
+    }
 
-    // Create /users/{uid} document
-    const appUser = await appUserService.create(userRecord.uid, { email, displayName, photoURL });
+    // Only set resident role claim if account has no role at all
+    const claims = (await adminAuth.getUser(userRecord.uid)).customClaims || {};
+    if (!claims.role) {
+      await adminAuth.setCustomUserClaims(userRecord.uid, { role: 'resident' });
+    }
 
-    return NextResponse.json({ uid: userRecord.uid, appUser }, { status: 201 });
+    // Find or Create /users/{uid} document
+    let appUser = await appUserService.getByUid(userRecord.uid);
+    if (!appUser) {
+      appUser = await appUserService.create(userRecord.uid, {
+        email,
+        displayName,
+        photoURL,
+        role: claims.role as string | undefined || 'resident',
+        permissions: claims.permissions as string[] | undefined || [],
+      });
+    }
+
+    return NextResponse.json({ uid: userRecord.uid, appUser }, { status: isExisting ? 200 : 201 });
   } catch (error: unknown) {
     if (
       typeof error === 'object' &&

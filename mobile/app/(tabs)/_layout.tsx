@@ -89,6 +89,7 @@ export default function TabsLayout() {
       />
 
       {/* ── Hidden tabs (accessible via router.push) ─── */}
+      <Tabs.Screen name="admin"     options={{ href: null, headerShown: false }} />
       <Tabs.Screen name="lms"      options={{ href: null }} />
       <Tabs.Screen name="schedule" options={{ href: null }} />
       <Tabs.Screen name="progress" options={{ href: null }} />

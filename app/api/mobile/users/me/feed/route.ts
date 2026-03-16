@@ -24,16 +24,21 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ events: [], chores: [] });
     }
 
-    const tenantIds = [...new Set(enrollSnap.docs.map(d => d.data().tenantId as string))];
+    const enrolledTenantIds = [...new Set(enrollSnap.docs.map(d => d.data().tenantId as string))];
     const now = new Date();
 
-    // Fan-out: parallel reads across all enrolled tenants
+    // Fetch all active tenants to find universal events
+    const allTenantsSnap = await adminDb.collection('tenants').where('status', '==', 'active').get();
+    const allTenantIds = allTenantsSnap.docs.map(doc => doc.id);
+
+    // Fan-out: parallel reads across all enrolled tenants (chores) and ALL tenants (universal events)
     const [eventsResults, choresResults] = await Promise.all([
       Promise.all(
-        tenantIds.map(tid =>
+        allTenantIds.map(tid =>
           adminDb
             .collection(`tenants/${tid}/events`)
             .where('scheduledAt', '>=', now)
+            .where('visibility', 'in', enrolledTenantIds.includes(tid) ? ['universal', 'tenant'] : ['universal'])
             .orderBy('scheduledAt', 'asc')
             .limit(10)
             .get()
@@ -49,13 +54,14 @@ export async function GET(request: NextRequest) {
                   duration: data.duration,
                   location: data.location,
                   type: data.type,
+                  visibility: data.visibility || 'tenant',
                 };
               })
             )
         )
       ),
       Promise.all(
-        tenantIds.map(tid =>
+        enrolledTenantIds.map(tid =>
           adminDb
             .collection(`tenants/${tid}/chores`)
             .where('assigneeIds', 'array-contains', appUser.residentId!)

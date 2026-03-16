@@ -29,8 +29,19 @@ import { format } from 'date-fns';
 const CATEGORIES = ['All', 'Houses', 'Programs', 'Staff Jobs', 'Events', 'Courses'] as const;
 type Category = (typeof CATEGORIES)[number];
 
+const PROGRAM_TAGS = [
+  'Recovery',
+  'Medication Assisted',
+  'Faith-based',
+  'LGBTQ+ Friendly',
+  'Veteran Focused',
+  'Women Only',
+  'Men Only',
+];
+
 export default function ExploreScreen() {
   const [activeCategory, setActiveCategory] = useState<Category>('All');
+  const [activeTag, setActiveTag] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [profileOpen, setProfileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -38,10 +49,13 @@ export default function ExploreScreen() {
 
   // Tenant query — used for All, Programs, Staff Jobs
   const tenantQuery = useQuery({
-    queryKey: ['explore', 'tenants'],
-    queryFn: tenantApi.list,
+    queryKey: ['explore', 'tenants', activeTag],
+    queryFn: () => tenantApi.list(activeTag || undefined),
     staleTime: 5 * 60 * 1000,
-    enabled: activeCategory === 'All' || activeCategory === 'Programs' || activeCategory === 'Staff Jobs',
+    enabled:
+      activeCategory === 'All' ||
+      activeCategory === 'Programs' ||
+      activeCategory === 'Staff Jobs',
   });
 
   // Houses query — used for Houses pill
@@ -151,6 +165,9 @@ export default function ExploreScreen() {
   // Section title per category
   const sectionTitle = () => {
     if (searchQuery) return `Results for "${searchQuery}"`;
+    if (activeTag && (activeCategory === 'All' || activeCategory === 'Programs')) {
+      return `${activeTag} Programs`;
+    }
     switch (activeCategory) {
       case 'Houses': return 'Sober Living Houses';
       case 'Events': return 'Upcoming Events';
@@ -200,6 +217,31 @@ export default function ExploreScreen() {
             </TouchableOpacity>
           ))}
         </ScrollView>
+
+        {/* Tag pills — only for Programs/All */}
+        {(activeCategory === 'All' || activeCategory === 'Programs') && (
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={[styles.pillsRow, { marginBottom: 20, paddingTop: 0 }]}
+          >
+            <TouchableOpacity
+              style={[styles.tagPill, !activeTag && styles.tagPillActive]}
+              onPress={() => setActiveTag(null)}
+            >
+              <Text style={[styles.tagText, !activeTag && styles.tagTextActive]}>Any Type</Text>
+            </TouchableOpacity>
+            {PROGRAM_TAGS.map((tag) => (
+              <TouchableOpacity
+                key={tag}
+                style={[styles.tagPill, activeTag === tag && styles.tagPillActive]}
+                onPress={() => setActiveTag(tag)}
+              >
+                <Text style={[styles.tagText, activeTag === tag && styles.tagTextActive]}>{tag}</Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        )}
 
         {/* Quick-action cards */}
         <View style={styles.quickRow}>
@@ -457,6 +499,19 @@ const styles = StyleSheet.create({
   pillActive: { backgroundColor: '#4f46e5', borderColor: '#6366f1' },
   pillText: { color: '#94a3b8', fontSize: 14, fontWeight: '500' },
   pillTextActive: { color: '#f8fafc' },
+
+  tagPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    backgroundColor: '#1e293b',
+    borderWidth: 1,
+    borderColor: '#334155',
+    marginRight: 8,
+  },
+  tagPillActive: { borderColor: '#10b981', backgroundColor: '#10b98122' },
+  tagText: { color: '#64748b', fontSize: 12, fontWeight: '600' },
+  tagTextActive: { color: '#10b981' },
 
   // Quick cards
   quickRow: {

@@ -11,6 +11,8 @@ import {
 import { useLocalSearchParams, useRouter, Stack } from 'expo-router';
 import { lmsApi, MobileCourseModule, MobileLessonContent } from '@/lib/api/routes';
 import { useAuth } from '@/lib/auth/AuthContext';
+import { useOfflineCourse } from '@/lib/hooks/useOfflineCourse';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 // ─── Lesson Type Icon ──────────────────────────────────────────────────────────
 
@@ -110,6 +112,8 @@ export default function CourseDetailScreen() {
   const tenantId = appUser?.tenantIds?.[0];
   const queryClient = useQueryClient();
 
+  const { isDownloaded, isDownloading, downloadCourse, removeDownload } = useOfflineCourse(courseId!);
+
   // Fetch full course detail (modules + lessons)
   const { data, isLoading, error } = useQuery({
     queryKey: ['mobile-course', tenantId, courseId],
@@ -191,6 +195,31 @@ export default function CourseDetailScreen() {
           </TouchableOpacity>
         )}
 
+        {/* Offline Support */}
+        {enrolled && course && (
+          <TouchableOpacity
+            style={[styles.offlineBtn, isDownloaded && styles.offlineBtnActive]}
+            onPress={() => (isDownloaded ? removeDownload() : downloadCourse(course))}
+            disabled={isDownloading}
+            activeOpacity={0.7}
+          >
+            {isDownloading ? (
+              <ActivityIndicator color="#6366f1" size="small" />
+            ) : (
+              <View style={styles.offlineBtnInner}>
+                <MaterialIcons
+                  name={isDownloaded ? 'cloud-done' : 'cloud-download'}
+                  size={20}
+                  color={isDownloaded ? '#10b981' : '#6366f1'}
+                />
+                <Text style={[styles.offlineBtnText, isDownloaded && styles.offlineBtnTextActive]}>
+                  {isDownloaded ? 'Downloaded Offline' : 'Download for Offline'}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        )}
+
         {/* Modules + Lessons */}
         {course.modules.map((mod) => (
           <ModuleSection
@@ -264,6 +293,21 @@ const styles = StyleSheet.create({
   },
   enrollBtnDisabled: { opacity: 0.5 },
   enrollBtnText: { fontSize: 16, fontWeight: '700', color: '#0a0f1e' },
+
+  // Offline button
+  offlineBtn: {
+    backgroundColor: SURFACE,
+    borderRadius: 14,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: BORDER,
+  },
+  offlineBtnActive: { borderColor: '#10b98122' },
+  offlineBtnInner: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  offlineBtnText: { fontSize: 14, fontWeight: '600', color: '#6366f1' },
+  offlineBtnTextActive: { color: '#10b981' },
 
   moduleContainer: {
     backgroundColor: SURFACE, borderRadius: 14, overflow: 'hidden',

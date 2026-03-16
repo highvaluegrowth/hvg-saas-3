@@ -66,6 +66,8 @@ export default function HomeScreen() {
       )
     : null;
 
+  const isAdmin = ['super_admin', 'admin', 'tenant_admin', 'staff_admin', 'staff', 'house_manager'].includes(appUser?.role || '');
+
   const bottomPad = TAB_BAR_BASE_HEIGHT + insets.bottom + 16;
 
   return (
@@ -94,6 +96,25 @@ export default function HomeScreen() {
             </View>
           )}
         </View>
+
+        {/* Admin Section */}
+        {isAdmin && (
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Administrative Tools</Text>
+            <TouchableOpacity
+              style={styles.applyCard}
+              onPress={() => router.push('/(tabs)/admin' as any)}
+              activeOpacity={0.75}
+            >
+              <Text style={styles.applyCardIcon}>🛡️</Text>
+              <View style={styles.applyCardBody}>
+                <Text style={styles.applyCardTitle}>Staff Dashboard</Text>
+                <Text style={styles.applyCardSub}>Manage house operations & residents</Text>
+              </View>
+              <Text style={styles.applyCardArrow}>→</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
         {/* My Houses — shown only when enrolled */}
         {enrolledTenantId && myHouses.length > 0 && (

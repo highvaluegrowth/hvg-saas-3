@@ -1,4 +1,4 @@
-export type NotificationType = 'application' | 'request' | 'incident' | 'system';
+export type NotificationType = 'application' | 'request' | 'incident' | 'system' | 'chat' | 'message' | 'announcement';
 export type NotificationPriority = 'low' | 'normal' | 'high';
 
 export interface InboxNotification {

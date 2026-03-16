@@ -14,6 +14,8 @@ export interface AppUser {
   photoURL?: string;
   residentId?: string | null;          // linked clinical record
   tenantIds?: string[];                // orgs this user belongs to/manages
+  role?: string;                       // firebase custom claim cached in user doc
+  permissions?: string[];              // list of specific platform permissions
   preferences?: string[];              // selections from omni-onboarding personalization
 
   // Profile builder fields (set during onboarding profile-builder screens)

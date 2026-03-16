@@ -14,6 +14,8 @@ export const appUserService = {
       displayName: input.displayName,
       residentId: null,
       tenantIds: input.tenantIds || [],
+      role: input.role,
+      permissions: input.permissions || [],
       preferences: input.preferences || [],
       sobrietyDate: null,
       recoveryGoals: [],
@@ -82,6 +84,8 @@ export const appUserService = {
       email: decodedToken.email || '',
       displayName: decodedToken.name || fallbackName,
       photoURL: decodedToken.picture || undefined,
+      role: decodedToken.role as string | undefined,
+      permissions: decodedToken.permissions as string[] | undefined,
       // If the token claims a specific tenantId, array-wrap it to start their multi-tenant tracking
       tenantIds: decodedToken.tenantId ? [decodedToken.tenantId] : [],
     });
