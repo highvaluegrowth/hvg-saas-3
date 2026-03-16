@@ -68,7 +68,7 @@
         }
       ]
     ],
-    "scheme": "hvg",
+    "scheme": "hvg-mobile",
     "experiments": {
       "typedRoutes": true
     },

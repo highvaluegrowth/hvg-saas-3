@@ -14,8 +14,9 @@
 		96905EF65AED1B983A6B3ABC /* libPods-HighValueGrowth.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 58EEBF8E8E6FB1BC6CAF49B5 /* libPods-HighValueGrowth.a */; };
 		B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		F8190D9C4F5A495D886A5DE1 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 57CDA60A748F4D579FAC1F36 /* GoogleService-Info.plist */; };
-		23CD79740D14439D9EDB71BF /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10FE8CD124634444BC3DF17B /* noop-file.swift */; };
+		7EDED8028AAC42B2AC856F1B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 5F16C569727545D5BDD1D0F4 /* PrivacyInfo.xcprivacy */; };
+		149095E7364549B293FCD411 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 5FB26EEB62424148ADCF1E05 /* GoogleService-Info.plist */; };
+		FBC4AAFD53E14C119D0A58A2 /* noop-file.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2153D3EA84A1423FB4738DE9 /* noop-file.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,9 +33,10 @@
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-HighValueGrowth/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
-		57CDA60A748F4D579FAC1F36 /* GoogleService-Info.plist */ = {isa = PBXFileReference; name = "GoogleService-Info.plist"; path = "HighValueGrowth/GoogleService-Info.plist"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = text.plist.xml; explicitFileType = undefined; includeInIndex = 0; };
-		10FE8CD124634444BC3DF17B /* noop-file.swift */ = {isa = PBXFileReference; name = "noop-file.swift"; path = "HighValueGrowth/noop-file.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; explicitFileType = undefined; includeInIndex = 0; };
-		A345EF27DE634E5DA38FF09F /* HighValueGrowth-Bridging-Header.h */ = {isa = PBXFileReference; name = "HighValueGrowth-Bridging-Header.h"; path = "HighValueGrowth/HighValueGrowth-Bridging-Header.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
+		5F16C569727545D5BDD1D0F4 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; name = "PrivacyInfo.xcprivacy"; path = "HighValueGrowth/PrivacyInfo.xcprivacy"; sourceTree = "<group>"; fileEncoding = undefined; lastKnownFileType = unknown; explicitFileType = undefined; includeInIndex = 0; };
+		5FB26EEB62424148ADCF1E05 /* GoogleService-Info.plist */ = {isa = PBXFileReference; name = "GoogleService-Info.plist"; path = "HighValueGrowth/GoogleService-Info.plist"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = text.plist.xml; explicitFileType = undefined; includeInIndex = 0; };
+		2153D3EA84A1423FB4738DE9 /* noop-file.swift */ = {isa = PBXFileReference; name = "noop-file.swift"; path = "HighValueGrowth/noop-file.swift"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.swift; explicitFileType = undefined; includeInIndex = 0; };
+		4D9614507CC248F7A08EB2C6 /* HighValueGrowth-Bridging-Header.h */ = {isa = PBXFileReference; name = "HighValueGrowth-Bridging-Header.h"; path = "HighValueGrowth/HighValueGrowth-Bridging-Header.h"; sourceTree = "<group>"; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; explicitFileType = undefined; includeInIndex = 0; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -59,9 +61,10 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				13B07FB71A68108700A75B9A /* main.m */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				57CDA60A748F4D579FAC1F36 /* GoogleService-Info.plist */,
-				10FE8CD124634444BC3DF17B /* noop-file.swift */,
-				A345EF27DE634E5DA38FF09F /* HighValueGrowth-Bridging-Header.h */,
+				5F16C569727545D5BDD1D0F4 /* PrivacyInfo.xcprivacy */,
+				5FB26EEB62424148ADCF1E05 /* GoogleService-Info.plist */,
+				2153D3EA84A1423FB4738DE9 /* noop-file.swift */,
+				4D9614507CC248F7A08EB2C6 /* HighValueGrowth-Bridging-Header.h */,
 			);
 			name = HighValueGrowth;
 			sourceTree = "<group>";
@@ -201,8 +204,9 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				F8190D9C4F5A495D886A5DE1 /* GoogleService-Info.plist in Resources */,
-				71F1A27040BF42BABFCD28DF /* HighValueGrowth-Bridging-Header.h in Resources */,
+				7EDED8028AAC42B2AC856F1B /* PrivacyInfo.xcprivacy in Resources */,
+				149095E7364549B293FCD411 /* GoogleService-Info.plist in Resources */,
+				A78EB4B40B6140B5A443A188 /* HighValueGrowth-Bridging-Header.h in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -278,7 +282,7 @@
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */,
-				23CD79740D14439D9EDB71BF /* noop-file.swift in Sources */,
+				FBC4AAFD53E14C119D0A58A2 /* noop-file.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
