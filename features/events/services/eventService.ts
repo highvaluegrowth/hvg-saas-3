@@ -9,12 +9,19 @@ class EventService extends BaseRepository<ProgramEvent> {
   }
 
   async createEvent(input: CreateProgramEventInput, createdBy: string): Promise<ProgramEvent> {
+    const verificationPin =
+      input.requireVerification && !input.verificationPin
+        ? String(Math.floor(1000 + Math.random() * 9000))
+        : input.verificationPin;
+
     return this.create({
       ...input,
       tenantId: this.tenantId,
       houseIds: input.houseIds ?? [],
       attendeeIds: [],
       createdBy,
+      requireVerification: input.requireVerification ?? false,
+      verificationPin,
     });
   }
 
@@ -43,6 +50,17 @@ class EventService extends BaseRepository<ProgramEvent> {
     });
   }
 
+  async getById(id: string): Promise<ProgramEvent | null> {
+    const event = await super.getById(id);
+    if (event) {
+      return {
+        ...event,
+        requireVerification: event.requireVerification ?? false,
+      };
+    }
+    return null;
+  }
+
   async getUpcoming(limit = 10): Promise<ProgramEvent[]> {
     const now = new Date();
     const result = await this.query({
@@ -50,7 +68,10 @@ class EventService extends BaseRepository<ProgramEvent> {
       orderBy: { field: 'scheduledAt', direction: 'asc' },
       limit,
     });
-    return result.items;
+    return result.items.map((event) => ({
+      ...event,
+      requireVerification: event.requireVerification ?? false,
+    }));
   }
 
   async getForHouse(houseId: string): Promise<ProgramEvent[]> {
@@ -58,7 +79,10 @@ class EventService extends BaseRepository<ProgramEvent> {
       where: [{ field: 'houseIds', operator: 'array-contains', value: houseId }],
       orderBy: { field: 'scheduledAt', direction: 'asc' },
     });
-    return result.items;
+    return result.items.map((event) => ({
+      ...event,
+      requireVerification: event.requireVerification ?? false,
+    }));
   }
 }
 

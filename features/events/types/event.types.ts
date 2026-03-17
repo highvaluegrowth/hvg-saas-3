@@ -35,6 +35,8 @@ export interface ProgramEvent extends BaseDocument {
   attendeeIds: string[];
   createdBy: string;
   coverImageUrl?: string;
+  requireVerification?: boolean;
+  verificationPin?: string;
 }
 
 export interface CreateProgramEventInput {
@@ -50,6 +52,8 @@ export interface CreateProgramEventInput {
   facilitator?: string;
   recurrence?: EventRecurrence;
   coverImageUrl?: string;
+  requireVerification?: boolean;
+  verificationPin?: string;
 }
 
 export interface UpdateProgramEventInput {
@@ -65,4 +69,6 @@ export interface UpdateProgramEventInput {
   facilitator?: string;
   recurrence?: EventRecurrence;
   attendeeIds?: string[];
+  requireVerification?: boolean;
+  verificationPin?: string;
 }
