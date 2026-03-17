@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
-import { adminDb } from '@/lib/firebase/admin';
+import { adminDb, FieldValue } from '@/lib/firebase/admin';
 import type { UserRole } from '@/features/auth/types/auth.types';
 import { notificationService } from '@/lib/firebase/notificationService';
 
@@ -215,7 +215,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
             if (!chatSnap.empty) {
                 const chatId = chatSnap.docs[0].id;
                 await adminDb.collection('chats').doc(chatId).update({
-                    participants: adminDb.FieldValue.arrayUnion(uid),
+                    participants: FieldValue.arrayUnion(uid),
                     updatedAt: now,
                 });
             }

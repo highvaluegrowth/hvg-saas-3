@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { authService } from '@/features/auth/services/authService';
 import { qaService } from '@/features/qa/services/qaService';
 import { QAFeedback, QAFeedbackStatus, FeedbackType } from '@/features/qa/types/qa.types';
 import { Bug, CheckCircle2, ChevronDown, ChevronUp, Copy, MessageSquare, Paintbrush, CircleDashed, ExternalLink, Sparkles } from 'lucide-react';

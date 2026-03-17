@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
-import { adminDb as db, adminAuth } from '@/lib/firebase/admin';
+import { adminDb as db, adminAuth, FieldValue } from '@/lib/firebase/admin';
 import { tenantOnboardingService } from '@/features/tenants/services/tenantOnboardingService';
 import { notificationService } from '@/lib/firebase/notificationService';
 
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest, { params }: { params: Params })
         // 4. Update User Role and Tenant Access
         await db.collection('users').doc(applicantUid).update({
             role: 'tenant_admin',
-            tenantIds: db.FieldValue.arrayUnion(tenantId),
+            tenantIds: FieldValue.arrayUnion(tenantId),
             updatedAt: now,
         });
 
