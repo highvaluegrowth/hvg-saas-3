@@ -1,5 +1,5 @@
 export type ApplicationType = 'tenant' | 'bed' | 'staff' | 'course' | 'event';
-export type ApplicationStatus = 'draft' | 'pending' | 'pending_triage' | 'assigned_to_tenant' | 'assigned' | 'accepted' | 'waitlisted' | 'rejected' | 'archived';
+export type ApplicationStatus = 'draft' | 'pending' | 'pending_triage' | 'assigned_to_tenant' | 'assigned' | 'reviewing' | 'accepted' | 'waitlisted' | 'rejected' | 'archived';
 
 export interface BaseApplication {
     id: string;
@@ -114,4 +114,7 @@ export interface TenantMatchScore {
     hasCapacity: boolean;
     availableBeds?: number;
     specializations: string[];
+    isSorEligible?: boolean;    // For SAMHSA/SOR grant matching
+    distanceMiles?: number;     // Approximate distance
+    financialMatch?: string;    // "Grant Eligible" | "Self-Pay" | etc.
 }

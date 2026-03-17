@@ -36,6 +36,9 @@ export async function GET(
         const bedHints: BedHints | undefined = app.type === 'bed' ? {
             matStatus: typeof app.data?.matStatus === 'boolean' ? app.data.matStatus : undefined,
             genderPreference: (app.data?.housePref as string | undefined) ?? (app.data?.genderPreference as string | undefined),
+            isOpioidUse: app.data?.isOpioidUse === true,
+            maxDistance: typeof app.data?.maxDistance === 'number' ? app.data.maxDistance : undefined,
+            incomeBracket: app.data?.incomeBracket as string | undefined,
         } : undefined;
 
         const matches = await getMatchedTenants(app.zipCode ?? '', prefs, 10, bedHints);

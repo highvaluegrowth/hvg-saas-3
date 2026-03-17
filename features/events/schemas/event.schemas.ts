@@ -29,6 +29,8 @@ export const CreateProgramEventSchema = z.object({
   facilitator: z.string().optional(),
   recurrence: EventRecurrenceSchema.optional(),
   coverImageUrl: z.string().optional(),
+  requireVerification: z.boolean().default(false),
+  verificationPin: z.string().length(4).optional(),
 }).refine(
   (data) => data.visibility !== 'house' || !!data.houseId,
   { message: 'houseId is required when visibility is "house"', path: ['houseId'] }
@@ -47,6 +49,8 @@ export const UpdateProgramEventSchema = z.object({
   facilitator: z.string().optional(),
   recurrence: EventRecurrenceSchema.optional(),
   attendeeIds: z.array(z.string()).optional(),
+  requireVerification: z.boolean().optional(),
+  verificationPin: z.string().length(4).optional(),
 });
 
 export type CreateProgramEventInput = z.infer<typeof CreateProgramEventSchema>;

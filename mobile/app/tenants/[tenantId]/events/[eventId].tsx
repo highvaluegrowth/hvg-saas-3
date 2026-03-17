@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -7,6 +8,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Modal,
+  TextInput,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -41,6 +44,8 @@ export default function EventDetailScreen() {
   const router = useRouter();
   const { tenantId, eventId } = useLocalSearchParams<{ tenantId: string; eventId: string }>();
   const queryClient = useQueryClient();
+  const [pin, setPin] = useState('');
+  const [showVerifyModal, setShowVerifyModal] = useState(false);
 
   // Reuse the cached events list — no extra network request needed
   const { data: event, isLoading, isError } = useQuery({
@@ -71,8 +76,27 @@ export default function EventDetailScreen() {
     },
   });
 
-  const isBusy = attendMutation.isPending || unattendMutation.isPending;
+  const verifyMutation = useMutation({
+    mutationFn: (code: string) => tenantApi.verifyEvent(tenantId, eventId, code),
+    onSuccess: (data) => {
+      if (data.verified) {
+        queryClient.invalidateQueries({ queryKey: ['events', tenantId] });
+        Alert.alert('Attendance Verified', 'Your presence has been confirmed.');
+        setShowVerifyModal(false);
+        setPin('');
+      }
+    },
+    onError: (e: unknown) => {
+      Alert.alert('Verification Failed', e instanceof Error ? e.message : 'Invalid code');
+    },
+  });
+
+  const isBusy = attendMutation.isPending || unattendMutation.isPending || verifyMutation.isPending;
   const typeLabel = event?.type ? (TYPE_LABELS[event.type] ?? event.type) : null;
+  const isAttending = event?.isAttending || false;
+  // Fallback false since API might not explicitly return isVerified yet in getEvents
+  // The user wouldn't see the verify button if they weren't attending anyway.
+  const isVerified = false; 
 
   return (
     <SafeAreaView style={styles.container}>
@@ -178,25 +202,77 @@ export default function EventDetailScreen() {
 
           {/* Sticky bottom RSVP bar */}
           <View style={styles.bottomBar}>
-            <TouchableOpacity
-              style={[styles.rsvpBtn, isBusy && styles.btnDisabled]}
-              onPress={() => attendMutation.mutate()}
-              disabled={isBusy}
-            >
-              <Text style={styles.rsvpBtnText}>
-                {attendMutation.isPending ? 'Sending…' : 'RSVP to Event'}
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[styles.cancelBtn, isBusy && styles.btnDisabled]}
-              onPress={() => unattendMutation.mutate()}
-              disabled={isBusy}
-            >
-              <Text style={styles.cancelBtnText}>
-                {unattendMutation.isPending ? 'Cancelling…' : 'Cancel RSVP'}
-              </Text>
-            </TouchableOpacity>
+            {event.requireVerification && isAttending && !isVerified && (
+              <TouchableOpacity
+                style={styles.verifyBtn}
+                onPress={() => setShowVerifyModal(true)}
+                disabled={isBusy}
+              >
+                <Text style={styles.verifyBtnText}>I'm Here (Verify Attendance)</Text>
+              </TouchableOpacity>
+            )}
+
+            {!isAttending ? (
+              <TouchableOpacity
+                style={[styles.rsvpBtn, isBusy && styles.btnDisabled]}
+                onPress={() => attendMutation.mutate()}
+                disabled={isBusy}
+              >
+                <Text style={styles.rsvpBtnText}>
+                  {attendMutation.isPending ? 'Sending…' : 'RSVP to Event'}
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <TouchableOpacity
+                style={[styles.cancelBtn, isBusy && styles.btnDisabled]}
+                onPress={() => unattendMutation.mutate()}
+                disabled={isBusy}
+              >
+                <Text style={styles.cancelBtnText}>
+                  {unattendMutation.isPending ? 'Cancelling…' : 'Cancel RSVP'}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
+
+          {/* Verification Modal */}
+          <Modal visible={showVerifyModal} transparent animationType="slide">
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Verify Attendance</Text>
+                <Text style={styles.modalSub}>Enter the 4-digit code provided at the event.</Text>
+                
+                <TextInput
+                  style={styles.pinInput}
+                  value={pin}
+                  onChangeText={setPin}
+                  placeholder="0000"
+                  placeholderTextColor="#475569"
+                  keyboardType="number-pad"
+                  maxLength={4}
+                  autoFocus
+                />
+
+                <View style={styles.modalActions}>
+                  <TouchableOpacity 
+                    style={styles.modalCancel} 
+                    onPress={() => setShowVerifyModal(false)}
+                  >
+                    <Text style={styles.modalCancelText}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity 
+                    style={[styles.modalSubmit, pin.length !== 4 && styles.btnDisabled]} 
+                    onPress={() => verifyMutation.mutate(pin)}
+                    disabled={pin.length !== 4 || verifyMutation.isPending}
+                  >
+                    <Text style={styles.modalSubmitText}>
+                      {verifyMutation.isPending ? 'Checking...' : 'Verify'}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
         </>
       )}
     </SafeAreaView>
@@ -307,4 +383,62 @@ const styles = StyleSheet.create({
   },
   cancelBtnText: { color: '#94a3b8', fontWeight: '600', fontSize: 15 },
   btnDisabled: { opacity: 0.5 },
+
+  // Verification Button
+  verifyBtn: {
+    backgroundColor: '#10b981',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  verifyBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+
+  // Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: '#1e293b',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: 24,
+    paddingBottom: 48,
+  },
+  modalTitle: { color: '#f8fafc', fontSize: 20, fontWeight: '700', marginBottom: 8 },
+  modalSub: { color: '#94a3b8', fontSize: 14, marginBottom: 20 },
+  pinInput: {
+    backgroundColor: '#0f172a',
+    borderWidth: 1,
+    borderColor: '#334155',
+    borderRadius: 12,
+    color: '#f8fafc',
+    fontSize: 24,
+    fontWeight: '700',
+    textAlign: 'center',
+    paddingVertical: 16,
+    letterSpacing: 10,
+    marginBottom: 24,
+  },
+  modalActions: { flexDirection: 'row', gap: 12 },
+  modalCancel: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: '#334155',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  modalCancelText: { color: '#94a3b8', fontWeight: '600', fontSize: 15 },
+  modalSubmit: {
+    flex: 1,
+    backgroundColor: '#6366f1',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  modalSubmitText: { color: '#fff', fontWeight: '700', fontSize: 16 },
 });

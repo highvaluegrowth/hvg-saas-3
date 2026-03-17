@@ -19,9 +19,13 @@ interface FormData {
   email: string;
   phone: string;
   zipCode: string;
+  maxDistance: string;
   gender: string;
+  raceEthnicity: string;
+  incomeBracket: string;
   sobrietyDate: string;
   primarySubstance: string;
+  isOpioidUse: boolean;
   goals: string;
   fundingSource: string;
 }
@@ -36,14 +40,18 @@ export default function BedApplicationScreen() {
     email: '',
     phone: '',
     zipCode: '',
+    maxDistance: '25',
     gender: '',
+    raceEthnicity: '',
+    incomeBracket: '',
     sobrietyDate: '',
     primarySubstance: '',
+    isOpioidUse: false,
     goals: '',
     fundingSource: '',
   });
 
-  const update = (key: keyof FormData, value: string) =>
+  const update = (key: keyof FormData, value: any) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
 
   const handleSubmit = async () => {
@@ -57,9 +65,13 @@ export default function BedApplicationScreen() {
         zipCode: formData.zipCode,
         data: {
           phone: formData.phone,
+          maxDistance: parseInt(formData.maxDistance),
           gender: formData.gender,
+          raceEthnicity: formData.raceEthnicity,
+          incomeBracket: formData.incomeBracket,
           sobrietyDate: formData.sobrietyDate,
           primarySubstance: formData.primarySubstance,
+          isOpioidUse: formData.isOpioidUse,
           goals: formData.goals,
           fundingSource: formData.fundingSource,
         },
@@ -149,12 +161,50 @@ export default function BedApplicationScreen() {
               placeholder="e.g. Male, Female, Non-binary..."
               placeholderTextColor="#475569"
             />
+
+            <Text style={styles.label}>Max Travel Distance (miles) *</Text>
+            <TextInput
+              style={styles.input}
+              value={formData.maxDistance}
+              onChangeText={(v) => update('maxDistance', v)}
+              placeholder="25"
+              placeholderTextColor="#475569"
+              keyboardType="number-pad"
+            />
+
+            <Text style={styles.label}>Race / Ethnicity</Text>
+            <TextInput
+              style={styles.input}
+              value={formData.raceEthnicity}
+              onChangeText={(v) => update('raceEthnicity', v)}
+              placeholder="White, Black, Hispanic..."
+              placeholderTextColor="#475569"
+            />
+
+            <Text style={styles.label}>Annual Income Bracket</Text>
+            <TextInput
+              style={styles.input}
+              value={formData.incomeBracket}
+              onChangeText={(v) => update('incomeBracket', v)}
+              placeholder="e.g. $0 - $15k, $15k - $30k..."
+              placeholderTextColor="#475569"
+            />
           </View>
         )}
 
         {step === 2 && (
           <View style={styles.stepContent}>
             <Text style={styles.stepHeading}>Recovery Profile</Text>
+
+            <View style={styles.checkboxRow}>
+              <TouchableOpacity 
+                style={[styles.checkbox, formData.isOpioidUse && styles.checkboxActive]} 
+                onPress={() => update('isOpioidUse', !formData.isOpioidUse)}
+              >
+                {formData.isOpioidUse && <Text style={styles.checkboxTick}>✓</Text>}
+              </TouchableOpacity>
+              <Text style={styles.checkboxLabel}>History of Opioid Use? (SOR Grant Eligibility)</Text>
+            </View>
 
             <Text style={styles.label}>Sobriety / Clean Date</Text>
             <TextInput
@@ -207,11 +257,15 @@ export default function BedApplicationScreen() {
               <ReviewRow label="Email" value={formData.email} />
               <ReviewRow label="Phone" value={formData.phone} />
               <ReviewRow label="ZIP Code" value={formData.zipCode} />
+              <ReviewRow label="Max Distance" value={`${formData.maxDistance} miles`} />
               <ReviewRow label="Gender" value={formData.gender} />
+              <ReviewRow label="Race/Ethnicity" value={formData.raceEthnicity} />
+              <ReviewRow label="Income Bracket" value={formData.incomeBracket} />
             </View>
 
             <View style={styles.reviewCard}>
               <Text style={styles.reviewSectionLabel}>Recovery Profile</Text>
+              <ReviewRow label="Opioid Use History" value={formData.isOpioidUse ? 'Yes' : 'No'} />
               <ReviewRow label="Sobriety Date" value={formData.sobrietyDate} />
               <ReviewRow label="Primary Substance" value={formData.primarySubstance} />
               <ReviewRow label="Goals" value={formData.goals} />
@@ -313,6 +367,22 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   multiline: { height: 100, paddingTop: 12 },
+
+  // Checkbox
+  checkboxRow: { flexDirection: 'row', alignItems: 'center', marginTop: 16, marginBottom: 8 },
+  checkbox: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    borderWidth: 2,
+    borderColor: '#10b981',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  checkboxActive: { backgroundColor: '#10b981' },
+  checkboxTick: { color: '#fff', fontWeight: '900', fontSize: 14 },
+  checkboxLabel: { color: '#f8fafc', fontSize: 14, flex: 1 },
 
   // Review card
   reviewCard: {

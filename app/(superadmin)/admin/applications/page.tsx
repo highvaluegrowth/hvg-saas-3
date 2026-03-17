@@ -28,6 +28,17 @@ interface Tenant {
     name: string;
 }
 
+interface TenantMatchScore {
+    tenantId: string;
+    tenantName: string;
+    city: string;
+    state: string;
+    score: number;
+    distanceMiles: number;
+    financialMatch: string;
+    isSorEligible: boolean;
+}
+
 // ─── Badge Helpers ────────────────────────────────────────────────────────────
 
 const TYPE_BADGE: Record<string, string> = {
@@ -133,6 +144,8 @@ export default function ApplicationsInboxPage() {
 
     // Dispatching Modal State
     const [dispatchApp, setDispatchApp] = useState<Application | null>(null);
+    const [matches, setMatches] = useState<TenantMatchScore[]>([]);
+    const [loadingMatches, setLoadingMatches] = useState(false);
     const [selectedTenantId, setSelectedTenantId] = useState<string>('');
     const [dispatching, setDispatching] = useState(false);
 
@@ -176,6 +189,26 @@ export default function ApplicationsInboxPage() {
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
+
+    const handleDispatchClick = async (app: Application) => {
+        setDispatchApp(app);
+        setMatches([]);
+        setLoadingMatches(true);
+        try {
+            const token = await authService.getIdToken();
+            const res = await fetch(`/api/admin/applications/${app.id}/matches`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setMatches(data.matches || []);
+            }
+        } catch (err) {
+            console.error('Failed to fetch matches:', err);
+        } finally {
+            setLoadingMatches(false);
+        }
+    };
 
     const handleDispatch = async () => {
         if (!dispatchApp || !selectedTenantId) return;
@@ -340,7 +373,7 @@ export default function ApplicationsInboxPage() {
                                             <div className="flex justify-end gap-3">
                                                 {app.status === 'pending_triage' && (
                                                     <button
-                                                        onClick={() => setDispatchApp(app)}
+                                                        onClick={() => handleDispatchClick(app)}
                                                         className="text-[#D946EF] hover:text-fuchsia-300 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 px-3 py-1.5 rounded-lg transition-colors border border-[#D946EF]/30 hover:border-[#D946EF]/50"
                                                     >
                                                         Dispatch
@@ -365,58 +398,111 @@ export default function ApplicationsInboxPage() {
             {/* Simple Native Dispatch Modal */}
             {dispatchApp && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <div className="w-full max-w-md transform overflow-hidden rounded-2xl bg-[#1A0B2E] border border-white/10 p-6 text-left align-middle shadow-xl transition-all relative">
+                    <div className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-[#1A0B2E] border border-white/10 p-6 text-left align-middle shadow-xl transition-all relative">
                         {dispatching && (
                             <div className="absolute inset-0 bg-black/50 z-10 flex items-center justify-center backdrop-blur-[2px] rounded-2xl">
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D946EF]"></div>
                             </div>
                         )}
-                        <h3 className="text-lg font-medium leading-6 text-white">
-                            Dispatch Application
+                        <h3 className="text-xl font-bold leading-6 text-white mb-2">
+                            AI-Assisted Dispatch
                         </h3>
-                        <div className="mt-4 text-sm text-slate-300">
-                            <p className="mb-4">Assign application from <strong>{dispatchApp?.applicantName}</strong> to an organization.</p>
+                        <p className="text-sm text-slate-400 mb-6">
+                            Review matches for <strong>{dispatchApp?.applicantName}</strong> (Zip: {dispatchApp?.zipCode})
+                        </p>
 
-                            {dispatchApp?.requestedTenantId && (
-                                <div className="mb-4 p-3 bg-white/5 border border-white/10 rounded-lg">
-                                    <span className="text-xs text-slate-400 block mb-1">Applicant Requested:</span>
-                                    <span className="text-[#D946EF] font-medium">
-                                        {tenants.find(t => t.id === dispatchApp.requestedTenantId)?.name || dispatchApp.requestedTenantId}
-                                    </span>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {/* Left Side: Top Matches */}
+                            <div className="space-y-4">
+                                <h4 className="text-xs font-semibold text-[#D946EF] uppercase tracking-wider">Top Matches</h4>
+                                {loadingMatches ? (
+                                    <div className="py-10 text-center space-y-3">
+                                        <div className="animate-pulse flex flex-col items-center">
+                                            <div className="h-4 w-3/4 bg-white/5 rounded mb-2"></div>
+                                            <div className="h-4 w-1/2 bg-white/5 rounded"></div>
+                                        </div>
+                                        <p className="text-xs text-slate-500 italic">Calculating match scores...</p>
+                                    </div>
+                                ) : matches.length === 0 ? (
+                                    <p className="text-sm text-slate-500 italic py-4">No high-confidence matches found.</p>
+                                ) : (
+                                    <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                                        {matches.map((match) => (
+                                            <button
+                                                key={match.tenantId}
+                                                onClick={() => setSelectedTenantId(match.tenantId)}
+                                                className={`w-full text-left p-3 rounded-xl border transition-all ${selectedTenantId === match.tenantId
+                                                    ? 'bg-fuchsia-500/20 border-fuchsia-500/50 ring-1 ring-fuchsia-500/50'
+                                                    : 'bg-white/5 border-white/10 hover:border-white/20'
+                                                    }`}
+                                            >
+                                                <div className="flex justify-between items-start mb-1">
+                                                    <span className="font-semibold text-sm text-white">{match.tenantName}</span>
+                                                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-bold ${match.score > 80 ? 'bg-emerald-500/20 text-emerald-400' : 'bg-blue-500/20 text-blue-400'
+                                                        }`}>
+                                                        {match.score}% Match
+                                                    </span>
+                                                </div>
+                                                <div className="flex flex-wrap gap-2 items-center text-[11px] text-slate-400">
+                                                    <span>📍 {match.distanceMiles} miles</span>
+                                                    <span className="w-1 h-1 rounded-full bg-slate-600"></span>
+                                                    <span className={match.isSorEligible ? 'text-emerald-400 font-medium' : ''}>
+                                                        💰 {match.financialMatch}
+                                                    </span>
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Right Side: Manual Selection & Action */}
+                            <div className="space-y-4 border-l border-white/10 pl-6">
+                                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Routing Details</h4>
+
+                                {dispatchApp?.requestedTenantId && (
+                                    <div className="p-3 bg-fuchsia-500/5 border border-fuchsia-500/20 rounded-xl">
+                                        <span className="text-[10px] text-fuchsia-400 block mb-1 font-bold uppercase">Applicant Preferred:</span>
+                                        <span className="text-white text-sm font-medium">
+                                            {tenants.find(t => t.id === dispatchApp.requestedTenantId)?.name || dispatchApp.requestedTenantId}
+                                        </span>
+                                    </div>
+                                )}
+
+                                <div>
+                                    <label className="block text-[11px] font-medium text-slate-400 mb-1.5 ml-1">Assigned Organization</label>
+                                    <select
+                                        value={selectedTenantId}
+                                        onChange={(e) => setSelectedTenantId(e.target.value)}
+                                        className="w-full bg-black/50 border border-white/20 rounded-xl p-3 text-sm text-white focus:ring-2 focus:ring-[#D946EF] focus:border-transparent outline-none transition-all"
+                                        disabled={dispatching}
+                                    >
+                                        <option value="" disabled>Select manually...</option>
+                                        {tenants.map(t => (
+                                            <option key={t.id} value={t.id}>{t.name}</option>
+                                        ))}
+                                    </select>
                                 </div>
-                            )}
 
-                            <label className="block text-xs font-medium text-slate-400 mb-1">Select Destination Organization</label>
-                            <select
-                                value={selectedTenantId}
-                                onChange={(e) => setSelectedTenantId(e.target.value)}
-                                className="w-full bg-black/50 border border-white/20 rounded-lg p-2.5 text-white focus:ring-2 focus:ring-[#D946EF] focus:border-transparent outline-none"
-                                disabled={dispatching}
-                            >
-                                <option value="" disabled>Select an organization...</option>
-                                {tenants.map(t => (
-                                    <option key={t.id} value={t.id}>{t.name}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="mt-6 flex justify-end gap-3">
-                            <button
-                                type="button"
-                                className="inline-flex justify-center rounded-lg border border-white/10 bg-transparent px-4 py-2 text-sm font-medium text-slate-300 hover:bg-white/5 focus:outline-none"
-                                onClick={() => setDispatchApp(null)}
-                                disabled={dispatching}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="button"
-                                className="inline-flex justify-center rounded-lg border border-transparent bg-[#D946EF] px-4 py-2 text-sm font-medium text-white hover:bg-fuchsia-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-fuchsia-500/20"
-                                onClick={handleDispatch}
-                                disabled={!selectedTenantId || dispatching}
-                            >
-                                Dispatch Application
-                            </button>
+                                <div className="pt-4 space-y-3">
+                                    <button
+                                        type="button"
+                                        className="w-full inline-flex justify-center rounded-xl border border-transparent bg-[#D946EF] px-4 py-3 text-sm font-bold text-white hover:bg-fuchsia-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-fuchsia-500/20 transition-all active:scale-[0.98]"
+                                        onClick={handleDispatch}
+                                        disabled={!selectedTenantId || dispatching}
+                                    >
+                                        Dispatch Application
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="w-full inline-flex justify-center rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-slate-300 hover:bg-white/10 focus:outline-none transition-all"
+                                        onClick={() => setDispatchApp(null)}
+                                        disabled={dispatching}
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -25,6 +25,7 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     return NextResponse.json({
         settings: {
             aiApiKey: data.aiApiKey ? true : false,
+            stageContracts: data.stageContracts || {},
         },
     });
 }
@@ -42,6 +43,9 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const update: Record<string, unknown> = {};
     if ('aiApiKey' in body) {
         update.aiApiKey = body.aiApiKey ?? null;
+    }
+    if ('stageContracts' in body) {
+        update.stageContracts = body.stageContracts;
     }
 
     if (Object.keys(update).length === 0) {

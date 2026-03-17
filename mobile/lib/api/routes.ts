@@ -43,6 +43,8 @@ export const tenantApi = {
     api.get<{ events: MobileEvent[] }>(`/api/mobile/tenants/${tenantId}/events`),
   attendEvent: (tenantId: string, eventId: string) =>
     api.post<{ success: boolean }>(`/api/mobile/tenants/${tenantId}/events/${eventId}/attend`, {}),
+  verifyEvent: (tenantId: string, eventId: string, pin: string) =>
+    api.post<{ success: boolean; verified: boolean }>(`/api/mobile/tenants/${tenantId}/events/${eventId}/verify`, { pin }),
   unattendEvent: (tenantId: string, eventId: string) =>
     api.delete<{ success: boolean }>(`/api/mobile/tenants/${tenantId}/events/${eventId}/attend`),
   getChores: (tenantId: string) =>

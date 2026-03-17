@@ -4,15 +4,23 @@ import type { TenantMatchScore } from '../types';
 export interface BedHints {
     matStatus?: boolean;          // true = applicant on MAT
     genderPreference?: string;    // "Men's" | "Women's" | "Co-ed" | "No preference"
+    isOpioidUse?: boolean;        // true = SOR grant eligible
+    incomeBracket?: string;       // For financial matching
+    maxDistance?: number;         // Max travel radius in miles
 }
 
-function zipProximityScore(applicantZip: string, tenantZip: string): number {
-    if (!applicantZip || !tenantZip) return 20;
-    const a = parseInt(applicantZip.slice(0, 3), 10);
-    const t = parseInt(tenantZip.slice(0, 3), 10);
-    if (isNaN(a) || isNaN(t)) return 20;
-    const diff = Math.abs(a - t);
-    return Math.max(0, 40 - diff * 0.4);
+function calculateDistance(zip1: string, zip2: string): number {
+    if (!zip1 || !zip2) return 999;
+    const a = parseInt(zip1.slice(0, 3), 10);
+    const t = parseInt(zip2.slice(0, 3), 10);
+    if (isNaN(a) || isNaN(t)) return 999;
+    // VERY rough approximation: 1 zip unit difference ~20 miles
+    return Math.abs(a - t) * 20;
+}
+
+function zipProximityScore(distance: number, maxDistance: number): number {
+    if (distance > maxDistance) return -500; // Force out of top results
+    return Math.max(0, 40 - (distance / 5)); // 40 points for 0 miles, 0 points for 200 miles
 }
 
 function specializationScore(applicantPrefs: string[], tenantSpecs: string[]): number {
@@ -59,24 +67,39 @@ export async function getMatchedTenants(
 
     const scores: TenantMatchScore[] = snapshot.docs.map(doc => {
         const t = doc.data() as Record<string, unknown>;
-        const prox = zipProximityScore(applicantZip, (t.zipCode as string) ?? '');
+        const dist = calculateDistance(applicantZip, (t.zipCode as string) ?? '');
+        const maxDist = bedHints?.maxDistance || 50;
+
+        const prox = zipProximityScore(dist, maxDist);
         const spec = specializationScore(applicantPrefs, (t.specializations as string[]) ?? []);
         const cap = capacityScore((t.availableBeds as number) ?? 0);
         const mat = matScore(bedHints, t);
         const gender = genderScore(bedHints, t);
+
+        // SOR Grant Matching
+        const isSorProvider = t.isSorProvider === true;
+        const applicantIsSorEligible = bedHints?.isOpioidUse === true;
+        const isSorMatch = isSorProvider && applicantIsSorEligible;
+
         return {
             tenantId: doc.id,
             tenantName: (t.name as string) ?? 'Unknown',
             city: (t.city as string) ?? '',
             state: (t.state as string) ?? '',
             zipCode: (t.zipCode as string) ?? '',
-            score: Math.max(0, Math.round(prox + spec + cap + mat + gender)),
+            score: Math.max(0, Math.round(prox + spec + cap + mat + gender + (isSorMatch ? 20 : 0))),
             specializationOverlap: spec,
             hasCapacity: ((t.availableBeds as number) ?? 0) > 0,
             availableBeds: t.availableBeds as number | undefined,
             specializations: (t.specializations as string[]) ?? [],
+            isSorEligible: isSorMatch,
+            distanceMiles: dist,
+            financialMatch: isSorMatch ? 'SOR Grant Eligible' : 'Self-Pay / Insurance',
         };
     });
 
-    return scores.sort((a, b) => b.score - a.score).slice(0, limit);
+    return scores
+        .filter(s => s.score > 0)
+        .sort((a, b) => b.score - a.score)
+        .slice(0, limit);
 }

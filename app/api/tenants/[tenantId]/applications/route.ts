@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { adminDb } from '@/lib/firebase/admin';
 import type { UserRole } from '@/features/auth/types/auth.types';
+import { notificationService } from '@/lib/firebase/notificationService';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,11 +77,11 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
     const body = await request.json();
     const { applicationId, status, notes } = body as {
       applicationId: string;
-      status: 'accepted' | 'rejected';
+      status: 'reviewing' | 'waitlisted' | 'accepted' | 'rejected';
       notes?: string;
     };
 
-    if (!applicationId || !['accepted', 'rejected'].includes(status)) {
+    if (!applicationId || !['reviewing', 'waitlisted', 'accepted', 'rejected'].includes(status)) {
       return NextResponse.json({ error: 'applicationId and valid status required' }, { status: 400 });
     }
 
@@ -95,11 +96,131 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
       return NextResponse.json({ error: 'Application not assigned to this tenant' }, { status: 403 });
     }
 
+    const isWaitlisted = status === 'waitlisted';
+    const isAccepted = status === 'accepted';
+    let waitlistPosition = null;
+
+    if (isWaitlisted) {
+      const waitlistSnap = await adminDb.collection('applications')
+        .where('assignedTenantId', '==', tenantId)
+        .where('status', '==', 'waitlisted')
+        .get();
+      waitlistPosition = waitlistSnap.size + 1;
+    }
+
+    // 1. Update Application Status
     await docRef.update({
       status,
       notes: notes ?? data.notes ?? '',
+      waitlistPosition: waitlistPosition,
       updatedAt: new Date().toISOString(),
     });
+
+    // 2. Automated Contract Triggers
+    const tenantDoc = await adminDb.collection('tenants').doc(tenantId).get();
+    const settings = tenantDoc.data()?.stageContracts || {};
+    const templateId = settings[status];
+
+    if (templateId) {
+        // Trigger contract creation (simplified - in a real app would use a service)
+        const contractRef = adminDb.collection('contracts').doc();
+        await contractRef.set({
+            tenantId,
+            residentName: data.applicantName,
+            residentEmail: data.applicantEmail,
+            templateId,
+            status: 'pending',
+            applicationId: docRef.id,
+            createdAt: new Date().toISOString(),
+        });
+        
+        // Send notification to mobile user via Inbox
+        await notificationService.createNotification({
+            tenantId,
+            userId: data.applicantId,
+            type: 'request',
+            refId: contractRef.id,
+            refCollection: 'contracts',
+            title: 'Action Required: Sign Document',
+            preview: `A new document needs your signature for your application.`,
+            priority: 'high',
+            metadata: { signingUrl: `${process.env.NEXT_PUBLIC_APP_URL || ''}/sign/${contractRef.id}` }
+        });
+    }
+
+    if (isWaitlisted) {
+        await notificationService.createNotification({
+            tenantId,
+            userId: data.applicantId,
+            type: 'system',
+            refId: docRef.id,
+            refCollection: 'applications',
+            title: 'Waitlist Update',
+            preview: `You have been added to the waitlist. Current position: ${waitlistPosition}.`,
+            metadata: { position: waitlistPosition }
+        });
+    }
+
+    // 3. Admission Sequence
+    if (isAccepted) {
+        const uid = data.applicantId;
+        const now = new Date().toISOString();
+        
+        // A. Promote AppUser to Resident
+        const residentId = `RES-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+        await adminDb.collection('users').doc(uid).update({
+            role: 'resident',
+            residentId: residentId,
+            updatedAt: now,
+        });
+
+        // B. Provision Resident Document (Clinical/Operational)
+        await adminDb.collection(`tenants/${tenantId}/residents`).doc(uid).set({
+            uid,
+            residentId,
+            name: data.applicantName,
+            email: data.applicantEmail,
+            status: 'active',
+            admittedAt: now,
+            houseId: data.requestedHouseId || null,
+        });
+
+        // C. Auto-Enroll in Welcome Course & House Rules
+        // Fetch universal or tenant-specific welcome courses
+        const coursesSnap = await adminDb.collection(`tenants/${tenantId}/courses`)
+            .where('isAutoEnroll', '==', true)
+            .get();
+        
+        const batch = adminDb.batch();
+        coursesSnap.forEach(course => {
+            const enrollmentRef = adminDb.collection(`tenants/${tenantId}/enrollments`).doc();
+            batch.set(enrollmentRef, {
+                courseId: course.id,
+                userId: uid,
+                status: 'active',
+                progress: 0,
+                enrolledAt: now,
+            });
+        });
+        await batch.commit();
+
+        // D. Add to House Group Chat
+        if (data.requestedHouseId) {
+            const chatSnap = await adminDb.collection('chats')
+                .where('type', '==', 'house')
+                .where('metadata.houseId', '==', data.requestedHouseId)
+                .limit(1)
+                .get();
+            
+            if (!chatSnap.empty) {
+                const chatId = chatSnap.docs[0].id;
+                await adminDb.collection('chats').doc(chatId).update({
+                    participants: adminDb.FieldValue.arrayUnion(uid),
+                    updatedAt: now,
+                });
+            }
+        }
+    }
 
     return NextResponse.json({ success: true, status });
   } catch (error: unknown) {

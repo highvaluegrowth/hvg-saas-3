@@ -238,6 +238,27 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
         </CardContent>
       </Card>
 
+      {/* Verification Code Card */}
+      {event.requireVerification && (
+        <Card className="border border-[#10b981]/30 bg-[#10b981]/10 rounded-xl">
+          <CardHeader>
+            <CardTitle className="text-base font-semibold text-[#10b981]">Attendance Verification</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0 flex items-center justify-between">
+            <div className="space-y-1">
+              <p className="text-sm text-white/80">
+                Attendees must enter this PIN in the mobile app to verify their presence.
+              </p>
+            </div>
+            <div className="bg-[#0f172a] border border-[#334155] rounded-xl px-6 py-3 ml-4 text-center">
+              <span className="text-3xl font-mono font-bold tracking-[0.25em] text-[#f8fafc]">
+                {event.verificationPin || '----'}
+              </span>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card className="border border-white/10 bg-white/5 rounded-xl">
         <CardHeader>
           <CardTitle className="text-base font-semibold text-white">

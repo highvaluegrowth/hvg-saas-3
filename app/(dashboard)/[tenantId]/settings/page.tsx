@@ -23,23 +23,56 @@ export default function SettingsPage() {
     const [avatarUrl, setAvatarUrl] = useState('');
     const [avatarSaved, setAvatarSaved] = useState(false);
 
+    const [templates, setTemplates] = useState<{ id: string; title: string }[]>([]);
+    const [stageContracts, setStageContracts] = useState<Record<string, string>>({});
+    const [workflowSaving, setWorkflowSaving] = useState(false);
+    const [workflowSaved, setWorkflowSaved] = useState(false);
+
     useEffect(() => {
         async function loadSettings() {
             try {
                 const token = await authService.getIdToken();
-                const res = await fetch(`/api/tenants/${tenantId}/settings`, { headers: { Authorization: `Bearer ${token}` } });
-                if (res.ok) {
-                    const data = await res.json();
+                const [settingsRes, templatesRes] = await Promise.all([
+                    fetch(`/api/tenants/${tenantId}/settings`, { headers: { Authorization: `Bearer ${token}` } }),
+                    fetch(`/api/tenants/${tenantId}/contracts/templates`, { headers: { Authorization: `Bearer ${token}` } })
+                ]);
+
+                if (settingsRes.ok) {
+                    const data = await settingsRes.json();
                     setApiKey(data.settings?.aiApiKey ? '••••••••••••••••' : '');
                     setApiKeySaved(!!data.settings?.aiApiKey);
                     if (data.settings?.logoUrl) setLogoUrl(data.settings.logoUrl);
                     if (data.settings?.coverUrl) setCoverUrl(data.settings.coverUrl);
+                    if (data.settings?.stageContracts) setStageContracts(data.settings.stageContracts);
+                }
+
+                if (templatesRes.ok) {
+                    const data = await templatesRes.json();
+                    setTemplates(data.templates || []);
                 }
             } catch { /* fail silently */ }
             finally { setApiKeyLoading(false); }
         }
         loadSettings();
     }, [tenantId]);
+
+    async function handleSaveWorkflow(e: React.FormEvent) {
+        e.preventDefault();
+        setWorkflowSaving(true);
+        try {
+            const token = await authService.getIdToken();
+            const res = await fetch(`/api/tenants/${tenantId}/settings`, {
+                method: 'PATCH',
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ stageContracts })
+            });
+            if (res.ok) {
+                setWorkflowSaved(true);
+                setTimeout(() => setWorkflowSaved(false), 3000);
+            }
+        } catch { /**/ }
+        finally { setWorkflowSaving(false); }
+    }
 
     async function handleSaveApiKey(e: React.FormEvent) {
         e.preventDefault();
@@ -226,6 +259,68 @@ export default function SettingsPage() {
                             )}
                         </form>
                     )}
+                </div>
+            </div>
+
+            {/* Workflow & Contracts */}
+            <div className="rounded-2xl overflow-hidden" style={cardStyle}>
+                <div className="px-6 py-4" style={cardHeaderBorder}>
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={iconBadgeStyle}>
+                            <svg className="w-4 h-4" style={{ color: '#67E8F9' }} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 className="text-base font-semibold text-white">Application Workflow & Contracts</h2>
+                            <p className="text-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>Automate contract sending when application stages change</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="px-6 py-5">
+                    <form onSubmit={handleSaveWorkflow} className="space-y-6">
+                        <div className="grid grid-cols-1 gap-4">
+                            {[
+                                { id: 'reviewing', label: 'Reviewing Stage', desc: 'Triggered when application is moved to Reviewing' },
+                                { id: 'waitlisted', label: 'Waitlist Stage', desc: 'Triggered when application is waitlisted' },
+                                { id: 'accepted', label: 'Admission Stage', desc: 'Triggered upon final acceptance' }
+                            ].map(stage => (
+                                <div key={stage.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-white/5 border border-white/10 transition-all hover:bg-white/10">
+                                    <div className="flex-1">
+                                        <label className="block text-sm font-semibold text-white mb-0.5">{stage.label}</label>
+                                        <p className="text-[11px] text-slate-500">{stage.desc}</p>
+                                    </div>
+                                    <div className="w-full sm:w-64">
+                                        <select 
+                                            value={stageContracts[stage.id] || ''}
+                                            onChange={(e) => setStageContracts(prev => ({ ...prev, [stage.id]: e.target.value }))}
+                                            className="w-full bg-black/50 border border-white/20 rounded-lg p-2 text-xs text-white focus:ring-2 focus:ring-cyan-500 outline-none"
+                                        >
+                                            <option value="">No contract required</option>
+                                            {templates.map(t => (
+                                                <option key={t.id} value={t.id}>{t.title}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2">
+                            <p className="text-[10px] text-slate-500 italic max-w-sm">
+                                Note: Mapping a contract to a stage will automatically generate and send the signing link to the applicant via their Mobile Inbox.
+                            </p>
+                            <div className="flex items-center gap-3">
+                                {workflowSaved && <SavedBadge label="Workflow saved" />}
+                                <button type="submit" disabled={workflowSaving}
+                                    className="px-6 py-2 text-sm font-bold text-white rounded-xl disabled:opacity-50 transition-all hover:opacity-90 shadow-lg shadow-cyan-500/20"
+                                    style={{ background: 'linear-gradient(135deg,#0891B2,#059669)' }}>
+                                    {workflowSaving ? 'Saving…' : 'Save Workflow'}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
