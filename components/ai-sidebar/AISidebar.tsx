@@ -11,6 +11,7 @@ import { getSemanticContext } from '@/lib/ai/routeContextMap';
 import { SidebarHeader } from './SidebarHeader';
 import { MessageList } from './MessageList';
 import { ChatInput } from './ChatInput';
+import { OutletVoice } from './OutletVoice';
 
 export function AISidebar() {
     const { user } = useAuth();
@@ -23,6 +24,7 @@ export function AISidebar() {
         messages,
         conversationId,
         isLoading,
+        isVoiceMode,
         setOpen,
         addMessage,
         setLoading,
@@ -30,6 +32,7 @@ export function AISidebar() {
         clearHistory,
         setPersona,
         hydrateMessages,
+        setVoiceMode,
     } = useAISidebarStore();
 
     const listRef = useRef<HTMLDivElement>(null);
@@ -130,6 +133,12 @@ export function AISidebar() {
                 } : {})
             });
 
+            // Voice response if in voice mode
+            if (isVoiceMode && typeof window !== 'undefined') {
+                const utterance = new SpeechSynthesisUtterance(res.reply);
+                window.speechSynthesis.speak(utterance);
+            }
+
         } catch (err) {
             addMessage({
                 role: 'assistant',
@@ -168,6 +177,14 @@ export function AISidebar() {
                     transform: isOpen ? 'translate(0, 0)' : 'translate(0, 100%)',
                 }}
             >
+                {/* Voice Mode Overlay */}
+                {isVoiceMode && (
+                    <OutletVoice 
+                        onSpeechProcessed={handleSend}
+                        isDirector={isDirector}
+                    />
+                )}
+
                 {/* Drag Handle for desktop */}
                 <div
                     className="hidden lg:block absolute left-0 top-0 w-2 h-full cursor-col-resize -translate-x-1/2 bg-transparent hover:bg-cyan-500/30 transition-colors z-50"

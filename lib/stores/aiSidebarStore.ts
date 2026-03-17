@@ -19,6 +19,7 @@ interface AISidebarState {
     messages: ChatMessage[];
     conversationId: string | null;
     isLoading: boolean;
+    isVoiceMode: boolean;
 
     // Actions
     setOpen: (open: boolean) => void;
@@ -30,6 +31,7 @@ interface AISidebarState {
     setConversationId: (id: string) => void;
     clearHistory: () => void;
     hydrateMessages: (msgs: ChatMessage[]) => void;
+    setVoiceMode: (isVoice: boolean) => void;
 }
 
 export const useAISidebarStore = create<AISidebarState>()(
@@ -41,6 +43,7 @@ export const useAISidebarStore = create<AISidebarState>()(
             messages: [],
             conversationId: null,
             isLoading: false,
+            isVoiceMode: false,
 
             setOpen: (open) => set({ isOpen: open }),
             toggleOpen: () => set((s) => ({ isOpen: !s.isOpen })),
@@ -65,6 +68,8 @@ export const useAISidebarStore = create<AISidebarState>()(
             clearHistory: () => set({ messages: [], conversationId: null }),
 
             hydrateMessages: (messages) => set({ messages }),
+
+            setVoiceMode: (isVoiceMode) => set({ isVoiceMode }),
         }),
         {
             name: 'hvg-ai-sidebar',
@@ -73,6 +78,7 @@ export const useAISidebarStore = create<AISidebarState>()(
                 conversationId: state.conversationId,
                 isOpen: state.isOpen,
                 sidebarWidth: state.sidebarWidth,
+                isVoiceMode: state.isVoiceMode,
             }),
         }
     )

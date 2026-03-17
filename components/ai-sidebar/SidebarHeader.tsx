@@ -1,6 +1,8 @@
 'use client';
 
 import React from 'react';
+import { useAISidebarStore } from '@/lib/stores/aiSidebarStore';
+import { Mic, MicOff, Trash2, X, Sparkles, Zap, Shield } from 'lucide-react';
 
 interface SidebarHeaderProps {
     persona: 'recovery' | 'operator';
@@ -9,27 +11,8 @@ interface SidebarHeaderProps {
     isDirector?: boolean;
 }
 
-const PERSONA_LABELS: Record<string, { label: string; icon: React.ReactNode }> = {
-    recovery: {
-        label: 'HVG Outlet',
-        icon: (
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09Z" />
-            </svg>
-        ),
-    },
-    operator: {
-        label: 'HVG Partner',
-        icon: (
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-            </svg>
-        ),
-    },
-};
-
 export function SidebarHeader({ persona, onClose, onClear, isDirector }: SidebarHeaderProps) {
-    const info = PERSONA_LABELS[persona] ?? PERSONA_LABELS.recovery;
+    const { isVoiceMode, setVoiceMode } = useAISidebarStore();
 
     return (
         <div
@@ -43,64 +26,60 @@ export function SidebarHeader({ persona, onClose, onClear, isDirector }: Sidebar
                     style={{
                         background: isDirector
                             ? 'linear-gradient(135deg, rgba(217,70,239,0.3) 0%, rgba(139,92,246,0.15) 100%)'
-                            : 'linear-gradient(135deg, rgba(8,145,178,0.3) 0%, rgba(52,211,153,0.15) 100%)',
-                        border: isDirector ? '1px solid rgba(217,70,239,0.3)' : '1px solid rgba(8,145,178,0.3)',
-                        color: isDirector ? '#E879F9' : '#67E8F9',
+                            : persona === 'operator'
+                                ? 'linear-gradient(135deg, rgba(8,145,178,0.3) 0%, rgba(52,211,153,0.15) 100%)'
+                                : 'linear-gradient(135deg, rgba(99,102,241,0.3) 0%, rgba(168,85,247,0.15) 100%)',
+                        border: isDirector 
+                            ? '1px solid rgba(217,70,239,0.3)' 
+                            : persona === 'operator'
+                                ? '1px solid rgba(8,145,178,0.3)'
+                                : '1px solid rgba(99,102,241,0.3)',
+                        color: isDirector ? '#E879F9' : persona === 'operator' ? '#67E8F9' : '#A5B4FC',
                     }}
                 >
-                    {info.icon}
+                    {isDirector ? <Shield size={16} /> : persona === 'operator' ? <Zap size={16} /> : <Sparkles size={16} />}
                 </div>
                 <div>
-                    <p className="text-sm font-semibold leading-tight" style={{ color: 'white' }}>
-                        {isDirector ? 'HVG Director' : 'HVG Partner'}
+                    <p className="text-sm font-semibold leading-tight text-white">
+                        HVG Outlet
                     </p>
-                    <p className="text-xs leading-tight" style={{ color: isDirector ? '#E879F9' : '#67E8F9' }}>
-                        {isDirector ? 'Strategic System Intelligence' : info.label}
+                    <p className="text-[10px] font-bold uppercase tracking-widest leading-tight opacity-50" style={{ color: isDirector ? '#E879F9' : persona === 'operator' ? '#67E8F9' : '#A5B4FC' }}>
+                        {isDirector ? 'Director Tier' : persona === 'operator' ? 'Operator Tier' : 'Resident Tier'}
                     </p>
                 </div>
             </div>
 
             {/* Actions */}
             <div className="flex items-center gap-1">
+                {/* Voice Toggle */}
+                <button
+                    type="button"
+                    onClick={() => setVoiceMode(!isVoiceMode)}
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all duration-200 cursor-pointer ${
+                        isVoiceMode ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'text-white/40 hover:bg-white/10 hover:text-white/80'
+                    }`}
+                    title={isVoiceMode ? "Disable Voice Mode" : "Enable Voice Mode"}
+                >
+                    {isVoiceMode ? <Mic size={16} className="animate-pulse" /> : <MicOff size={16} />}
+                </button>
+
+                <div className="w-px h-4 bg-white/10 mx-1" />
+
                 <button
                     type="button"
                     onClick={onClear}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors duration-150 cursor-pointer"
-                    style={{ color: 'rgba(255,255,255,0.4)' }}
-                    onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)';
-                        (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.8)';
-                    }}
-                    onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.background = 'transparent';
-                        (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.4)';
-                    }}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-white/40 hover:bg-white/10 hover:text-white/80 transition-colors duration-150 cursor-pointer"
                     title="Clear conversation"
-                    aria-label="Clear conversation"
                 >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
-                    </svg>
+                    <Trash2 size={16} />
                 </button>
                 <button
                     type="button"
                     onClick={onClose}
-                    className="w-7 h-7 rounded-lg flex items-center justify-center transition-colors duration-150 cursor-pointer"
-                    style={{ color: 'rgba(255,255,255,0.4)' }}
-                    onMouseEnter={(e) => {
-                        (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.08)';
-                        (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.8)';
-                    }}
-                    onMouseLeave={(e) => {
-                        (e.currentTarget as HTMLElement).style.background = 'transparent';
-                        (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.4)';
-                    }}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-white/40 hover:bg-white/10 hover:text-white/80 transition-colors duration-150 cursor-pointer"
                     title="Close sidebar"
-                    aria-label="Close AI sidebar"
                 >
-                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                    </svg>
+                    <X size={18} />
                 </button>
             </div>
         </div>

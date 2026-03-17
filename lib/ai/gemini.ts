@@ -6,3 +6,4 @@ if (!process.env.GEMINI_API_KEY) {
 
 export const genai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY! });
 export const GEMINI_MODEL = 'gemini-2.5-flash';
+export const GEMINI_LIVE_MODEL = 'gemini-2.0-flash-exp'; // Supporting Multimodal Live API
