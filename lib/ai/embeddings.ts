@@ -7,9 +7,15 @@ const EMBEDDING_MODEL = 'text-embedding-004';
  */
 export async function generateEmbedding(text: string): Promise<number[]> {
     try {
-        const model = genai.getGenerativeModel({ model: EMBEDDING_MODEL });
-        const result = await model.embedContent(text);
-        return result.embedding.values;
+        const result = await genai.models.embedContent({
+            model: EMBEDDING_MODEL,
+            contents: [{ role: 'user', parts: [{ text }] }]
+        });
+        
+        const embedding = result.embeddings?.[0]?.values;
+        if (!embedding) throw new Error('No embedding returned from Gemini');
+        
+        return embedding;
     } catch (error) {
         console.error('Error generating embedding:', error);
         throw new Error('Failed to generate embedding');
@@ -21,14 +27,15 @@ export async function generateEmbedding(text: string): Promise<number[]> {
  */
 export async function generateBatchEmbeddings(texts: string[]): Promise<number[][]> {
     try {
-        const model = genai.getGenerativeModel({ model: EMBEDDING_MODEL });
-        const result = await model.batchEmbedContents({
-            requests: texts.map(text => ({
-                content: { role: 'user', parts: [{ text }] },
-                taskType: 'RETRIEVAL_DOCUMENT' as any
-            }))
+        const result = await genai.models.embedContent({
+            model: EMBEDDING_MODEL,
+            contents: texts.map(text => ({ role: 'user', parts: [{ text }] }))
         });
-        return result.embeddings.map(e => e.values);
+        
+        const embeddings = result.embeddings?.map(e => e.values).filter((v): v is number[] => !!v);
+        if (!embeddings || embeddings.length === 0) throw new Error('No embeddings returned from Gemini');
+        
+        return embeddings;
     } catch (error) {
         console.error('Error generating batch embeddings:', error);
         throw new Error('Failed to generate batch embeddings');

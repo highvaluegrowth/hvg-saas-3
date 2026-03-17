@@ -1,42 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { verifyAppUserToken } from '@/lib/middleware/residentAuthMiddleware';
-import { adminDb } from '@/lib/firebase/admin';
+import { adminDb, VectorValue } from '@/lib/firebase/admin';
 import { genai, GEMINI_MODEL } from '@/lib/ai/gemini';
 import type { Content, FunctionCall, Part } from '@google/genai';
 import { superAdminTierTools, executeTieredTool } from '@/lib/ai/agents';
+import { generateEmbedding } from '@/lib/ai/embeddings';
 
 export const dynamic = 'force-dynamic';
 
 const ChatSchema = z.object({
     message: z.string().min(1),
     conversationId: z.string().optional(),
+    tenantId: z.string().optional(), // Optional: focus research on a specific tenant
 });
 
-function buildDirectorSystemPrompt(user: { displayName: string }) {
-    return `You are HVG Outlet (SuperAdmin Tier), the platform-wide executive director AI for High Value Growth.
-Your role is to perform global synthesis, monitor platform health, and assist with high-level administrative tasks across all tenants.
+function buildDirectorSystemPrompt(user: { displayName: string }, knowledge?: string[]) {
+    return [
+        `You are HVG Outlet (SuperAdmin Tier), the platform-wide executive director AI for High Value Growth.`,
+        `Your role is to perform global synthesis, monitor platform health, and assist with high-level administrative tasks across all tenants.`,
 
-USER: ${user.displayName} (SuperAdmin)
+        `USER: ${user.displayName} (SuperAdmin)`,
 
-GOALS:
-1. Provide cross-tenant analytics and pattern recognition.
-2. Moderate and manage universal applications (bed, staff, course, event).
-3. Monitor system-wide engagement and financials.
-4. Execute bulk operations across the entire platform when requested.
+        `GOALS:`,
+        `1. Provide cross-tenant analytics and pattern recognition.`,
+        `2. Moderate and manage universal applications (bed, staff, course, event).`,
+        `3. Monitor system-wide engagement and financials.`,
+        `4. Execute bulk operations across the entire platform when requested.`,
 
-TONE:
-Authoritative, data-driven, and highly efficient. Use clear executive summaries.
+        knowledge && knowledge.length > 0 ? `
+GLOBAL KNOWLEDGE RETRIEVAL:
+The following relevant documentation/SOPs were found across the platform:
+${knowledge.map((k, i) => `[${i + 1}] ${k}`).join('\n')}
+` : '',
 
-CAPABILITIES:
-- You have access to synthesis tools for platform-wide data.
-- You can assign applications to specific tenants.
-- You can view global analytics.
+        `TONE:`,
+        `Authoritative, data-driven, and highly efficient. Use clear executive summaries.`,
 
-CONTEXT:
-Current platform state: Production.
-Current date: ${new Date().toLocaleDateString()}
-`;
+        `CAPABILITIES:`,
+        `- You have access to synthesis tools for platform-wide data.`,
+        `- You can assign applications to specific tenants.`,
+        `- You can view global analytics.`,
+
+        `CONTEXT:`,
+        `Current platform state: Production.`,
+        `Current date: ${new Date().toLocaleDateString()}`,
+    ].filter(Boolean).join('\n');
 }
 
 export async function POST(request: NextRequest) {
@@ -49,7 +58,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
         }
 
-        const { message, conversationId } = parsed.data;
+        const { message, conversationId, tenantId } = parsed.data;
 
         // Director Route strictly requires super_admin role
         if (decodedToken.role !== 'super_admin') {
@@ -57,6 +66,29 @@ export async function POST(request: NextRequest) {
         }
 
         const convId = conversationId ?? adminDb.collection('conversations').doc().id;
+
+        // --- GLOBAL RAG ---
+        let retrievedKnowledge: string[] = [];
+        try {
+            const queryEmbedding = await generateEmbedding(message);
+            let query = adminDb.collectionGroup('knowledge') as FirebaseFirestore.Query;
+            
+            if (tenantId) {
+                // If specific tenant requested, restrict search
+                query = adminDb.collection(`tenants/${tenantId}/knowledge`);
+            }
+
+            const snap = await (query as any)
+                .findNearest('embedding', VectorValue.create(queryEmbedding), {
+                    limit: 3,
+                    distanceMeasure: 'COSINE'
+                })
+                .get();
+            
+            retrievedKnowledge = snap.docs.map((doc: any) => doc.data().content);
+        } catch (err) {
+            console.error('Director RAG Error:', err);
+        }
 
         // Load conversation history
         let history: Content[] = [];
@@ -71,7 +103,7 @@ export async function POST(request: NextRequest) {
         }
 
         const contents: Content[] = [...history, { role: 'user', parts: [{ text: message }] }];
-        const systemInstruction = buildDirectorSystemPrompt({ displayName: appUser.displayName });
+        const systemInstruction = buildDirectorSystemPrompt({ displayName: appUser.displayName }, retrievedKnowledge);
 
         const response = await genai.models.generateContent({
             model: GEMINI_MODEL,
@@ -94,7 +126,8 @@ export async function POST(request: NextRequest) {
                     const toolArgs = (fc.args ?? {}) as Record<string, unknown>;
                     const result = await executeTieredTool(fc.name!, toolArgs, {
                         tier: 'superadmin',
-                        uid
+                        uid,
+                        tenantId: tenantId || (toolArgs.tenantId as string) // Use context or arg
                     });
 
                     if (fc.name === primaryFc.name) componentData = result;

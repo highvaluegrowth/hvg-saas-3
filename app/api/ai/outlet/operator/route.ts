@@ -7,6 +7,7 @@ import type { Content, FunctionCall, Part } from '@google/genai';
 import { operatorTierTools, executeTieredTool } from '@/lib/ai/agents';
 import { buildOperatorSystemPrompt } from '@/lib/ai/prompts/hvg-partner';
 import { knowledgeService } from '@/lib/ai/knowledgeService';
+import { actionLedger } from '@/lib/ai/actionLedger';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,7 +46,6 @@ export async function POST(request: NextRequest) {
             retrievedKnowledge = searchResults.map(r => r.content);
         } catch (err) {
             console.error('RAG Search Error:', err);
-            // Non-blocking
         }
 
         // Load conversation history (last 20 messages)
@@ -88,14 +88,39 @@ export async function POST(request: NextRequest) {
             const toolResultParts: Part[] = await Promise.all(
                 functionCalls.map(async (fc: FunctionCall) => {
                     const toolArgs = (fc.args ?? {}) as Record<string, unknown>;
-                    const result = await executeTieredTool(fc.name!, toolArgs, {
-                        tier: 'operator',
-                        tenantId,
-                        uid
-                    });
+                    
+                    try {
+                        const result = await executeTieredTool(fc.name!, toolArgs, {
+                            tier: 'operator',
+                            tenantId,
+                            uid
+                        });
 
-                    if (fc.name === primaryFc.name) componentData = result;
-                    return { functionResponse: { name: fc.name!, response: result } } as Part;
+                        // LOG TO ACTION LEDGER
+                        await actionLedger.logAction({
+                            tier: 'operator',
+                            uid,
+                            tenantId,
+                            toolName: fc.name!,
+                            toolArgs,
+                            status: result.error ? 'failed' : 'success',
+                            executionData: result
+                        });
+
+                        if (fc.name === primaryFc.name) componentData = result;
+                        return { functionResponse: { name: fc.name!, response: result } } as Part;
+                    } catch (toolErr) {
+                        await actionLedger.logAction({
+                            tier: 'operator',
+                            uid,
+                            tenantId,
+                            toolName: fc.name!,
+                            toolArgs,
+                            status: 'failed',
+                            executionData: { error: toolErr instanceof Error ? toolErr.message : 'Unknown tool error' }
+                        });
+                        return { functionResponse: { name: fc.name!, response: { error: 'Tool execution failed' } } } as Part;
+                    }
                 })
             );
 

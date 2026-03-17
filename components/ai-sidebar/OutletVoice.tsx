@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useAISidebarStore } from '@/lib/stores/aiSidebarStore';
-import { Mic, X, Volume2, Waveform } from 'lucide-react';
+import { Mic, X, Volume2, Activity } from 'lucide-react';
 
 interface OutletVoiceProps {
     onSpeechProcessed: (text: string) => void;

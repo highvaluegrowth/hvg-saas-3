@@ -6,6 +6,7 @@ import { genai, GEMINI_MODEL } from '@/lib/ai/gemini';
 import type { Content, FunctionCall, Part } from '@google/genai';
 import { residentTierTools, executeTieredTool } from '@/lib/ai/agents';
 import { buildResidentSystemPrompt } from '@/lib/ai/prompts/hvg-companion';
+import { knowledgeService } from '@/lib/ai/knowledgeService';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,6 +29,18 @@ export async function POST(request: NextRequest) {
         const { message, conversationId, routeContext } = parsed.data;
         const convId = conversationId ?? adminDb.collection('conversations').doc().id;
 
+        // --- RAG: Search resident knowledge (tenant context) ---
+        let retrievedKnowledge: string[] = [];
+        const tenantId = appUser.tenantIds?.[0]; // Use primary tenant
+        if (tenantId) {
+            try {
+                const searchResults = await knowledgeService.searchKnowledge(tenantId, message, 3);
+                retrievedKnowledge = searchResults.map(r => r.content);
+            } catch (err) {
+                console.error('Resident RAG Search Error:', err);
+            }
+        }
+
         // Load conversation history (last 20 messages)
         let history: Content[] = [];
         if (conversationId) {
@@ -41,7 +54,7 @@ export async function POST(request: NextRequest) {
         }
 
         const contents: Content[] = [...history, { role: 'user', parts: [{ text: message }] }];
-        const systemInstruction = buildResidentSystemPrompt(appUser, routeContext);
+        const systemInstruction = buildResidentSystemPrompt(appUser, routeContext, retrievedKnowledge);
 
         const response = await genai.models.generateContent({
             model: GEMINI_MODEL,
@@ -65,7 +78,8 @@ export async function POST(request: NextRequest) {
                     const result = await executeTieredTool(fc.name!, toolArgs, {
                         tier: 'resident',
                         uid,
-                        sobrietyDate: appUser.sobrietyDate
+                        sobrietyDate: appUser.sobrietyDate,
+                        tenantId // Pass context if available
                     });
 
                     if (fc.name === primaryFc.name) componentData = result;
