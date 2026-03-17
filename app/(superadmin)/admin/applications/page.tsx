@@ -149,6 +149,12 @@ export default function ApplicationsInboxPage() {
     const [selectedTenantId, setSelectedTenantId] = useState<string>('');
     const [dispatching, setDispatching] = useState(false);
 
+    // Rejection Modal State
+    const [rejectingApp, setRejectingApp] = useState<Application | null>(null);
+    const [rejectionReason, setRejectionReason] = useState('');
+    const [rectificationSteps, setRectificationSteps] = useState('');
+    const [isSubmittingRejection, setIsSubmittingRejection] = useState(false);
+
     const fetchData = async () => {
         if (!user) return;
         setLoading(true);
@@ -239,6 +245,58 @@ export default function ApplicationsInboxPage() {
             alert(err instanceof Error ? err.message : String(err));
         } finally {
             setDispatching(false);
+        }
+    };
+
+    const handleRejectSubmit = async () => {
+        if (!rejectingApp) return;
+        setIsSubmittingRejection(true);
+        try {
+            const token = await authService.getIdToken();
+            const res = await fetch(`/api/admin/applications/${rejectingApp.id}/reject`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ 
+                    reason: rejectionReason, 
+                    rectification: rectificationSteps 
+                }),
+            });
+
+            if (!res.ok) throw new Error('Failed to reject application');
+
+            setApplications(prev => prev.map(a =>
+                a.id === rejectingApp.id ? { ...a, status: 'rejected' } : a
+            ));
+
+            setRejectingApp(null);
+            setRejectionReason('');
+            setRectificationSteps('');
+        } catch (err) {
+            alert(err instanceof Error ? err.message : String(err));
+        } finally {
+            setIsSubmittingRejection(false);
+        }
+    };
+
+    const handleApproveTenant = async (app: Application) => {
+        if (!confirm(`Are you sure you want to approve the tenant application for ${app.applicantName}?`)) return;
+        try {
+            const token = await authService.getIdToken();
+            const res = await fetch(`/api/admin/applications/${app.id}/approve-tenant`, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (!res.ok) throw new Error('Failed to approve tenant');
+            
+            setApplications(prev => prev.map(a =>
+                a.id === app.id ? { ...a, status: 'accepted' } : a
+            ));
+            alert('Tenant approved and onboarding initialized.');
+        } catch (err) {
+            alert(err instanceof Error ? err.message : String(err));
         }
     };
 
@@ -372,12 +430,29 @@ export default function ApplicationsInboxPage() {
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex justify-end gap-3">
                                                 {app.status === 'pending_triage' && (
-                                                    <button
-                                                        onClick={() => handleDispatchClick(app)}
-                                                        className="text-[#D946EF] hover:text-fuchsia-300 bg-fuchsia-500/10 hover:bg-fuchsia-500/20 px-3 py-1.5 rounded-lg transition-colors border border-[#D946EF]/30 hover:border-[#D946EF]/50"
-                                                    >
-                                                        Dispatch
-                                                    </button>
+                                                    <>
+                                                        {(app.type === 'bed' || app.type === 'staff') ? (
+                                                            <button
+                                                                onClick={() => handleDispatchClick(app)}
+                                                                className="text-white bg-fuchsia-600 hover:bg-fuchsia-500 px-3 py-1.5 rounded-lg transition-colors shadow-lg shadow-fuchsia-500/20"
+                                                            >
+                                                                Dispatch
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => handleApproveTenant(app)}
+                                                                className="text-white bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded-lg transition-colors shadow-lg shadow-emerald-500/20"
+                                                            >
+                                                                Approve
+                                                            </button>
+                                                        )}
+                                                        <button
+                                                            onClick={() => setRejectingApp(app)}
+                                                            className="text-red-400 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 px-3 py-1.5 rounded-lg transition-colors border border-red-500/30"
+                                                        >
+                                                            Reject
+                                                        </button>
+                                                    </>
                                                 )}
                                                 <Link
                                                     href={`/admin/applications/${app.id}`}
@@ -502,6 +577,58 @@ export default function ApplicationsInboxPage() {
                                         Cancel
                                     </button>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Rejection Reason Modal */}
+            {rejectingApp && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <div className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-[#1A0B2E] border border-white/10 p-6 shadow-xl transition-all">
+                        <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                            <span className="text-red-500">⚠️</span> Reject Application
+                        </h3>
+                        <p className="text-sm text-slate-400 mb-6">
+                            Provide a reason for rejecting <strong>{rejectingApp.applicantName}</strong> and steps to rectify.
+                        </p>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5 ml-1">Rejection Reason</label>
+                                <textarea
+                                    value={rejectionReason}
+                                    onChange={(e) => setRejectionReason(e.target.value)}
+                                    placeholder="e.g. Incomplete documentation, Background check failure..."
+                                    className="w-full bg-black/50 border border-white/20 rounded-xl p-3 text-sm text-white focus:ring-2 focus:ring-red-500 outline-none transition-all h-24 resize-none"
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5 ml-1">Rectification Steps</label>
+                                <textarea
+                                    value={rectificationSteps}
+                                    onChange={(e) => setRectificationSteps(e.target.value)}
+                                    placeholder="What should the applicant do to be reconsidered?"
+                                    className="w-full bg-black/50 border border-white/20 rounded-xl p-3 text-sm text-white focus:ring-2 focus:ring-emerald-500 outline-none transition-all h-24 resize-none"
+                                />
+                            </div>
+
+                            <div className="pt-4 flex gap-3">
+                                <button
+                                    onClick={() => setRejectingApp(null)}
+                                    className="flex-1 px-4 py-3 rounded-xl border border-white/10 text-sm font-medium text-slate-300 hover:bg-white/5 transition-all"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleRejectSubmit}
+                                    disabled={!rejectionReason || isSubmittingRejection}
+                                    className="flex-[2] bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-red-600/20 disabled:opacity-50 transition-all active:scale-[0.98]"
+                                >
+                                    {isSubmittingRejection ? 'Processing...' : 'Confirm Rejection'}
+                                </button>
                             </div>
                         </div>
                     </div>

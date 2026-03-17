@@ -78,4 +78,25 @@ export const authService = {
     if (!user) return null;
     return user.getIdToken();
   },
+
+  impersonateTenant(tenantId: string) {
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('hvg_impersonated_tenant_id', tenantId);
+      window.location.href = `/${tenantId}`;
+    }
+  },
+
+  stopImpersonating() {
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('hvg_impersonated_tenant_id');
+      window.location.href = '/admin/tenants';
+    }
+  },
+
+  getImpersonatedTenantId(): string | null {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('hvg_impersonated_tenant_id');
+    }
+    return null;
+  }
 };

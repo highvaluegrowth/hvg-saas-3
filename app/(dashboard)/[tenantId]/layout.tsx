@@ -122,6 +122,17 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
             : { transition: 'padding-right 0.3s ease' }
         }
       >
+        {user?.isImpersonating && (
+          <div className="bg-amber-500 text-black px-4 py-2 text-center text-[10px] font-black uppercase flex items-center justify-center gap-4 z-[60] tracking-widest shadow-xl">
+            <span>⚠️ SuperAdmin Impersonation Mode Active</span>
+            <button 
+              onClick={() => authService.stopImpersonating()}
+              className="bg-black text-white px-3 py-1 rounded-full hover:bg-zinc-800 transition-colors text-[9px]"
+            >
+              Exit Impersonation
+            </button>
+          </div>
+        )}
         <GlobalNavbar
           tenantName={tenantName}
           onMenuClick={() => setSidebarOpen(true)}

@@ -12,6 +12,7 @@ export interface User {
   tenantId?: string;
   tenantIds?: string[];
   role?: UserRole;
+  isImpersonating?: boolean;
 }
 
 export interface AuthState {

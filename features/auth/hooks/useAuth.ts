@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { auth } from '@/lib/firebase/client';
+import { authService } from '../services/authService';
 import type { User, AuthState, UserRole } from '../types/auth.types';
 
 export interface UseAuthReturn extends AuthState {
@@ -21,14 +22,17 @@ export function useAuth(): UseAuthReturn {
     try {
       // Get custom claims from ID token
       const idTokenResult = await fbUser.getIdTokenResult();
+      const role = idTokenResult.claims.role as UserRole | undefined;
+      const impersonatedId = role === 'super_admin' ? authService.getImpersonatedTenantId() : null;
 
       const user: User = {
         uid: fbUser.uid,
         email: fbUser.email!,
         displayName: fbUser.displayName,
-        tenantId: idTokenResult.claims.tenant_id as string | undefined,
+        tenantId: impersonatedId || (idTokenResult.claims.tenant_id as string | undefined),
         tenantIds: (idTokenResult.claims.tenant_ids as string[]) || [], // For multi-tenant operators
-        role: idTokenResult.claims.role as UserRole | undefined,
+        role,
+        isImpersonating: !!impersonatedId,
       };
 
       setState({
