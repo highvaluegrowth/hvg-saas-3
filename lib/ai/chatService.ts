@@ -19,7 +19,8 @@ interface ChatResponse {
 }
 
 export async function sendChatMessage({ message, conversationId, pathname, userRole }: SendChatParams): Promise<ChatResponse> {
-    const isOperator = ['tenant_admin', 'staff_admin', 'admin', 'house_manager', 'staff', 'super_admin'].includes(userRole);
+    const isSuperAdmin = userRole === 'super_admin';
+    const isOperator = ['tenant_admin', 'staff_admin', 'admin', 'house_manager', 'staff'].includes(userRole);
 
     // Transform the message if it's a known slash command
     let processedMessage = message;
@@ -28,14 +29,18 @@ export async function sendChatMessage({ message, conversationId, pathname, userR
         const rawCmd = trimmed.slice(1).split(' ')[0].toLowerCase();
         processedMessage = slashCommandToPrompt(
             { command: rawCmd, args: trimmed.slice(rawCmd.length + 1).trim() },
-            isOperator ? 'operator' : 'resident'
+            (isOperator || isSuperAdmin) ? 'operator' : 'resident'
         );
     }
 
     const routeContext = getRouteContext(pathname);
     const token = await authService.getIdToken();
     if (!token) throw new Error('Not authenticated. Please log in and try again.');
-    const endpoint = isOperator ? '/api/ai/saas/chat' : '/api/ai/mobile/chat';
+    
+    // Tiered endpoints for HVG Outlet
+    let endpoint = '/api/ai/outlet/resident';
+    if (isSuperAdmin) endpoint = '/api/ai/outlet/director';
+    else if (isOperator) endpoint = '/api/ai/outlet/operator';
 
     const res = await fetch(endpoint, {
         method: 'POST',

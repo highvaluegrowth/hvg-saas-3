@@ -73,11 +73,11 @@ export const chatApi = {
       conversationId: string;
       component?: string;
       componentData?: unknown;
-    }>('/api/ai/mobile/chat', body),
+    }>('/api/ai/outlet/resident', body),
   getHistory: (conversationId?: string) => {
     const qs = conversationId ? `?conversationId=${conversationId}` : '';
     return api.get<{ messages?: ChatMessage[]; conversations?: { id: string; updatedAt: string }[] }>(
-      `/api/ai/mobile/chat/history${qs}`
+      `/api/ai/outlet/resident/history${qs}`
     );
   },
 };

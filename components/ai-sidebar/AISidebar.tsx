@@ -45,7 +45,7 @@ export function AISidebar() {
     useEffect(() => {
         if (conversationId && !hasHydrated && isOpen) {
             setLoading(true);
-            fetchChatHistory(conversationId)
+            fetchChatHistory(conversationId, user?.role)
                 .then(history => {
                     if (history.length > 0) {
                         hydrateMessages(history);

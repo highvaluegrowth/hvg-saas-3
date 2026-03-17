@@ -1,15 +1,25 @@
-import { Type, Tool, FunctionCall, Part } from '@google/genai';
+import { Type, Tool } from '@google/genai';
 import { adminDb } from '@/lib/firebase/admin';
-import { FieldValue } from 'firebase-admin/firestore';
 
-export const residentTools: Tool[] = [
+export const clinicalTools: Tool[] = [
     {
         functionDeclarations: [
-            // ── Sobriety & Wellness ──────────────────────────────────────────────
             {
-                name: 'get_sobriety_stats',
-                description: 'Get the resident\'s sobriety stats: days sober, months, years, and streak milestones',
-                parameters: { type: Type.OBJECT, properties: {} },
+                name: 'draft_incident_report',
+                description: 'Generate a formal, structured incident report from conversational shorthand inputs',
+                parameters: {
+                    type: Type.OBJECT,
+                    required: ['summary', 'incidentDate', 'involvedResidents'],
+                    properties: {
+                        summary: { type: Type.STRING, description: 'Detailed formal summary expanding on the shorthand inputs' },
+                        incidentDate: { type: Type.STRING, description: 'ISO 8601 date of the incident' },
+                        involvedResidents: {
+                            type: Type.ARRAY,
+                            items: { type: Type.STRING },
+                            description: 'List of resident IDs or names involved',
+                        },
+                    },
+                },
             },
             {
                 name: 'log_mood',
@@ -32,25 +42,6 @@ export const residentTools: Tool[] = [
                 description: 'Get a summary of recent mood check-ins (last 7 days) to show emotional trends',
                 parameters: { type: Type.OBJECT, properties: {} },
             },
-
-            // ── House & Chores ───────────────────────────────────────────────────
-            {
-                name: 'get_chore_status',
-                description: 'Get all pending and in-progress chores currently assigned to the resident',
-                parameters: { type: Type.OBJECT, properties: {} },
-            },
-            {
-                name: 'get_upcoming_events',
-                description: 'Get upcoming house events (meetings, groups, activities) for the resident',
-                parameters: {
-                    type: Type.OBJECT,
-                    properties: {
-                        days: { type: Type.NUMBER, description: 'Number of days to look ahead (default 7, max 30)' },
-                    },
-                },
-            },
-
-            // ── Meetings & Recovery ──────────────────────────────────────────────
             {
                 name: 'log_meeting_attendance',
                 description: 'Log that the resident attended a 12-step or recovery meeting (AA, NA, SMART Recovery, etc.)',
@@ -87,15 +78,28 @@ export const residentTools: Tool[] = [
                     },
                 },
             },
-
-            // ── Learning (LMS) ───────────────────────────────────────────────────
             {
                 name: 'get_my_courses',
                 description: 'Get courses the resident is enrolled in, including progress percentage and completion status',
                 parameters: { type: Type.OBJECT, properties: {} },
             },
-
-            // ── Journal ──────────────────────────────────────────────────────────
+            {
+                name: 'build_lms_course',
+                description: 'Draft, structure, and save a new LMS course module directly to the courses collection',
+                parameters: {
+                    type: Type.OBJECT,
+                    required: ['title', 'description', 'modules'],
+                    properties: {
+                        title: { type: Type.STRING, description: 'Course title' },
+                        description: { type: Type.STRING, description: 'Course description' },
+                        modules: {
+                            type: Type.ARRAY,
+                            items: { type: Type.STRING },
+                            description: 'List of module titles to be created within the course',
+                        },
+                    },
+                },
+            },
             {
                 name: 'create_journal_entry',
                 description: 'Save a private journal entry for the resident. Only they can see it.',
@@ -118,47 +122,44 @@ export const residentTools: Tool[] = [
                 description: 'Retrieve the resident\'s most recent journal entries (last 5)',
                 parameters: { type: Type.OBJECT, properties: {} },
             },
-
-            // ── Crisis Resources ─────────────────────────────────────────────────
             {
                 name: 'get_crisis_resources',
                 description: 'Get immediate crisis resources and hotline numbers when a resident is struggling or in danger',
                 parameters: { type: Type.OBJECT, properties: {} },
             },
-        ],
-    },
+            {
+                name: 'get_sobriety_stats',
+                description: 'Get the resident\'s sobriety stats: days sober, months, years, and streak milestones',
+                parameters: { type: Type.OBJECT, properties: {} },
+            },
+        ]
+    }
 ];
 
-// ─── Tool Executor ────────────────────────────────────────────────────────────
-
-export async function executeResidentTool(
+export async function executeClinicalTool(
     toolName: string,
     args: Record<string, unknown>,
-    residentId: string,
-    sobrietyDate: Date | null | undefined
+    context: { tenantId?: string; uid: string; sobrietyDate?: Date | null }
 ): Promise<Record<string, unknown>> {
+    const { tenantId, uid, sobrietyDate } = context;
     const now = new Date();
 
-    // ── Sobriety Stats ───────────────────────────────────────────────────────
-    if (toolName === 'get_sobriety_stats') {
-        if (!sobrietyDate) return { message: 'No sobriety date set in profile. Encourage the resident to set it.' };
-        const days = Math.floor((now.getTime() - sobrietyDate.getTime()) / (1000 * 60 * 60 * 24));
-        const milestones = [30, 60, 90, 180, 365, 730, 1825].filter(m => days >= m);
-        const nextMilestone = [30, 60, 90, 180, 365, 730, 1825].find(m => m > days);
-        return {
-            daysSober: days,
-            years: Math.floor(days / 365),
-            months: Math.floor((days % 365) / 30),
-            sobrietyDate: sobrietyDate.toISOString(),
-            achievedMilestones: milestones,
-            nextMilestoneDays: nextMilestone ?? null,
-            daysToNextMilestone: nextMilestone ? nextMilestone - days : null,
-        };
+    if (toolName === 'draft_incident_report') {
+        if (!tenantId) return { error: 'Tenant context required' };
+        const ref = adminDb.collection(`tenants/${tenantId}/incidents`).doc();
+        await ref.set({
+            summary: args.summary,
+            incidentDate: args.incidentDate ? new Date(args.incidentDate as string) : now,
+            involvedResidents: args.involvedResidents,
+            status: 'review_pending',
+            createdBy: uid,
+            createdAt: now,
+        });
+        return { success: true, incidentId: ref.id, summarySnippet: (args.summary as string).substring(0, 50) + '...' };
     }
 
-    // ── Log Mood ─────────────────────────────────────────────────────────────
     if (toolName === 'log_mood') {
-        await adminDb.collection(`users/${residentId}/moods`).add({
+        await adminDb.collection(`users/${uid}/moods`).add({
             mood: args.mood,
             note: args.note ?? '',
             loggedAt: now,
@@ -166,10 +167,9 @@ export async function executeResidentTool(
         return { success: true, message: `Mood "${args.mood}" logged successfully` };
     }
 
-    // ── Wellness Summary (last 7 days of moods) ──────────────────────────────
     if (toolName === 'get_wellness_summary') {
         const since = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        const snap = await adminDb.collection(`users/${residentId}/moods`)
+        const snap = await adminDb.collection(`users/${uid}/moods`)
             .where('loggedAt', '>=', since)
             .orderBy('loggedAt', 'desc')
             .limit(20)
@@ -179,66 +179,8 @@ export async function executeResidentTool(
         return { past7Days: moods, moodCounts: counts, totalEntries: moods.length };
     }
 
-    // ── Chore Status ─────────────────────────────────────────────────────────
-    if (toolName === 'get_chore_status') {
-        const enrollSnap = await adminDb.collectionGroup('enrollments')
-            .where('residentId', '==', residentId)
-            .where('status', '==', 'active')
-            .get();
-        if (enrollSnap.empty) return { chores: [], message: 'No active enrollments found' };
-        const tenantIds = [...new Set(enrollSnap.docs.map(d => d.data().tenantId as string))];
-        const results = await Promise.all(
-            tenantIds.map(tid =>
-                adminDb.collection(`tenants/${tid}/chores`)
-                    .where('assigneeIds', 'array-contains', residentId)
-                    .where('status', 'in', ['pending', 'in_progress'])
-                    .get()
-                    .then(snap => snap.docs.map(d => ({
-                        id: d.id,
-                        tenantId: tid,
-                        title: d.data().title,
-                        status: d.data().status,
-                        priority: d.data().priority,
-                        dueDate: d.data().dueDate?.toDate?.()?.toISOString() ?? null,
-                    })))
-            )
-        );
-        return { chores: results.flat() };
-    }
-
-    // ── Upcoming Events ──────────────────────────────────────────────────────
-    if (toolName === 'get_upcoming_events') {
-        const days = typeof args.days === 'number' ? Math.min(args.days, 30) : 7;
-        const cutoff = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
-        const enrollSnap = await adminDb.collectionGroup('enrollments')
-            .where('residentId', '==', residentId)
-            .where('status', '==', 'active')
-            .get();
-        if (enrollSnap.empty) return { events: [] };
-        const tenantIds = [...new Set(enrollSnap.docs.map(d => d.data().tenantId as string))];
-        const results = await Promise.all(
-            tenantIds.map(tid =>
-                adminDb.collection(`tenants/${tid}/events`)
-                    .where('scheduledAt', '>=', now)
-                    .where('scheduledAt', '<=', cutoff)
-                    .orderBy('scheduledAt', 'asc')
-                    .get()
-                    .then(snap => snap.docs.map(d => ({
-                        id: d.id,
-                        tenantId: tid,
-                        title: d.data().title,
-                        scheduledAt: d.data().scheduledAt?.toDate?.()?.toISOString(),
-                        location: d.data().location ?? null,
-                        type: d.data().type,
-                    })))
-            )
-        );
-        return { events: results.flat(), lookAheadDays: days };
-    }
-
-    // ── Log Meeting Attendance ────────────────────────────────────────────────
     if (toolName === 'log_meeting_attendance') {
-        await adminDb.collection(`users/${residentId}/meetingAttendance`).add({
+        await adminDb.collection(`users/${uid}/meetingAttendance`).add({
             meetingType: args.meetingType,
             location: args.location ?? null,
             notes: args.notes ?? null,
@@ -247,10 +189,9 @@ export async function executeResidentTool(
         return { success: true, message: `${args.meetingType} meeting attendance logged` };
     }
 
-    // ── Get Meeting Attendance (last 30 days) ─────────────────────────────────
     if (toolName === 'get_meeting_attendance') {
         const since = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        const snap = await adminDb.collection(`users/${residentId}/meetingAttendance`)
+        const snap = await adminDb.collection(`users/${uid}/meetingAttendance`)
             .where('attendedAt', '>=', since)
             .orderBy('attendedAt', 'desc')
             .get();
@@ -267,7 +208,6 @@ export async function executeResidentTool(
         return { past30Days: meetings, totalCount: meetings.length, countByType };
     }
 
-    // ── Find AA/NA Meetings ───────────────────────────────────────────────────
     if (toolName === 'find_aa_meetings') {
         const type = (args.meetingType as string) ?? 'Any';
         return {
@@ -281,10 +221,9 @@ export async function executeResidentTool(
         };
     }
 
-    // ── My Courses (LMS Enrollments) ─────────────────────────────────────────
     if (toolName === 'get_my_courses') {
         const enrollSnap = await adminDb.collectionGroup('enrollments')
-            .where('residentId', '==', residentId)
+            .where('residentId', '==', uid)
             .where('status', '==', 'active')
             .get();
         if (enrollSnap.empty) return { enrollments: [], message: 'Not enrolled in any houses yet' };
@@ -292,7 +231,7 @@ export async function executeResidentTool(
         const results = await Promise.all(
             tenantIds.map(async tid => {
                 const lmsSnap = await adminDb.collection(`tenants/${tid}/enrollments`)
-                    .where('userId', '==', residentId)
+                    .where('userId', '==', uid)
                     .get();
                 return lmsSnap.docs.map(d => ({
                     courseId: d.data().courseId,
@@ -307,9 +246,22 @@ export async function executeResidentTool(
         return { courses: results.flat() };
     }
 
-    // ── Create Journal Entry ──────────────────────────────────────────────────
+    if (toolName === 'build_lms_course') {
+        if (!tenantId) return { error: 'Tenant context required' };
+        const ref = adminDb.collection(`tenants/${tenantId}/courses`).doc();
+        await ref.set({
+            title: args.title,
+            description: args.description,
+            modules: args.modules,
+            status: 'draft',
+            createdBy: uid,
+            createdAt: now,
+        });
+        return { success: true, courseId: ref.id, title: args.title, message: 'LMS Course drafted successfully' };
+    }
+
     if (toolName === 'create_journal_entry') {
-        await adminDb.collection(`users/${residentId}/journal`).add({
+        await adminDb.collection(`users/${uid}/journal`).add({
             title: args.title ?? null,
             content: args.content,
             mood: args.mood ?? null,
@@ -318,9 +270,8 @@ export async function executeResidentTool(
         return { success: true, message: 'Journal entry saved privately' };
     }
 
-    // ── Get Journal Entries (last 5) ──────────────────────────────────────────
     if (toolName === 'get_journal_entries') {
-        const snap = await adminDb.collection(`users/${residentId}/journal`)
+        const snap = await adminDb.collection(`users/${uid}/journal`)
             .orderBy('createdAt', 'desc')
             .limit(5)
             .get();
@@ -334,7 +285,6 @@ export async function executeResidentTool(
         return { entries };
     }
 
-    // ── Crisis Resources ──────────────────────────────────────────────────────
     if (toolName === 'get_crisis_resources') {
         return {
             immediate: [
@@ -350,5 +300,21 @@ export async function executeResidentTool(
         };
     }
 
-    return { error: `Unknown tool: ${toolName}` };
+    if (toolName === 'get_sobriety_stats') {
+        if (!sobrietyDate) return { message: 'No sobriety date set in profile.' };
+        const days = Math.floor((now.getTime() - sobrietyDate.getTime()) / (1000 * 60 * 60 * 24));
+        const milestones = [30, 60, 90, 180, 365, 730, 1825].filter(m => days >= m);
+        const nextMilestone = [30, 60, 90, 180, 365, 730, 1825].find(m => m > days);
+        return {
+            daysSober: days,
+            years: Math.floor(days / 365),
+            months: Math.floor((days % 365) / 30),
+            sobrietyDate: sobrietyDate.toISOString(),
+            achievedMilestones: milestones,
+            nextMilestoneDays: nextMilestone ?? null,
+            daysToNextMilestone: nextMilestone ? nextMilestone - days : null,
+        };
+    }
+
+    return { error: `Unknown clinical tool: ${toolName}` };
 }

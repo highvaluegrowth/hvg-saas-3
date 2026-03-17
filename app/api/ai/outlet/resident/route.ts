@@ -4,22 +4,20 @@ import { verifyAppUserToken } from '@/lib/middleware/residentAuthMiddleware';
 import { adminDb } from '@/lib/firebase/admin';
 import { genai, GEMINI_MODEL } from '@/lib/ai/gemini';
 import type { Content, FunctionCall, Part } from '@google/genai';
-import { operatorTools, executeOperatorTool } from '@/lib/ai/tools/saas-tools';
-import { buildOperatorSystemPrompt } from '@/lib/ai/prompts/hvg-partner';
+import { residentTierTools, executeTieredTool } from '@/lib/ai/agents';
+import { buildResidentSystemPrompt } from '@/lib/ai/prompts/hvg-companion';
 
 export const dynamic = 'force-dynamic';
-
 
 const ChatSchema = z.object({
     message: z.string().min(1),
     conversationId: z.string().optional(),
     routeContext: z.string().optional(),
-    view: z.string().optional(),
 });
 
 export async function POST(request: NextRequest) {
     try {
-        const { uid, appUser, decodedToken } = await verifyAppUserToken(request);
+        const { uid, appUser } = await verifyAppUserToken(request);
 
         const body = await request.json();
         const parsed = ChatSchema.safeParse(body);
@@ -27,16 +25,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
         }
 
-        const { message, conversationId, routeContext, view } = parsed.data;
-
-        // SaaS Route requires Operator role
-        const isOperator = decodedToken.role && ['tenant_admin', 'staff_admin', 'admin', 'house_manager', 'staff', 'super_admin'].includes(decodedToken.role as string);
-        if (!isOperator) {
-            return NextResponse.json({ error: 'Access restricted to SaaS Operators' }, { status: 403 });
-        }
-
-        // Default to 'none' if missing (managed directly by prompt builder)
-        const tenantId = (decodedToken.tenantId as string) || appUser.tenantIds?.[0] || 'none';
+        const { message, conversationId, routeContext } = parsed.data;
         const convId = conversationId ?? adminDb.collection('conversations').doc().id;
 
         // Load conversation history (last 20 messages)
@@ -52,12 +41,12 @@ export async function POST(request: NextRequest) {
         }
 
         const contents: Content[] = [...history, { role: 'user', parts: [{ text: message }] }];
-        const systemInstruction = buildOperatorSystemPrompt({ displayName: appUser.displayName, role: decodedToken.role as string }, tenantId, routeContext, view);
+        const systemInstruction = buildResidentSystemPrompt(appUser, routeContext);
 
         const response = await genai.models.generateContent({
             model: GEMINI_MODEL,
             contents,
-            config: { systemInstruction, tools: operatorTools },
+            config: { systemInstruction, tools: residentTierTools },
         });
 
         let finalText = response.text ?? '';
@@ -73,7 +62,11 @@ export async function POST(request: NextRequest) {
             const toolResultParts: Part[] = await Promise.all(
                 functionCalls.map(async (fc: FunctionCall) => {
                     const toolArgs = (fc.args ?? {}) as Record<string, unknown>;
-                    const result = await executeOperatorTool(fc.name!, toolArgs, tenantId, uid);
+                    const result = await executeTieredTool(fc.name!, toolArgs, {
+                        tier: 'resident',
+                        uid,
+                        sobrietyDate: appUser.sobrietyDate
+                    });
 
                     if (fc.name === primaryFc.name) componentData = result;
                     return { functionResponse: { name: fc.name!, response: result } } as Part;
@@ -99,7 +92,7 @@ export async function POST(request: NextRequest) {
         const batch = adminDb.batch();
         const convRef = adminDb.collection('conversations').doc(convId);
 
-        batch.set(convRef, { userId: uid, persona: 'operator', tenantId, updatedAt: new Date() }, { merge: true });
+        batch.set(convRef, { userId: uid, persona: 'recovery', tier: 'resident', updatedAt: new Date() }, { merge: true });
         batch.set(convRef.collection('messages').doc(), { role: 'user', content: message, createdAt: new Date() });
 
         const assistantPayload: any = { role: 'assistant', content: finalText, createdAt: new Date() };
@@ -114,7 +107,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             reply: finalText,
             conversationId: convId,
-            persona: 'operator',
+            persona: 'recovery',
+            tier: 'resident',
             component: componentName,
             componentData
         });

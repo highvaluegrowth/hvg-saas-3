@@ -4,7 +4,6 @@ import { adminDb } from '@/lib/firebase/admin';
 
 export const dynamic = 'force-dynamic';
 
-
 export async function GET(request: NextRequest) {
   try {
     const { uid } = await verifyAppUserToken(request);
@@ -13,7 +12,6 @@ export async function GET(request: NextRequest) {
     const conversationId = url.searchParams.get('conversationId');
 
     if (conversationId) {
-      // Verify ownership before returning messages
       const convDoc = await adminDb.collection('conversations').doc(conversationId).get();
       if (!convDoc.exists || convDoc.data()?.userId !== uid) {
         return NextResponse.json({ error: 'Conversation not found' }, { status: 404 });
@@ -30,18 +28,18 @@ export async function GET(request: NextRequest) {
         id: doc.id,
         role: doc.data().role,
         content: doc.data().content,
-        component: doc.data().component,       // NEW
-        componentData: doc.data().componentData, // NEW
-        createdAt: doc.data().createdAt?.toMillis() ?? Date.now(), // Use epoch ms as required by Zustand store
+        component: doc.data().component,
+        componentData: doc.data().componentData,
+        createdAt: doc.data().createdAt?.toMillis() ?? Date.now(),
       }));
 
       return NextResponse.json({ messages });
     }
 
-    // List all conversations for this user (most recent first)
     const convsSnap = await adminDb
       .collection('conversations')
       .where('userId', '==', uid)
+      .where('tier', '==', 'operator')
       .orderBy('updatedAt', 'desc')
       .limit(10)
       .get();
