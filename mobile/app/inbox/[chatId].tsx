@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { View, StyleSheet, ActivityIndicator, TouchableOpacity, Text } from 'react-native';
 import { GiftedChat, Bubble, Send, IMessage } from 'react-native-gifted-chat';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -44,7 +44,7 @@ export default function ChatDetailScreen() {
     if (newMessages.length > 0) {
       sendMutation.mutate(newMessages[0].text);
     }
-  }, [chatId]);
+  }, [sendMutation]);
 
   if (isLoading && messages.length === 0) {
     return (

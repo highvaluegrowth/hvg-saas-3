@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MobileCourseDetail } from '@/lib/api/routes';
 
@@ -9,11 +9,7 @@ export function useOfflineCourse(courseId: string) {
   const [isDownloaded, setIsDownloaded] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  useEffect(() => {
-    checkDownloadStatus();
-  }, [courseId]);
-
-  const checkDownloadStatus = async () => {
+  const checkDownloadStatus = useCallback(async () => {
     try {
       const stored = await AsyncStorage.getItem(OFFLINE_COURSES_KEY);
       if (stored) {
@@ -23,7 +19,11 @@ export function useOfflineCourse(courseId: string) {
     } catch (e) {
       console.error('Error checking download status', e);
     }
-  };
+  }, [courseId]);
+
+  useEffect(() => {
+    checkDownloadStatus();
+  }, [checkDownloadStatus]);
 
   const downloadCourse = async (courseDetail: MobileCourseDetail) => {
     setIsDownloading(true);

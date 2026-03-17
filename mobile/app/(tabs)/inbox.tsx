@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   View,
   Text,
@@ -14,11 +13,9 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { inboxApi, type Chat } from '@/lib/api/routes';
 import { AppHeader } from '@/components/AppHeader';
 import { formatDistanceToNow } from 'date-fns';
-import { useAuth } from '@/lib/auth/AuthContext';
 
 export default function InboxScreen() {
   const router = useRouter();
-  const { appUser } = useAuth();
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['chats'],
     queryFn: inboxApi.getChats,
@@ -35,11 +32,15 @@ export default function InboxScreen() {
     return (
       <TouchableOpacity
         style={styles.chatCard}
-        onPress={() => router.push(`/inbox/${item.id}` as any)}
+        onPress={() => router.push({ pathname: '/inbox/[chatId]', params: { chatId: item.id } })}
       >
         <View style={styles.avatarWrap}>
           {item.metadata?.image ? (
-            <Image source={{ uri: item.metadata.image }} style={styles.avatar} />
+            <Image 
+              source={{ uri: item.metadata.image }} 
+              style={styles.avatar} 
+              alt={displayName}
+            />
           ) : (
             <View style={[styles.avatarPlaceholder, { backgroundColor: isGroup ? '#6366f1' : '#10b981' }]}>
               <MaterialIcons name={isGroup ? 'groups' : 'person'} size={24} color="#fff" />

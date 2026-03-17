@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   ScrollView,
@@ -57,16 +57,18 @@ export default function HomeScreen() {
   const myHouses: TenantHouse[] = housesData?.houses ?? [];
 
   const events = data?.events ?? [];
-  const chores = data?.chores ?? [];
+  const { appUser } = useAuth();
 
-  const sobrietyDays = appUser?.sobrietyDate
-    ? Math.floor(
-        (Date.now() - new Date(appUser.sobrietyDate as unknown as string).getTime()) /
-          86400000,
-      )
-    : null;
+  const sobrietyDays = useMemo(() => {
+    if (!appUser?.sobrietyDate) return null;
+    return Math.floor(
+      (Date.now() - new Date(appUser.sobrietyDate as unknown as string).getTime()) /
+        86400000,
+    );
+  }, [appUser?.sobrietyDate]);
 
   const isAdmin = ['super_admin', 'admin', 'tenant_admin', 'staff_admin', 'staff', 'house_manager'].includes(appUser?.role || '');
+
 
   const bottomPad = TAB_BAR_BASE_HEIGHT + insets.bottom + 16;
 

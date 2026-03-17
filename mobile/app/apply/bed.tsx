@@ -51,7 +51,7 @@ export default function BedApplicationScreen() {
     fundingSource: '',
   });
 
-  const update = (key: keyof FormData, value: any) =>
+  const update = (key: keyof FormData, value: string | boolean) =>
     setFormData((prev) => ({ ...prev, [key]: value }));
 
   const handleSubmit = async () => {

@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/Input';
 
 export default function CreateTenantPage() {
   const router = useRouter();
-  const { user, refreshToken } = useAuth();
+  const { refreshToken } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
@@ -69,9 +69,10 @@ export default function CreateTenantPage() {
 
       // Navigate using the known tenant ID
       router.push(`/${newTenantId}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error creating tenant:', err);
-      setError(err.message || 'Failed to create organization');
+      const message = err instanceof Error ? err.message : 'Failed to create organization';
+      setError(message);
     } finally {
       setIsLoading(false);
     }

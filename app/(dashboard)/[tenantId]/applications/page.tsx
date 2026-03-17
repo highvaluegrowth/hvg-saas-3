@@ -16,7 +16,6 @@ import {
   defaultDropAnimationSideEffects,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
@@ -28,7 +27,7 @@ import { CSS } from '@dnd-kit/utilities';
 
 function TenantChat({ tenantId, applicationId, applicantName }: { tenantId: string; applicationId: string; applicantName: string }) {
   const [chatId, setChatId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<{ senderName: string; content: string; createdAt: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
@@ -83,7 +82,7 @@ function TenantChat({ tenantId, applicationId, applicantName }: { tenantId: stri
       });
       if (res.ok) {
         setNewMessage('');
-        fetchMessages(chatId);
+        if (chatId) fetchMessages(chatId);
       }
     } catch (err) {
       console.error('Send error:', err);
@@ -228,6 +227,7 @@ function KanbanCard({ app, isOverlay = false, onClick }: { app: Application; isO
       {...attributes}
       {...listeners}
       onClick={(e) => {
+        e.stopPropagation();
         if (!isDragging && onClick) onClick();
       }}
       className={`group bg-[#161B22] border border-white/10 rounded-xl p-4 cursor-grab active:cursor-grabbing hover:border-white/20 transition-all ${isOverlay ? 'shadow-2xl ring-2 ring-cyan-500/50' : ''
@@ -303,7 +303,6 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
 
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [activeApp, setActiveApp] = useState<Application | null>(null);
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
 
@@ -328,7 +327,7 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
       const json = await res.json();
       setApplications(json.applications ?? []);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error');
+      console.error('Fetch error:', err);
     } finally {
       setLoading(false);
     }
@@ -349,12 +348,10 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
         },
         body: JSON.stringify({ applicationId: appId, status: newStatus }),
       });
-      // Optimistic update already handled by dnd logic if we want,
-      // but simpler to just refresh after drop for now to ensure consistency
       await fetchApplications();
     } catch (err) {
       console.error('Failed to update status:', err);
-      fetchApplications(); // Revert
+      fetchApplications();
     }
   };
 
@@ -373,7 +370,6 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
     const appId = active.id as string;
     const overId = over.id as string;
 
-    // Check if we dropped onto a column
     const overColumn = COLUMNS.find(c => c.id === overId);
     if (overColumn) {
       const app = applications.find(a => a.id === appId);
@@ -383,7 +379,6 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
       return;
     }
 
-    // Check if we dropped onto another card
     const overApp = applications.find(a => a.id === overId);
     if (overApp) {
       const activeApp = applications.find(a => a.id === appId);
@@ -455,11 +450,9 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
         </div>
       )}
 
-      {/* Detail Modal */}
       {selectedApp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-4xl h-[80vh] transform overflow-hidden rounded-3xl bg-[#0D1117] border border-white/10 flex flex-col shadow-2xl">
-            {/* Modal Header */}
             <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
               <div>
                 <div className="flex items-center gap-3">
@@ -480,9 +473,7 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
               </button>
             </div>
 
-            {/* Modal Body */}
             <div className="flex-1 flex overflow-hidden">
-              {/* Left: Details */}
               <div className="flex-1 p-8 overflow-y-auto custom-scrollbar border-r border-white/10">
                 <h3 className="text-xs font-bold text-[#D946EF] uppercase tracking-widest mb-6">Application Details</h3>
                 <div className="space-y-6">
@@ -497,19 +488,15 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
                 </div>
               </div>
 
-              {/* Right: Chat Interface Placeholder */}
               <div className="w-[400px] bg-black/20 flex flex-col">
                 <div className="p-4 border-b border-white/5 bg-white/5">
                   <h3 className="text-xs font-bold text-cyan-400 uppercase tracking-widest">Direct Message</h3>
                 </div>
-                <div className="flex-1 flex items-center justify-center p-10 text-center">
-                  <div className="space-y-4">
-                    <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto border border-white/10">
-                      <span className="text-2xl">💬</span>
-                    </div>
-                    <p className="text-sm text-slate-400">Secure messaging with {selectedApp.applicantName.split(' ')[0]} will be available here.</p>
-                  </div>
-                </div>
+                <TenantChat 
+                  tenantId={tenantId} 
+                  applicationId={selectedApp.id} 
+                  applicantName={selectedApp.applicantName} 
+                />
               </div>
             </div>
           </div>

@@ -10,7 +10,7 @@ export default function AdminDashboardScreen() {
   const insets = useSafeAreaInsets();
   const bottomPad = TAB_BAR_BASE_HEIGHT + insets.bottom + 16;
 
-  const adminStats = [
+  const adminStats: { label: string; value: string; icon: keyof typeof MaterialIcons.glyphMap; color: string }[] = [
     { label: 'Active Residents', value: '--', icon: 'people', color: '#6366f1' },
     { label: 'Pending Chores', value: '--', icon: 'assignment', color: '#10b981' },
     { label: 'Incidents (24h)', value: '--', icon: 'report-problem', color: '#ef4444' },
@@ -33,7 +33,7 @@ export default function AdminDashboardScreen() {
           {adminStats.map((stat, i) => (
             <View key={i} style={styles.statCard}>
               <View style={[styles.statIcon, { backgroundColor: stat.color + '22' }]}>
-                <MaterialIcons name={stat.icon as any} size={20} color={stat.color} />
+                <MaterialIcons name={stat.icon} size={20} color={stat.color} />
               </View>
               <Text style={styles.statValue}>{stat.value}</Text>
               <Text style={styles.statLabel}>{stat.label}</Text>
@@ -76,11 +76,11 @@ export default function AdminDashboardScreen() {
   );
 }
 
-function AdminAction({ icon, title, subtitle }: { icon: string; title: string; subtitle: string }) {
+function AdminAction({ icon, title, subtitle }: { icon: keyof typeof MaterialIcons.glyphMap; title: string; subtitle: string }) {
   return (
     <TouchableOpacity style={styles.actionCard} activeOpacity={0.7}>
       <View style={styles.actionIcon}>
-        <MaterialIcons name={icon as any} size={24} color="#f8fafc" />
+        <MaterialIcons name={icon} size={24} color="#f8fafc" />
       </View>
       <View style={styles.actionBody}>
         <Text style={styles.actionTitle}>{title}</Text>

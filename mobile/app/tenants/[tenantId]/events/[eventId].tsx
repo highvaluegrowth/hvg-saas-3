@@ -208,7 +208,8 @@ export default function EventDetailScreen() {
                 onPress={() => setShowVerifyModal(true)}
                 disabled={isBusy}
               >
-                <Text style={styles.verifyBtnText}>I'm Here (Verify Attendance)</Text>
+                <Text style={styles.verifyBtnText}>I&apos;m Here (Verify Attendance)</Text>
+
               </TouchableOpacity>
             )}
 
