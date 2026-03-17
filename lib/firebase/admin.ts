@@ -13,7 +13,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import type { App } from 'firebase-admin/app';
 import type { Auth } from 'firebase-admin/auth';
-import type { Firestore, FieldValue as FieldValueType, FieldPath as FieldPathType } from 'firebase-admin/firestore';
+import type { Firestore, FieldValue as FieldValueType, FieldPath as FieldPathType, VectorValue as VectorValueType } from 'firebase-admin/firestore';
 import type { Storage } from 'firebase-admin/storage';
 
 let _adminApp: App | null = null;
@@ -117,6 +117,13 @@ export const FieldPath: typeof FieldPathType = new Proxy({} as typeof FieldPathT
   get: (_, prop) => {
     const { FieldPath: FP } = require('firebase-admin/firestore');
     return FP[prop as keyof typeof FieldPathType];
+  },
+});
+
+export const VectorValue: typeof VectorValueType = new Proxy({} as typeof VectorValueType, {
+  get: (_, prop) => {
+    const { VectorValue: VV } = require('firebase-admin/firestore');
+    return VV[prop as keyof typeof VectorValueType];
   },
 });
 

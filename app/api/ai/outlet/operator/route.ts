@@ -6,6 +6,7 @@ import { genai, GEMINI_MODEL } from '@/lib/ai/gemini';
 import type { Content, FunctionCall, Part } from '@google/genai';
 import { operatorTierTools, executeTieredTool } from '@/lib/ai/agents';
 import { buildOperatorSystemPrompt } from '@/lib/ai/prompts/hvg-partner';
+import { knowledgeService } from '@/lib/ai/knowledgeService';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,6 +38,16 @@ export async function POST(request: NextRequest) {
         const tenantId = (decodedToken.tenant_id as string) || appUser.tenantIds?.[0] || 'none';
         const convId = conversationId ?? adminDb.collection('conversations').doc().id;
 
+        // --- RAG: Search tenant knowledge base ---
+        let retrievedKnowledge: string[] = [];
+        try {
+            const searchResults = await knowledgeService.searchKnowledge(tenantId, message, 3);
+            retrievedKnowledge = searchResults.map(r => r.content);
+        } catch (err) {
+            console.error('RAG Search Error:', err);
+            // Non-blocking
+        }
+
         // Load conversation history (last 20 messages)
         let history: Content[] = [];
         if (conversationId) {
@@ -54,7 +65,8 @@ export async function POST(request: NextRequest) {
             { displayName: appUser.displayName, role: decodedToken.role as string }, 
             tenantId, 
             routeContext, 
-            view
+            view,
+            retrievedKnowledge
         );
 
         const response = await genai.models.generateContent({
