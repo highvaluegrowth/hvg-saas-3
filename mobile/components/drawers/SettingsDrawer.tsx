@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -8,7 +8,6 @@ import {
   Modal,
   Pressable,
   Dimensions,
-  Switch,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -24,8 +23,8 @@ interface SettingsDrawerProps {
 export function SettingsDrawer({ visible, onClose }: SettingsDrawerProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const translateX = useRef(new Animated.Value(DRAWER_WIDTH)).current;
-  const overlayOpacity = useRef(new Animated.Value(0)).current;
+  const translateX = useMemo(() => new Animated.Value(DRAWER_WIDTH), []);
+  const overlayOpacity = useMemo(() => new Animated.Value(0), []);
 
   useEffect(() => {
     if (visible) {
@@ -56,7 +55,7 @@ export function SettingsDrawer({ visible, onClose }: SettingsDrawerProps) {
         }),
       ]).start();
     }
-  }, [visible]);
+  }, [visible, translateX, overlayOpacity]);
 
   function nav(path: string) {
     onClose();

@@ -88,6 +88,10 @@ export const applicationApi = {
     api.post<{ id: string; success: boolean }>('/api/applications/bed', body),
   submitStaff: (body: Record<string, unknown>) =>
     api.post<{ id: string; success: boolean }>('/api/applications/staff', body),
+  submitCourse: (body: { courseId: string; courseTitle: string; reason: string }) =>
+    api.post<{ id: string; success: boolean }>('/api/applications/course', body),
+  submitEvent: (body: { eventId: string; eventTitle: string; notes?: string }) =>
+    api.post<{ id: string; success: boolean }>('/api/applications/event', body),
   getUserApplications: () =>
     api.get<{ applications: Record<string, unknown>[] }>('/api/applications/user'),
 };
@@ -206,6 +210,16 @@ export interface MobileCourse {
   completedLessons: number;
 }
 
+export interface MobileQuizQuestion {
+  id: string;
+  type: 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'SHORT_ANSWER' | 'LONG_ANSWER' | 'FILL_BLANK' | 'LIKERT_SCALE' | 'MATCHING' | 'ORDERING' | 'RATING' | 'IMAGE_CHOICE' | 'FILE_UPLOAD' | 'HOTSPOT';
+  questionText: string;
+  points: number;
+  options?: string[];
+  correctAnswer?: string | number | string[];
+  metadata?: Record<string, unknown>;
+}
+
 export interface MobileLessonContent {
   id: string;
   title: string;
@@ -214,7 +228,7 @@ export interface MobileLessonContent {
   videoUrl?: string;
   thumbnailUrl?: string;
   content?: string;
-  questions?: unknown[];
+  questions?: MobileQuizQuestion[];
   slides?: { id: string; imageUrl: string; caption?: string }[];
 }
 

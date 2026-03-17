@@ -95,7 +95,7 @@ export async function POST(
     const now = new Date().toISOString();
     const isPublished = Boolean(published);
 
-    const docData: Omit<BlogPost, 'id'> = {
+    const docData: Record<string, any> = {
       title: title.trim(),
       slug,
       authorId: token.uid,
@@ -103,13 +103,14 @@ export async function POST(
       tenantId,
       body: postBody,
       excerpt: excerpt ?? '',
-      coverImageUrl: coverImageUrl ?? undefined,
       tags: Array.isArray(tags) ? tags : [],
       published: isPublished,
-      publishedAt: isPublished ? now : undefined,
       createdAt: now,
       updatedAt: now,
     };
+
+    if (coverImageUrl) docData.coverImageUrl = coverImageUrl;
+    if (isPublished) docData.publishedAt = now;
 
     const ref = await adminDb.collection('blogPosts').add(docData);
 

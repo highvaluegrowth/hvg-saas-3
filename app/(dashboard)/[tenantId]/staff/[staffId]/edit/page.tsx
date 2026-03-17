@@ -182,10 +182,10 @@ export default function EditStaffPage({ params }: EditStaffPageProps) {
   if (loadingData) {
     return (
       <div className="max-w-2xl mx-auto space-y-6">
-        <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
-        <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
+        <div className="h-8 w-48 bg-white/10 rounded animate-pulse" />
+        <div className="bg-white/5 border border-white/10 rounded-lg p-6 space-y-4">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-10 bg-gray-200 rounded animate-pulse" />
+            <div key={i} className="h-10 bg-white/10 rounded animate-pulse" />
           ))}
         </div>
       </div>
@@ -195,10 +195,10 @@ export default function EditStaffPage({ params }: EditStaffPageProps) {
   if (fetchError) {
     return (
       <div className="max-w-2xl mx-auto">
-        <div className="rounded-md bg-red-50 border border-red-200 p-6 text-center">
-          <p className="text-sm font-medium text-red-700">{fetchError}</p>
+        <div className="rounded-md bg-red-500/10 border border-red-500/20 p-6 text-center">
+          <p className="text-sm font-medium text-red-400">{fetchError}</p>
           <Link href={`/${tenantId}/staff`} className="mt-4 inline-block">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="border-white/10 text-white/70 hover:bg-white/10 bg-transparent">
               Back to Staff
             </Button>
           </Link>
@@ -213,41 +213,41 @@ export default function EditStaffPage({ params }: EditStaffPageProps) {
         <div className="flex items-center gap-2 mb-1">
           <Link
             href={`/${tenantId}/staff`}
-            className="text-sm text-gray-500 hover:text-gray-700"
+            className="text-sm text-white/50 hover:text-white"
           >
             Staff
           </Link>
-          <span className="text-gray-400">/</span>
+          <span className="text-white/20">/</span>
           <Link
             href={`/${tenantId}/staff/${staffId}`}
-            className="text-sm text-gray-500 hover:text-gray-700"
+            className="text-sm text-white/50 hover:text-white"
           >
             {firstName} {lastName}
           </Link>
-          <span className="text-gray-400">/</span>
-          <span className="text-sm text-gray-700">Edit</span>
+          <span className="text-white/20">/</span>
+          <span className="text-sm text-white/90">Edit</span>
         </div>
-        <h1 className="text-2xl font-bold text-gray-900">Edit Staff Member</h1>
+        <h1 className="text-2xl font-bold text-white">Edit Staff Member</h1>
       </div>
 
       {apiError && (
-        <div className="rounded-md bg-red-50 border border-red-200 p-4">
-          <p className="text-sm text-red-700">{apiError}</p>
+        <div className="rounded-md bg-red-500/10 border border-red-500/20 p-4">
+          <p className="text-sm text-red-400">{apiError}</p>
         </div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Personal Information */}
-        <Card className="border-gray-200 bg-white">
+        <Card className="border-white/10 bg-white/5">
           <CardHeader>
-            <CardTitle className="text-base font-semibold text-gray-900">
+            <CardTitle className="text-base font-semibold text-white">
               Personal Information
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white/80 mb-1">
                   First Name <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -255,14 +255,14 @@ export default function EditStaffPage({ params }: EditStaffPageProps) {
                   onChange={(e) => setFirstName(e.target.value)}
                   placeholder="Jane"
                   disabled={submitting}
-                  className={errors.firstName ? 'border-red-500' : ''}
+                  className={errors.firstName ? 'border-red-500 bg-white/5 text-white' : 'border-white/10 bg-white/5 text-white'}
                 />
                 {errors.firstName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.firstName}</p>
+                  <p className="mt-1 text-sm text-red-400">{errors.firstName}</p>
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-white/80 mb-1">
                   Last Name <span className="text-red-500">*</span>
                 </label>
                 <Input
@@ -270,16 +270,16 @@ export default function EditStaffPage({ params }: EditStaffPageProps) {
                   onChange={(e) => setLastName(e.target.value)}
                   placeholder="Smith"
                   disabled={submitting}
-                  className={errors.lastName ? 'border-red-500' : ''}
+                  className={errors.lastName ? 'border-red-500 bg-white/5 text-white' : 'border-white/10 bg-white/5 text-white'}
                 />
                 {errors.lastName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.lastName}</p>
+                  <p className="mt-1 text-sm text-red-400">{errors.lastName}</p>
                 )}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-white/80 mb-1">
                 Email <span className="text-red-500">*</span>
               </label>
               <Input
@@ -288,16 +288,16 @@ export default function EditStaffPage({ params }: EditStaffPageProps) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="jane@example.com"
                 disabled={submitting}
-                className={errors.email ? 'border-red-500' : ''}
+                className={errors.email ? 'border-red-500 bg-white/5 text-white' : 'border-white/10 bg-white/5 text-white'}
               />
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                <p className="mt-1 text-sm text-red-400">{errors.email}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Phone <span className="text-gray-400 font-normal">(optional)</span>
+              <label className="block text-sm font-medium text-white/80 mb-1">
+                Phone <span className="text-white/40 font-normal">(optional)</span>
               </label>
               <Input
                 type="tel"
@@ -305,6 +305,7 @@ export default function EditStaffPage({ params }: EditStaffPageProps) {
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+1 555 000 0000"
                 disabled={submitting}
+                className="border-white/10 bg-white/5 text-white"
               />
             </div>
 
@@ -328,9 +329,9 @@ export default function EditStaffPage({ params }: EditStaffPageProps) {
         </Card>
 
         {/* Schedule */}
-        <Card className="border-gray-200 bg-white">
+        <Card className="border-white/10 bg-white/5">
           <CardHeader>
-            <CardTitle className="text-base font-semibold text-gray-900">
+            <CardTitle className="text-base font-semibold text-white">
               Weekly Schedule
             </CardTitle>
           </CardHeader>
@@ -338,8 +339,8 @@ export default function EditStaffPage({ params }: EditStaffPageProps) {
             {DAYS.map(({ key, label }) => {
               const shift = schedule[key];
               return (
-                <div key={key} className="flex items-center gap-3">
-                  <div className="w-28 text-sm font-medium text-gray-700">{label}</div>
+                <div key={key} className="flex items-center gap-3 text-white">
+                  <div className="w-28 text-sm font-medium text-white/80">{label}</div>
                   {shift === null ? (
                     <Button
                       type="button"
@@ -347,7 +348,7 @@ export default function EditStaffPage({ params }: EditStaffPageProps) {
                       size="sm"
                       onClick={() => enableDay(key)}
                       disabled={submitting}
-                      className="text-cyan-600 border-cyan-300 hover:bg-cyan-50"
+                      className="text-cyan-400 border-cyan-500/30 hover:bg-cyan-500/10 bg-transparent"
                     >
                       + Add shift
                     </Button>
@@ -358,21 +359,21 @@ export default function EditStaffPage({ params }: EditStaffPageProps) {
                         value={shift.start}
                         onChange={(e) => setShiftField(key, 'start', e.target.value)}
                         disabled={submitting}
-                        className="block px-3 py-1.5 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                        className="block px-3 py-1.5 border border-white/10 rounded-md text-sm text-white bg-white/5 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 scheme-dark"
                       />
-                      <span className="text-gray-500 text-sm">to</span>
+                      <span className="text-white/40 text-sm">to</span>
                       <input
                         type="time"
                         value={shift.end}
                         onChange={(e) => setShiftField(key, 'end', e.target.value)}
                         disabled={submitting}
-                        className="block px-3 py-1.5 border border-gray-300 rounded-md text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500"
+                        className="block px-3 py-1.5 border border-white/10 rounded-md text-sm text-white bg-white/5 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 scheme-dark"
                       />
                       <button
                         type="button"
                         onClick={() => clearDay(key)}
                         disabled={submitting}
-                        className="text-gray-400 hover:text-red-500 transition-colors ml-1"
+                        className="text-white/20 hover:text-red-400 transition-colors ml-1"
                         aria-label={`Remove ${label} shift`}
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -394,6 +395,7 @@ export default function EditStaffPage({ params }: EditStaffPageProps) {
             variant="outline"
             onClick={() => router.push(`/${tenantId}/staff/${staffId}`)}
             disabled={submitting}
+            className="border-white/10 text-white/70 hover:bg-white/10 bg-transparent"
           >
             Cancel
           </Button>

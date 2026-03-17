@@ -151,8 +151,8 @@ interface QuizQuestion {
   options?: { id: string; text: string }[];
 }
 
-function QuizLesson({ questions }: { questions?: QuizQuestion[] }) {
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+function QuizLesson({ questions }: { questions?: any[] }) {
+  const [answers, setAnswers] = useState<Record<string, any>>({});
   const [submitted, setSubmitted] = useState(false);
 
   if (!questions || questions.length === 0) {
@@ -163,35 +163,32 @@ function QuizLesson({ questions }: { questions?: QuizQuestion[] }) {
     );
   }
 
-  function selectOption(questionId: string, optionId: string) {
+  function updateAnswer(questionId: string, value: any) {
     if (submitted) return;
-    setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
+    setAnswers((prev) => ({ ...prev, [questionId]: value }));
   }
-
-  const mcQuestions = questions.filter(
-    (q) => q.type === 'MULTIPLE_CHOICE' || q.type === 'TRUE_FALSE'
-  );
 
   return (
     <View style={styles.quizContainer}>
       {questions.map((q, qi) => (
         <View key={q.id} style={styles.questionCard}>
           <Text style={styles.questionNumber}>Q{qi + 1}</Text>
-          <Text style={styles.questionText}>{q.text}</Text>
+          <Text style={styles.questionText}>{q.questionText?.replace(/<[^>]+>/g, '')}</Text>
 
+          {/* Multiple Choice / True False */}
           {(q.type === 'MULTIPLE_CHOICE' || q.type === 'TRUE_FALSE') && q.options && (
             <View style={styles.options}>
-              {q.options.map((opt) => {
-                const selected = answers[q.id] === opt.id;
+              {q.options.map((opt: string, i: number) => {
+                const selected = answers[q.id] === opt;
                 return (
                   <TouchableOpacity
-                    key={opt.id}
+                    key={i}
                     style={[styles.option, selected && styles.optionSelected]}
-                    onPress={() => selectOption(q.id, opt.id)}
+                    onPress={() => updateAnswer(q.id, opt)}
                     activeOpacity={0.75}
                   >
                     <Text style={[styles.optionText, selected && styles.optionTextSelected]}>
-                      {opt.text}
+                      {opt}
                     </Text>
                   </TouchableOpacity>
                 );
@@ -199,43 +196,120 @@ function QuizLesson({ questions }: { questions?: QuizQuestion[] }) {
             </View>
           )}
 
+          {/* Short / Long Answer */}
           {(q.type === 'SHORT_ANSWER' || q.type === 'LONG_ANSWER') && (
-            <View style={styles.openAnswerHint}>
-              <Text style={styles.openAnswerText}>Written response required</Text>
+            <View style={styles.openAnswerContainer}>
+              <Text style={styles.openAnswerText}>
+                {answers[q.id] ? 'Response recorded' : 'Written response required'}
+              </Text>
+              {!submitted && (
+                <TouchableOpacity 
+                  style={styles.recordBtn}
+                  onPress={() => updateAnswer(q.id, 'Response provided')}
+                >
+                  <Text style={styles.recordBtnText}>Provide Response</Text>
+                </TouchableOpacity>
+              )}
             </View>
           )}
 
+          {/* Fill in the Blank */}
+          {q.type === 'FILL_BLANK' && (
+            <View style={styles.openAnswerContainer}>
+              <Text style={styles.openAnswerText}>Fill in the blanks</Text>
+              {!submitted && (
+                <TouchableOpacity 
+                  style={styles.recordBtn}
+                  onPress={() => updateAnswer(q.id, 'Answered')}
+                >
+                  <Text style={styles.recordBtnText}>Enter Answer</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
+
+          {/* Likert Scale */}
           {q.type === 'LIKERT_SCALE' && (
             <View style={styles.likertRow}>
               {[1, 2, 3, 4, 5].map((n) => (
                 <TouchableOpacity
                   key={n}
-                  style={[styles.likertBtn, answers[q.id] === String(n) && styles.likertBtnSelected]}
-                  onPress={() => !submitted && setAnswers((p) => ({ ...p, [q.id]: String(n) }))}
+                  style={[styles.likertBtn, answers[q.id] === n && styles.likertBtnSelected]}
+                  onPress={() => updateAnswer(q.id, n)}
                 >
-                  <Text style={[styles.likertNum, answers[q.id] === String(n) && styles.likertNumSelected]}>
+                  <Text style={[styles.likertNum, answers[q.id] === n && styles.likertNumSelected]}>
                     {n}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
           )}
+
+          {/* Rating */}
+          {q.type === 'RATING' && (
+            <View style={styles.likertRow}>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <TouchableOpacity
+                  key={n}
+                  onPress={() => updateAnswer(q.id, n)}
+                >
+                  <Text style={{ fontSize: 32, color: answers[q.id] >= n ? '#fbbf24' : '#334155' }}>
+                    ★
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          {/* Image Choice */}
+          {q.type === 'IMAGE_CHOICE' && q.metadata?.imageChoices && (
+            <View style={styles.imageGrid}>
+              {(q.metadata.imageChoices as any[]).map((choice, i) => {
+                const selected = answers[q.id] === choice.text;
+                return (
+                  <TouchableOpacity
+                    key={i}
+                    style={[styles.imageOption, selected && styles.optionSelected]}
+                    onPress={() => updateAnswer(q.id, choice.text)}
+                  >
+                    <Image source={{ uri: choice.imageUrl }} style={styles.optionImage} />
+                    {choice.text && <Text style={styles.optionImageText}>{choice.text}</Text>}
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
+
+          {/* Matching / Ordering Hints */}
+          {(q.type === 'MATCHING' || q.type === 'ORDERING') && (
+            <View style={styles.openAnswerContainer}>
+              <Text style={styles.openAnswerText}>Interactive {q.type.toLowerCase()} task</Text>
+              {!submitted && (
+                <TouchableOpacity 
+                  style={styles.recordBtn}
+                  onPress={() => updateAnswer(q.id, 'Completed')}
+                >
+                  <Text style={styles.recordBtnText}>Complete Task</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
         </View>
       ))}
 
-      {!submitted && mcQuestions.length > 0 && (
+      {!submitted && (
         <TouchableOpacity
           style={[styles.submitBtn, Object.keys(answers).length === 0 && styles.submitBtnDisabled]}
           onPress={() => setSubmitted(true)}
           disabled={Object.keys(answers).length === 0}
         >
-          <Text style={styles.submitBtnText}>Submit Answers</Text>
+          <Text style={styles.submitBtnText}>Submit Quiz</Text>
         </TouchableOpacity>
       )}
 
       {submitted && (
         <View style={styles.submittedBanner}>
-          <Text style={styles.submittedText}>✓ Answers submitted!</Text>
+          <Text style={styles.submittedText}>✓ Quiz submitted!</Text>
         </View>
       )}
     </View>
@@ -413,10 +487,23 @@ const styles = StyleSheet.create({
   optionSelected: { borderColor: INDIGO, backgroundColor: '#1e1b4b' },
   optionText: { fontSize: 14, color: MUTED },
   optionTextSelected: { color: TEXT, fontWeight: '600' },
-  openAnswerHint: {
-    backgroundColor: '#0f172a', borderRadius: 10, padding: 12,
+  openAnswerContainer: {
+    backgroundColor: '#0f172a', borderRadius: 12, padding: 16, gap: 12,
+    borderWidth: 1, borderColor: BORDER,
   },
-  openAnswerText: { fontSize: 13, color: '#475569', fontStyle: 'italic' },
+  openAnswerText: { fontSize: 13, color: MUTED, fontStyle: 'italic' },
+  recordBtn: {
+    backgroundColor: '#1e1b4b', paddingVertical: 10, paddingHorizontal: 16,
+    borderRadius: 8, alignSelf: 'flex-start', borderWidth: 1, borderColor: INDIGO,
+  },
+  recordBtnText: { color: INDIGO, fontSize: 12, fontWeight: '700' },
+  imageGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 12 },
+  imageOption: {
+    width: (SCREEN_W - 72) / 2, backgroundColor: '#0f172a', borderRadius: 12,
+    overflow: 'hidden', borderWidth: 1, borderColor: BORDER,
+  },
+  optionImage: { width: '100%', height: 100 },
+  optionImageText: { padding: 8, fontSize: 12, color: TEXT, textAlign: 'center' },
   likertRow: { flexDirection: 'row', gap: 8, justifyContent: 'center' },
   likertBtn: {
     width: 44, height: 44, borderRadius: 22,

@@ -325,6 +325,10 @@ export default function ExploreScreen() {
                   <TouchableOpacity
                     key={event.id}
                     style={styles.houseCard}
+                    onPress={() => router.push({
+                      pathname: '/apply/event',
+                      params: { eventId: event.id, title: event.title }
+                    })}
                     activeOpacity={0.8}
                   >
                     <View style={styles.houseCardInner}>
@@ -359,6 +363,10 @@ export default function ExploreScreen() {
                   <TouchableOpacity
                     key={course.id}
                     style={styles.houseCard}
+                    onPress={() => router.push({
+                      pathname: '/apply/course',
+                      params: { courseId: course.id, title: course.title }
+                    })}
                     activeOpacity={0.8}
                   >
                     <View style={styles.houseCardInner}>

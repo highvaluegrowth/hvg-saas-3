@@ -4,30 +4,32 @@
 
 High Value Growth (HVG) is a multi-tenant SaaS platform for managing sober-living houses and supporting residents in recovery through AI-powered tools.
 
-## Current Status: Sessions A–E Complete ✅
+## Current Status: Sessions A–F Complete ✅
 
 **Web (Next.js 14, App Router, TypeScript, Tailwind 4, Firebase):**
 - Auth + RBAC (custom claims), multi-tenant routing + Firestore isolation
 - Dashboard: Houses, Residents, Staff, Incidents, Chores, Vehicles, Events
-- LMS: course builder, 10 quiz types, analytics
+- SuperAdmin: Full dashboard (Tenants, Courses, Events, Financials, Analytics, Health)
+- LMS: course builder, 12 quiz types (10/12 functional in UI), analytics
 - AI: HVG Partner (16 saas-tools), HVG Outlet (13 mobile-tools), Gemini 2.5 Flash
 - News Feed, Contracts + e-signature (pdf-lib + signature_pad), Blog
 - Tenant Directory + promos, Kanban board, Contacts page
 - Application system (bed/staff/course/event/tenant), SuperAdmin queue
-- Image uploads wired: profile, events, courses, houses, vehicles, LMS slides
+- Engagement: Cron sync for Meta Graph API metrics implemented.
 
 **Mobile (Expo 52, React Native, Expo Router 4):**
 - Firebase Auth + SecureStore token management (Firebase-first flow)
 - HVG Outlet AI chat with optimistic updates + error handling
+- LMS: Enrolled courses, lessons, 10/12 quiz question types supported.
+- Applications: Bed, Staff, Course, and Event application screens built.
 - Bundle: iOS `com.hvgsaas3.mobile`, Android `com.hvg_saas_3.mobile`
 
 ## Next Steps
 
-- Stripe payments (placeholder only — `STRIPE_SECRET_KEY` env var exists)
-- Course/event application pages (not yet built)
-- Mobile bed/staff application entry points
-- SuperAdmin AI tools for applications
-- LMS quiz types: 10 of 12 built (2 remaining)
+- Real OAuth credentials for TikTok, X, LinkedIn.
+- iOS App Store enrollment and first build.
+- Full UI for complex quiz types (File Upload, Hotspot).
+- Stripe live testing with configured Price IDs.
 
 ## Architecture Decisions
 

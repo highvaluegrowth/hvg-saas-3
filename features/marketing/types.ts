@@ -34,6 +34,7 @@ export interface SocialPost {
     aiGenerated: boolean;
     imageUrl?: string | null;
     sourceContext: Record<string, unknown>;
+    externalIds?: Record<string, string>; // platform -> externalId
     engagement?: PostEngagement;
 }
 

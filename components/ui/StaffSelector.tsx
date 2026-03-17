@@ -1,7 +1,14 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { useStaff } from '@/features/staff/hooks/useStaff';
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import { authService } from '@/features/auth/services/authService';
+
+interface StaffOption {
+  id: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+}
 
 interface StaffSelectorProps {
   tenantId: string;
@@ -22,8 +29,39 @@ export function StaffSelector({
   maxHeight = 'max-h-48',
   singleSelect = false,
 }: StaffSelectorProps) {
-  const { staff } = useStaff(tenantId);
+  const [staff, setStaff] = useState<StaffOption[]>([]);
   const [search, setSearch] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const fetchStaff = useCallback(async () => {
+    if (!tenantId) return;
+    setLoading(true);
+    try {
+      const token = await authService.getIdToken();
+      const res = await fetch(`/api/tenants/${tenantId}/staff`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error('Failed to load');
+      const data = await res.json();
+      
+      const options = (data.staff || []).map((s: any) => ({
+        id: s.id,
+        firstName: s.firstName || s.name?.split(' ')[0] || 'Unknown',
+        lastName: s.lastName || s.name?.split(' ')[1] || 'Staff',
+        role: s.role || 'staff'
+      }));
+      
+      setStaff(options);
+    } catch (e) {
+      console.error('StaffSelector fetch error', e);
+    } finally {
+      setLoading(false);
+    }
+  }, [tenantId]);
+
+  useEffect(() => {
+    fetchStaff();
+  }, [fetchStaff]);
 
   const filtered = useMemo(
     () =>
@@ -51,7 +89,7 @@ export function StaffSelector({
   return (
     <div className="space-y-2">
       {label && (
-        <label className="block text-sm font-medium text-gray-700">{label}</label>
+        <label className="block text-sm font-medium text-white/80">{label}</label>
       )}
 
       {selectedStaff.length > 0 && (
@@ -59,13 +97,13 @@ export function StaffSelector({
           {selectedStaff.map((s) => (
             <span
               key={s.id}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 text-xs font-medium"
+              className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-400 text-xs font-medium border border-cyan-500/20"
             >
               {s.firstName} {s.lastName}
               <button
                 type="button"
                 onClick={() => toggle(s.id)}
-                className="text-blue-500 hover:text-blue-700 ml-0.5 leading-none"
+                className="text-cyan-500 hover:text-cyan-300 ml-0.5 leading-none"
                 aria-label={`Remove ${s.firstName} ${s.lastName}`}
               >
                 ×
@@ -80,12 +118,12 @@ export function StaffSelector({
         value={search}
         onChange={(e) => setSearch(e.target.value)}
         placeholder={placeholder}
-        className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+        className="w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
       />
 
-      <div className={`border border-gray-200 rounded-md overflow-y-auto ${maxHeight}`}>
+      <div className={`border border-white/10 rounded-md overflow-y-auto bg-white/5 ${maxHeight}`}>
         {filtered.length === 0 ? (
-          <p className="text-sm text-gray-500 p-3 text-center">
+          <p className="text-sm text-white/40 p-3 text-center">
             {staff.length === 0 ? 'No staff members' : 'No staff match search'}
           </p>
         ) : (
@@ -94,17 +132,17 @@ export function StaffSelector({
               const checked = selectedIds.includes(member.id);
               return (
                 <li key={member.id}>
-                  <label className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 cursor-pointer">
+                  <label className="flex items-center gap-3 px-3 py-2 hover:bg-white/5 cursor-pointer border-b border-white/5 last:border-0">
                     <input
                       type={singleSelect ? 'radio' : 'checkbox'}
                       checked={checked}
                       onChange={() => toggle(member.id)}
-                      className="rounded border-gray-300 text-cyan-600 focus:ring-cyan-500"
+                      className="rounded border-white/20 bg-white/5 text-cyan-600 focus:ring-cyan-500"
                     />
-                    <span className="text-sm text-gray-900">
+                    <span className="text-sm text-white/90">
                       {member.firstName} {member.lastName}
                     </span>
-                    <span className="text-xs text-gray-500 capitalize ml-auto">
+                    <span className="text-xs text-white/40 capitalize ml-auto">
                       {member.role.replace('_', ' ')}
                     </span>
                   </label>

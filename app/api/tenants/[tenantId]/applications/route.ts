@@ -166,58 +166,103 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
         const uid = data.applicantId;
         const now = new Date().toISOString();
         
-        // A. Promote AppUser to Resident
-        const residentId = `RES-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
-        await adminDb.collection('users').doc(uid).update({
-            role: 'resident',
-            residentId: residentId,
-            updatedAt: now,
-        });
-
-        // B. Provision Resident Document (Clinical/Operational)
-        await adminDb.collection(`tenants/${tenantId}/residents`).doc(uid).set({
-            uid,
-            residentId,
-            name: data.applicantName,
-            email: data.applicantEmail,
-            status: 'active',
-            admittedAt: now,
-            houseId: data.requestedHouseId || null,
-        });
-
-        // C. Auto-Enroll in Welcome Course & House Rules
-        // Fetch universal or tenant-specific welcome courses
-        const coursesSnap = await adminDb.collection(`tenants/${tenantId}/courses`)
-            .where('isAutoEnroll', '==', true)
-            .get();
-        
-        const batch = adminDb.batch();
-        coursesSnap.forEach(course => {
-            const enrollmentRef = adminDb.collection(`tenants/${tenantId}/enrollments`).doc();
-            batch.set(enrollmentRef, {
-                courseId: course.id,
-                userId: uid,
-                status: 'active',
-                progress: 0,
-                enrolledAt: now,
+        if (data.type === 'staff') {
+            // A. Update AppUser to Staff
+            await adminDb.collection('users').doc(uid).update({
+                role: 'staff',
+                tenantIds: FieldValue.arrayUnion(tenantId),
+                updatedAt: now,
             });
-        });
-        await batch.commit();
 
-        // D. Add to House Group Chat
-        if (data.requestedHouseId) {
-            const chatSnap = await adminDb.collection('chats')
-                .where('type', '==', 'house')
-                .where('metadata.houseId', '==', data.requestedHouseId)
-                .limit(1)
+            // B. Provision Staff Document
+            await adminDb.collection(`tenants/${tenantId}/staffMembers`).doc(uid).set({
+                uid,
+                role: 'staff', // Default role, can be updated later
+                status: 'active',
+                hiredAt: now,
+            });
+            
+            // Send welcome notification
+            await notificationService.createNotification({
+                tenantId,
+                userId: uid,
+                type: 'system',
+                refId: docRef.id,
+                refCollection: 'applications',
+                title: 'Welcome to the Team! 🎉',
+                preview: `You have been hired as a staff member for ${tenantDoc.data()?.name || 'the organization'}.`,
+                priority: 'high',
+            });
+        } else {
+            // A. Promote AppUser to Resident
+            const residentId = `RES-${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+            await adminDb.collection('users').doc(uid).update({
+                role: 'resident',
+                residentId: residentId,
+                tenantIds: FieldValue.arrayUnion(tenantId),
+                updatedAt: now,
+            });
+
+            // B. Provision Resident Document (Clinical/Operational)
+            await adminDb.collection(`tenants/${tenantId}/residents`).doc(uid).set({
+                uid,
+                residentId,
+                name: data.applicantName,
+                email: data.applicantEmail,
+                status: 'active',
+                admittedAt: now,
+                houseId: data.requestedHouseId || null,
+            });
+
+            // Create a default enrollment for this resident
+            const nowTime = new Date();
+            await adminDb.collection(`tenants/${tenantId}/enrollments`).doc(uid).set({
+                residentId: uid, // Use global UID
+                tenantId,
+                status: 'active',
+                phase: 1,
+                sobrietyStartDate: null,
+                moveInDate: nowTime,
+                moveOutDate: null,
+                createdAt: nowTime,
+                updatedAt: nowTime,
+                houseId: data.requestedHouseId || null,
+            });
+
+            // C. Auto-Enroll in Welcome Course & House Rules
+            // Fetch universal or tenant-specific welcome courses
+            const coursesSnap = await adminDb.collection(`tenants/${tenantId}/courses`)
+                .where('isAutoEnroll', '==', true)
                 .get();
             
-            if (!chatSnap.empty) {
-                const chatId = chatSnap.docs[0].id;
-                await adminDb.collection('chats').doc(chatId).update({
-                    participants: FieldValue.arrayUnion(uid),
-                    updatedAt: now,
+            const batch = adminDb.batch();
+            coursesSnap.forEach(course => {
+                const enrollmentRef = adminDb.collection(`tenants/${tenantId}/enrollments`).doc();
+                batch.set(enrollmentRef, {
+                    courseId: course.id,
+                    userId: uid,
+                    status: 'active',
+                    progress: 0,
+                    enrolledAt: now,
                 });
+            });
+            await batch.commit();
+
+            // D. Add to House Group Chat
+            if (data.requestedHouseId) {
+                const chatSnap = await adminDb.collection('chats')
+                    .where('type', '==', 'house')
+                    .where('metadata.houseId', '==', data.requestedHouseId)
+                    .limit(1)
+                    .get();
+                
+                if (!chatSnap.empty) {
+                    const chatId = chatSnap.docs[0].id;
+                    await adminDb.collection('chats').doc(chatId).update({
+                        participants: FieldValue.arrayUnion(uid),
+                        updatedAt: now,
+                    });
+                }
             }
         }
     }

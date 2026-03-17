@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { authService } from '@/features/auth/services/authService';
 import Link from 'next/link';
@@ -8,7 +8,7 @@ import Link from 'next/link';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type ApplicationType = 'bed' | 'staff' | 'course' | 'event' | 'tenant';
-type ApplicationStatus = 'pending' | 'pending_triage' | 'assigned_to_tenant' | 'assigned' | 'accepted' | 'rejected' | 'archived' | 'waitlisted';
+type ApplicationStatus = 'pending_triage' | 'pending' | 'assigned_to_tenant' | 'assigned' | 'reviewing' | 'accepted' | 'waitlisted' | 'rejected' | 'archived';
 
 interface Application {
     id: string;
@@ -16,11 +16,10 @@ interface Application {
     status: ApplicationStatus;
     applicantName: string;
     applicantEmail: string;
-    zipCode: string;
-    requestedTenantId?: string | null;
-    requestedHouseId?: string | null;
+    zipCode?: string;
     submittedAt: string | { _seconds: number };
-    data: Record<string, unknown>;
+    requestedTenantId?: string;
+    data?: Record<string, unknown>;
 }
 
 interface Tenant {
@@ -37,6 +36,8 @@ interface TenantMatchScore {
     distanceMiles: number;
     financialMatch: string;
     isSorEligible: boolean;
+    hasCapacity: boolean;
+    availableBeds?: number;
 }
 
 // ─── Badge Helpers ────────────────────────────────────────────────────────────
@@ -54,89 +55,47 @@ const STATUS_BADGE: Record<string, string> = {
     pending: 'bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30',
     assigned_to_tenant: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
     assigned: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
-    accepted: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
+    accepted: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/20',
     rejected: 'bg-red-500/20 text-red-300 border border-red-500/30',
     archived: 'bg-slate-500/20 text-slate-300 border border-slate-500/30',
     waitlisted: 'bg-purple-500/20 text-purple-300 border border-purple-500/30',
 };
 
-function TypeBadge({ type }: { type: string }) {
-    return (
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${TYPE_BADGE[type] ?? 'bg-white/10 text-slate-300 border border-white/20'}`}>
-            {type}
-        </span>
-    );
-}
-
 function StatusBadge({ status }: { status: string }) {
     return (
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize ${STATUS_BADGE[status] ?? 'bg-white/10 text-slate-300 border border-white/20'}`}>
+        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${STATUS_BADGE[status] ?? 'bg-white/5 text-slate-400 border border-white/10'}`}>
             {status.replace(/_/g, ' ')}
         </span>
     );
 }
 
-// ─── Date Helper ──────────────────────────────────────────────────────────────
+function TypeBadge({ type }: { type: string }) {
+    return (
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${TYPE_BADGE[type] ?? 'bg-white/5 text-slate-400 border border-white/10'}`}>
+            {type}
+        </span>
+    );
+}
 
-function formatDate(value: string | { _seconds: number } | undefined): string {
+function formatDate(value: string | { _seconds: number } | null | undefined): string {
     if (!value) return '—';
     if (typeof value === 'string') {
         const d = new Date(value);
         return isNaN(d.getTime()) ? value : d.toLocaleDateString();
     }
-    return new Date(value._seconds * 1000).toLocaleDateString();
+    if (value._seconds) {
+        return new Date(value._seconds * 1000).toLocaleDateString();
+    }
+    return '—';
 }
 
-// ─── Loading Skeleton ─────────────────────────────────────────────────────────
-
-function TableSkeleton() {
-    return (
-        <div className="animate-pulse">
-            {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex items-center space-x-4 px-6 py-4 border-b border-white/10 last:border-0">
-                    <div className="h-5 w-16 bg-white/5 rounded-full" />
-                    <div className="h-4 w-32 bg-white/5 rounded" />
-                    <div className="h-4 w-40 bg-white/5 rounded flex-1" />
-                    <div className="h-4 w-16 bg-white/5 rounded" />
-                    <div className="h-4 w-20 bg-white/5 rounded" />
-                    <div className="h-5 w-20 bg-white/5 rounded-full" />
-                    <div className="h-8 w-16 bg-white/5 rounded-lg" />
-                </div>
-            ))}
-        </div>
-    );
-}
-
-// ─── Filter Bar ───────────────────────────────────────────────────────────────
-
-const APPLICATION_TYPES = [
-    { label: 'All', value: 'all' },
-    { label: 'Bed', value: 'bed' },
-    { label: 'Staff', value: 'staff' },
-    { label: 'Course', value: 'course' },
-    { label: 'Event', value: 'event' },
-    { label: 'Tenant', value: 'tenant' },
-];
-
-const APPLICATION_STATUSES = [
-    { label: 'All', value: 'all' },
-    { label: 'Pending Triage', value: 'pending_triage' },
-    { label: 'Assigned', value: 'assigned_to_tenant' },
-    { label: 'Pending', value: 'pending' },
-    { label: 'Accepted', value: 'accepted' },
-    { label: 'Waitlisted', value: 'waitlisted' },
-    { label: 'Rejected', value: 'rejected' },
-];
-
-// ─── Page Component ───────────────────────────────────────────────────────────
+// ─── Main Component ──────────────────────────────────────────────────────────
 
 export default function ApplicationsInboxPage() {
     const { user } = useAuth();
-
     const [applications, setApplications] = useState<Application[]>([]);
     const [tenants, setTenants] = useState<Tenant[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
 
     // Client-side filters
     const [typeFilter, setTypeFilter] = useState<string>('all');
@@ -146,7 +105,22 @@ export default function ApplicationsInboxPage() {
     const [dispatchApp, setDispatchApp] = useState<Application | null>(null);
     const [matches, setMatches] = useState<TenantMatchScore[]>([]);
     const [loadingMatches, setLoadingMatches] = useState(false);
+    const [matchSort, setMatchSort] = useState<'score' | 'distance' | 'availability'>('score');
     const [selectedTenantId, setSelectedTenantId] = useState<string>('');
+
+    const sortedMatches = useMemo(() => {
+        return [...matches].sort((a, b) => {
+            if (matchSort === 'score') return b.score - a.score;
+            if (matchSort === 'distance') return a.distanceMiles - b.distanceMiles;
+            if (matchSort === 'availability') {
+                if (a.hasCapacity && !b.hasCapacity) return -1;
+                if (!a.hasCapacity && b.hasCapacity) return 1;
+                return b.score - a.score;
+            }
+            return 0;
+        });
+    }, [matches, matchSort]);
+
     const [dispatching, setDispatching] = useState(false);
 
     // Rejection Modal State
@@ -160,30 +134,18 @@ export default function ApplicationsInboxPage() {
         setLoading(true);
         try {
             const token = await authService.getIdToken();
-
-            // Fetch apps and tenants parallel
             const [appRes, tenantRes] = await Promise.all([
-                fetch('/api/admin/applications?limit=100', {
-                    headers: { Authorization: `Bearer ${token}` },
-                }),
-                fetch('/api/admin/tenants?status=active', { // assuming this gets active
-                    headers: { Authorization: `Bearer ${token}` },
-                })
+                fetch('/api/admin/applications', { headers: { Authorization: `Bearer ${token}` } }),
+                fetch('/api/tenants', { headers: { Authorization: `Bearer ${token}` } }),
             ]);
 
-            if (appRes.ok) {
-                const data = await appRes.json();
-                setApplications(data.applications || []);
-            } else {
-                throw new Error('Failed to fetch applications');
-            }
+            const appData = await appRes.json();
+            const tenantData = await tenantRes.json();
 
-            if (tenantRes.ok) {
-                const data = await tenantRes.json();
-                setTenants(data.tenants || []);
-            }
+            setApplications(appData.applications || []);
+            setTenants(tenantData.tenants || []);
         } catch (err) {
-            setError(err instanceof Error ? err.message : String(err));
+            console.error('Failed to fetch inbox data:', err);
         } finally {
             setLoading(false);
         }
@@ -232,11 +194,8 @@ export default function ApplicationsInboxPage() {
 
             if (!res.ok) throw new Error('Failed to dispatch application');
 
-            // Remove from local state or update status
             setApplications(prev => prev.map(a =>
-                a.id === dispatchApp.id
-                    ? { ...a, status: 'assigned_to_tenant', assignedTenantId: selectedTenantId }
-                    : a
+                a.id === dispatchApp.id ? { ...a, status: 'assigned_to_tenant' } : a
             ));
 
             setDispatchApp(null);
@@ -300,8 +259,7 @@ export default function ApplicationsInboxPage() {
         }
     };
 
-    // Apply client-side filters
-    const filtered = applications.filter((app) => {
+    const filteredApplications = applications.filter((app) => {
         const matchesType = typeFilter === 'all' || app.type === typeFilter;
         const matchesStatus = statusFilter === 'all' || app.status === statusFilter;
         return matchesType && matchesStatus;
@@ -312,28 +270,26 @@ export default function ApplicationsInboxPage() {
             {/* Header */}
             <div className="flex justify-between items-start">
                 <div>
-                    <h2 className="text-2xl font-bold tracking-tight text-white">Central Triage Dashboard</h2>
-                    <p className="text-sm text-slate-400 mt-1">
-                        Review globally submitted applications and dispatch to appropriate organizations.
-                    </p>
+                    <h2 className="text-3xl font-black tracking-tighter text-white uppercase italic">Applications Inbox</h2>
+                    <p className="text-sm text-slate-400 mt-1">Review and dispatch placement or organization requests.</p>
                 </div>
-                {!loading && !error && (
-                    <span className="text-sm text-slate-400 mt-1 pt-1 bg-white/5 px-3 py-1 rounded-full border border-white/10">
-                        {filtered.length} application{filtered.length !== 1 ? 's' : ''}
-                    </span>
-                )}
             </div>
 
             {/* Filter Bar */}
-            <div className="flex flex-wrap gap-4 items-center">
-                {/* Type Filter */}
-                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-lg p-1">
-                    {APPLICATION_TYPES.map(({ label, value }) => (
+            <div className="flex flex-wrap gap-4 items-center justify-between bg-white/5 p-4 rounded-2xl border border-white/10 backdrop-blur-sm">
+                <div className="flex gap-2 p-1 bg-black/20 rounded-xl">
+                    {[
+                        { id: 'all', label: 'All' },
+                        { id: 'pending_triage', label: 'Triage' },
+                        { id: 'assigned_to_tenant', label: 'Assigned' },
+                        { id: 'accepted', label: 'Accepted' },
+                        { id: 'rejected', label: 'Rejected' },
+                    ].map(({ id, label }) => (
                         <button
-                            key={value}
-                            onClick={() => setTypeFilter(value)}
-                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${typeFilter === value
-                                ? 'bg-[#D946EF] text-white shadow-lg shadow-fuchsia-500/20'
+                            key={id}
+                            onClick={() => setStatusFilter(id)}
+                            className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${statusFilter === id
+                                ? 'bg-[#D946EF] text-white shadow-lg'
                                 : 'text-slate-400 hover:bg-white/10 hover:text-white'
                                 }`}
                         >
@@ -342,90 +298,63 @@ export default function ApplicationsInboxPage() {
                     ))}
                 </div>
 
-                {/* Status Filter */}
-                <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded-lg p-1">
-                    {APPLICATION_STATUSES.map(({ label, value }) => (
-                        <button
-                            key={value}
-                            onClick={() => setStatusFilter(value)}
-                            className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${statusFilter === value
-                                ? 'bg-[#D946EF] text-white shadow-lg shadow-fuchsia-500/20'
-                                : 'text-slate-400 hover:bg-white/10 hover:text-white'
-                                }`}
-                        >
-                            {label}
-                        </button>
-                    ))}
-                </div>
+                <select
+                    value={typeFilter}
+                    onChange={(e) => setTypeFilter(e.target.value)}
+                    className="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-xs font-bold text-white outline-none focus:ring-2 focus:ring-[#D946EF] transition-all"
+                >
+                    <option value="all">All Types</option>
+                    <option value="bed">Bed Application</option>
+                    <option value="staff">Staff Application</option>
+                    <option value="tenant">Tenant Request</option>
+                    <option value="course">LMS Course</option>
+                    <option value="event">Program Event</option>
+                </select>
             </div>
 
-            {/* Table Card */}
-            <div className="bg-white/5 rounded-xl border border-white/10 shadow-xl overflow-hidden backdrop-blur-sm">
+            {/* Table */}
+            <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden shadow-2xl backdrop-blur-sm">
                 {loading ? (
-                    <TableSkeleton />
-                ) : error ? (
-                    <div className="p-10 text-center text-red-400">{error}</div>
-                ) : filtered.length === 0 ? (
-                    <div className="p-10 text-center">
-                        <svg className="mx-auto h-12 w-12 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                        <h3 className="mt-2 text-sm font-medium text-white">No applications</h3>
-                        <p className="mt-1 text-sm text-slate-400">
-                            {typeFilter !== 'all' || statusFilter !== 'all'
-                                ? 'No applications match your current filters.'
-                                : 'There are currently no applications to review.'}
-                        </p>
-                        {(typeFilter !== 'all' || statusFilter !== 'all') && (
-                            <button
-                                onClick={() => { setTypeFilter('all'); setStatusFilter('all'); }}
-                                className="mt-3 text-sm text-[#D946EF] hover:text-fuchsia-400 font-medium"
-                            >
-                                Clear filters
-                            </button>
-                        )}
+                    <div className="py-20 text-center animate-pulse">
+                        <div className="w-10 h-10 border-4 border-[#D946EF] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                        <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Synchronizing Triage Data...</p>
+                    </div>
+                ) : filteredApplications.length === 0 ? (
+                    <div className="py-20 text-center">
+                        <div className="text-4xl mb-4 opacity-20">📥</div>
+                        <p className="text-slate-500 font-medium italic">No applications matching your current filters.</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
-                        <table className="min-w-full divide-y divide-white/10">
+                        <table className="min-w-full divide-y divide-white/5">
                             <thead className="bg-white/5">
                                 <tr>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Type</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Applicant Name</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Requested Org</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Zip Code</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Submitted</th>
-                                    <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Status</th>
-                                    <th scope="col" className="relative px-6 py-4"><span className="sr-only">Actions</span></th>
+                                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Applicant</th>
+                                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Type</th>
+                                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Location</th>
+                                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Status</th>
+                                    <th className="px-6 py-4 text-left text-[10px] font-black text-slate-500 uppercase tracking-widest">Submitted</th>
+                                    <th className="px-6 py-4 text-right text-[10px] font-black text-slate-500 uppercase tracking-widest">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody className="divide-y divide-white/10">
-                                {filtered.map((app) => (
-                                    <tr key={app.id} className="hover:bg-white/5 transition-colors">
+                            <tbody className="divide-y divide-white/5">
+                                {filteredApplications.map((app) => (
+                                    <tr key={app.id} className="hover:bg-white/[0.03] transition-colors group">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="font-bold text-white group-hover:text-[#D946EF] transition-colors">{app.applicantName}</div>
+                                            <div className="text-[10px] text-slate-500 font-medium">{app.applicantEmail}</div>
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <TypeBadge type={app.type} />
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm font-medium text-white">
-                                                {app.applicantName || '—'}
-                                            </div>
-                                            <div className="text-xs text-slate-400">
-                                                {app.applicantEmail || ''}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="text-sm text-slate-300">
-                                                {app.requestedTenantId ? tenants.find(t => t.id === app.requestedTenantId)?.name || app.requestedTenantId : 'None'}
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
+                                        <td className="px-6 py-4 whitespace-nowrap text-xs font-mono text-slate-400">
                                             {app.zipCode || '—'}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
-                                            {formatDate(app.submittedAt)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <StatusBadge status={app.status} />
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-xs text-slate-500 tabular-nums">
+                                            {formatDate(app.submittedAt)}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex justify-end gap-3">
@@ -470,7 +399,7 @@ export default function ApplicationsInboxPage() {
                 )}
             </div>
 
-            {/* Simple Native Dispatch Modal */}
+            {/* Native Dispatch Modal */}
             {dispatchApp && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                     <div className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-[#1A0B2E] border border-white/10 p-6 text-left align-middle shadow-xl transition-all relative">
@@ -479,7 +408,7 @@ export default function ApplicationsInboxPage() {
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#D946EF]"></div>
                             </div>
                         )}
-                        <h3 className="text-xl font-bold leading-6 text-white mb-2">
+                        <h3 className="text-xl font-bold text-white mb-2 uppercase italic tracking-tight">
                             AI-Assisted Dispatch
                         </h3>
                         <p className="text-sm text-slate-400 mb-6">
@@ -489,7 +418,20 @@ export default function ApplicationsInboxPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Left Side: Top Matches */}
                             <div className="space-y-4">
-                                <h4 className="text-xs font-semibold text-[#D946EF] uppercase tracking-wider">Top Matches</h4>
+                                <div className="flex items-center justify-between">
+                                    <h4 className="text-xs font-semibold text-[#D946EF] uppercase tracking-wider">Property Matches</h4>
+                                    <div className="flex gap-2">
+                                        <select 
+                                            value={matchSort}
+                                            onChange={(e) => setMatchSort(e.target.value as 'score' | 'distance' | 'availability')}
+                                            className="bg-white/5 border border-white/10 rounded px-2 py-1 text-[10px] text-slate-400 outline-none focus:border-[#D946EF]"
+                                        >
+                                            <option value="score">By Score</option>
+                                            <option value="distance">By Distance</option>
+                                            <option value="availability">By Availability</option>
+                                        </select>
+                                    </div>
+                                </div>
                                 {loadingMatches ? (
                                     <div className="py-10 text-center space-y-3">
                                         <div className="animate-pulse flex flex-col items-center">
@@ -498,17 +440,17 @@ export default function ApplicationsInboxPage() {
                                         </div>
                                         <p className="text-xs text-slate-500 italic">Calculating match scores...</p>
                                     </div>
-                                ) : matches.length === 0 ? (
+                                ) : sortedMatches.length === 0 ? (
                                     <p className="text-sm text-slate-500 italic py-4">No high-confidence matches found.</p>
                                 ) : (
                                     <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                                        {matches.map((match) => (
+                                        {sortedMatches.map((match) => (
                                             <button
                                                 key={match.tenantId}
                                                 onClick={() => setSelectedTenantId(match.tenantId)}
                                                 className={`w-full text-left p-3 rounded-xl border transition-all ${selectedTenantId === match.tenantId
                                                     ? 'bg-fuchsia-500/20 border-fuchsia-500/50 ring-1 ring-fuchsia-500/50'
-                                                    : 'bg-white/5 border-white/10 hover:border-white/20'
+                                                    : 'bg-white/5 border border-white/10 hover:border-white/20'
                                                     }`}
                                             >
                                                 <div className="flex justify-between items-start mb-1">
@@ -518,11 +460,16 @@ export default function ApplicationsInboxPage() {
                                                         {match.score}% Match
                                                     </span>
                                                 </div>
-                                                <div className="flex flex-wrap gap-2 items-center text-[11px] text-slate-400">
+                                                <div className="flex flex-wrap gap-2 items-center text-[11px] text-slate-400 mb-2">
                                                     <span>📍 {match.distanceMiles} miles</span>
                                                     <span className="w-1 h-1 rounded-full bg-slate-600"></span>
                                                     <span className={match.isSorEligible ? 'text-emerald-400 font-medium' : ''}>
                                                         💰 {match.financialMatch}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-end">
+                                                    <span className="text-[10px] font-bold text-fuchsia-400 uppercase tracking-widest">
+                                                        {selectedTenantId === match.tenantId ? '✓ Ready to Assign' : 'Review Match →'}
                                                     </span>
                                                 </div>
                                             </button>
@@ -587,8 +534,8 @@ export default function ApplicationsInboxPage() {
             {rejectingApp && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
                     <div className="w-full max-w-lg transform overflow-hidden rounded-2xl bg-[#1A0B2E] border border-white/10 p-6 shadow-xl transition-all">
-                        <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
-                            <span className="text-red-500">⚠️</span> Reject Application
+                        <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2 uppercase italic tracking-tighter">
+                            <span className="text-red-500 font-normal">⚠️</span> Reject Application
                         </h3>
                         <p className="text-sm text-slate-400 mb-6">
                             Provide a reason for rejecting <strong>{rejectingApp.applicantName}</strong> and steps to rectify.
@@ -596,7 +543,7 @@ export default function ApplicationsInboxPage() {
 
                         <div className="space-y-4">
                             <div>
-                                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5 ml-1">Rejection Reason</label>
+                                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5 ml-1 tracking-widest">Rejection Reason</label>
                                 <textarea
                                     value={rejectionReason}
                                     onChange={(e) => setRejectionReason(e.target.value)}
@@ -606,7 +553,7 @@ export default function ApplicationsInboxPage() {
                             </div>
 
                             <div>
-                                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5 ml-1">Rectification Steps</label>
+                                <label className="block text-xs font-semibold text-slate-400 uppercase mb-1.5 ml-1 tracking-widest">Rectification Steps</label>
                                 <textarea
                                     value={rectificationSteps}
                                     onChange={(e) => setRectificationSteps(e.target.value)}

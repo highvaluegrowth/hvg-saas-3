@@ -71,8 +71,8 @@ export default function RideDetailPage({
         setPassengerIds(data.ride.passengerIds ?? []);
         setDriverId(data.ride.driverId ? [data.ride.driverId] : []);
         setVehicleId(data.ride.vehicleId ?? '');
-      } catch (err: any) {
-        setError(err.message);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'An unexpected error occurred');
       } finally {
         setLoading(false);
       }
@@ -98,8 +98,8 @@ export default function RideDetailPage({
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to update ride');
       setRide((prev) => (prev ? { ...prev, status: newStatus } : prev));
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {
       setUpdating(false);
     }
@@ -132,8 +132,8 @@ export default function RideDetailPage({
           }
           : prev
       );
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred');
     } finally {
       setUpdating(false);
     }
@@ -141,12 +141,12 @@ export default function RideDetailPage({
 
   if (loading)
     return (
-      <div className="p-6 animate-pulse">
-        <div className="h-8 bg-gray-200 rounded w-1/3 mb-4" />
-        <div className="h-48 bg-gray-200 rounded" />
+      <div className="p-6 animate-pulse space-y-4">
+        <div className="h-8 bg-white/10 rounded w-1/3 mb-4" />
+        <div className="h-48 bg-white/10 rounded" />
       </div>
     );
-  if (!ride) return <div className="p-6 text-red-600">Ride not found</div>;
+  if (!ride) return <div className="p-6 text-red-400">Ride not found</div>;
 
   const nextStatuses = STATUS_TRANSITIONS[ride.status];
 
@@ -154,8 +154,8 @@ export default function RideDetailPage({
     <div className="p-6 max-w-2xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Ride Details</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-white">Ride Details</h1>
+          <p className="text-sm text-white/50 mt-1">
             {new Date(ride.scheduledAt).toLocaleDateString()} at{' '}
             {new Date(ride.scheduledAt).toLocaleTimeString([], {
               hour: '2-digit',
@@ -170,54 +170,54 @@ export default function RideDetailPage({
             {STATUS_LABELS[ride.status]}
           </span>
           <Link href={`/${tenantId}/rides`}>
-            <Button variant="outline">← Back</Button>
+            <Button variant="outline" className="border-white/10 text-white/70 hover:bg-white/10 bg-transparent">← Back</Button>
           </Link>
         </div>
       </div>
 
       {error && (
-        <div className="bg-red-50 text-red-800 px-4 py-3 rounded-md text-sm">{error}</div>
+        <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-md text-sm">{error}</div>
       )}
 
-      <Card>
+      <Card className="bg-white/5 border border-white/10">
         <CardHeader>
-          <CardTitle>Trip Information</CardTitle>
+          <CardTitle className="text-lg text-white font-semibold">Trip Information</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3 text-sm">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-1">
+              <p className="text-white/40 text-xs font-medium uppercase tracking-wider mb-1">
                 Pickup
               </p>
-              <p className="text-gray-900">{ride.pickupAddress}</p>
+              <p className="text-white/90">{ride.pickupAddress}</p>
             </div>
             <div>
-              <p className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-1">
+              <p className="text-white/40 text-xs font-medium uppercase tracking-wider mb-1">
                 Dropoff
               </p>
-              <p className="text-gray-900">{ride.dropoffAddress}</p>
+              <p className="text-white/90">{ride.dropoffAddress}</p>
             </div>
           </div>
           {ride.purpose && (
             <div>
-              <p className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-1">
+              <p className="text-white/40 text-xs font-medium uppercase tracking-wider mb-1">
                 Purpose
               </p>
-              <p className="text-gray-900">{ride.purpose}</p>
+              <p className="text-white/90">{ride.purpose}</p>
             </div>
           )}
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-1">
+              <p className="text-white/40 text-xs font-medium uppercase tracking-wider mb-1">
                 Requested By
               </p>
-              <p className="text-gray-900 capitalize">{ride.requestedByType}</p>
+              <p className="text-white/90 capitalize">{ride.requestedByType}</p>
             </div>
             <div>
-              <p className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-1">
+              <p className="text-white/40 text-xs font-medium uppercase tracking-wider mb-1">
                 Passengers
               </p>
-              <p className="text-gray-900">
+              <p className="text-white/90">
                 {passengerIds.length === 0
                   ? 'None assigned'
                   : `${passengerIds.length} passenger(s)`}
@@ -226,10 +226,10 @@ export default function RideDetailPage({
           </div>
           {ride.notes && (
             <div>
-              <p className="text-gray-500 text-xs font-medium uppercase tracking-wider mb-1">
+              <p className="text-white/40 text-xs font-medium uppercase tracking-wider mb-1">
                 Notes
               </p>
-              <p className="text-gray-700">{ride.notes}</p>
+              <p className="text-white/70">{ride.notes}</p>
             </div>
           )}
         </CardContent>
@@ -237,9 +237,9 @@ export default function RideDetailPage({
 
       {/* Assignment Card */}
       {userCanWrite && ride.status !== 'completed' && ride.status !== 'cancelled' && (
-        <Card>
+        <Card className="bg-white/5 border border-white/10">
           <CardHeader>
-            <CardTitle>Assignment</CardTitle>
+            <CardTitle className="text-lg text-white font-semibold">Assignment</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <ResidentSelector
@@ -256,37 +256,40 @@ export default function RideDetailPage({
               singleSelect={true}
             />
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Vehicle</label>
+              <label className="block text-sm font-medium text-white/80 mb-1">Vehicle</label>
               <select
                 value={vehicleId}
                 onChange={(e) => setVehicleId(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                className="w-full rounded-md border border-white/10 bg-white/5 text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 scheme-dark"
               >
-                <option value="">— No vehicle assigned —</option>
+                <option value="" className="bg-[#0C1A2E]">-- No vehicle assigned --</option>
                 {vehicles.map((v) => (
-                  <option key={v.id} value={v.id}>
+                  <option key={v.id} value={v.id} className="bg-[#0C1A2E]">
                     {v.year} {v.make} {v.model} ({v.licensePlate})
                   </option>
                 ))}
               </select>
             </div>
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleAssignmentUpdate}
-              disabled={updating}
-            >
-              {updating ? 'Saving...' : 'Save Assignment'}
-            </Button>
+            <div className="pt-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleAssignmentUpdate}
+                disabled={updating}
+                className="border-white/10 text-white/70 hover:bg-white/10 bg-transparent"
+              >
+                {updating ? 'Saving...' : 'Save Assignment'}
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
 
       {/* Status Progression */}
       {nextStatuses.length > 0 && (
-        <Card>
+        <Card className="bg-white/5 border border-white/10">
           <CardHeader>
-            <CardTitle>Update Status</CardTitle>
+            <CardTitle className="text-lg text-white font-semibold">Update Status</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex gap-2 flex-wrap">
@@ -297,6 +300,7 @@ export default function RideDetailPage({
                   disabled={updating}
                   variant={status === 'cancelled' ? 'outline' : 'default'}
                   size="sm"
+                  className={status === 'cancelled' ? 'border-white/10 text-white/70 hover:bg-white/10 bg-transparent' : 'bg-cyan-600 hover:bg-cyan-700 text-white'}
                 >
                   {updating ? 'Updating...' : `Mark as ${STATUS_LABELS[status]}`}
                 </Button>
@@ -307,7 +311,7 @@ export default function RideDetailPage({
       )}
 
       {(ride.status === 'completed' || ride.status === 'cancelled') && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center text-sm text-gray-500">
+        <div className="bg-white/5 border border-white/10 rounded-lg p-4 text-center text-sm text-white/50">
           This ride is {STATUS_LABELS[ride.status].toLowerCase()} and cannot be modified.
         </div>
       )}

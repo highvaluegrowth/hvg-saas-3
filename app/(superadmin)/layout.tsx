@@ -62,9 +62,9 @@ export default function SuperAdminLayout({ children }: SuperAdminLayoutProps) {
                 }
             >
                 <GlobalNavbar
-                    tenantName="HVG SuperAdmin"
                     onMenuClick={() => setSidebarOpen(true)}
                 />
+
 
                 <main className="flex-1 p-6 overflow-y-auto">
                     {children}

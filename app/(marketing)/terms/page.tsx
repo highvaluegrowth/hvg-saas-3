@@ -1,5 +1,6 @@
 import { MarketingNavbar } from '@/components/marketing/MarketingNavbar';
 import { MarketingFooter } from '@/components/marketing/MarketingFooter';
+import Link from 'next/link';
 
 export const metadata = {
   title: 'Terms of Service | High Value Growth',
@@ -21,12 +22,12 @@ export default function TermsOfServicePage() {
           {/* 1. Acceptance of Terms */}
           <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-3">1. Acceptance of Terms</h2>
           <p className="text-gray-600 leading-relaxed">
-            By accessing or using the High Value Growth platform (the "Service"), including the web application
+            By accessing or using the High Value Growth platform (the &quot;Service&quot;), including the web application
             at <span className="font-medium">hvg.app</span> and the HVG mobile application, you agree to be
-            bound by these Terms of Service ("Terms") and our{' '}
-            <a href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</a>. These Terms
-            constitute a legally binding agreement between you and High Value Growth LLC ("HVG," "we," "us,"
-            or "our").
+            bound by these Terms of Service (&quot;Terms&quot;) and our{' '}
+            <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>. These Terms
+            constitute a legally binding agreement between you and High Value Growth LLC (&quot;HVG,&quot; &quot;we,&quot; &quot;us,&quot;
+            or &quot;our&quot;).
           </p>
           <p className="text-gray-600 leading-relaxed mt-3">
             If you are accepting these Terms on behalf of an organization, you represent that you have the
@@ -208,7 +209,7 @@ export default function TermsOfServicePage() {
           </p>
           <p className="text-gray-600 leading-relaxed mt-3">
             <span className="font-medium">Your Content.</span> You retain ownership of all data, content,
-            and materials you upload or create within the Service ("Your Content"). By using the Service,
+            and materials you upload or create within the Service (&quot;Your Content&quot;). By using the Service,
             you grant HVG a non-exclusive, worldwide, royalty-free license to host, store, process, and
             display Your Content solely as necessary to provide and improve the Service. This license
             terminates when you delete Your Content or close your account, subject to our data retention

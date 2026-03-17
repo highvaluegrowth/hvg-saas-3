@@ -17,7 +17,7 @@ function buildPostText(post: SocialPost): string {
   return tags ? `${post.content}\n\n${tags}` : post.content;
 }
 
-async function publishFacebook(pageId: string, token: string, post: SocialPost) {
+async function publishFacebook(pageId: string, token: string, post: SocialPost): Promise<string> {
   const body: Record<string, string> = { message: buildPostText(post), access_token: token };
   if (post.imageUrl) body.link = post.imageUrl;
   const res = await fetch(`${META_GRAPH}/${pageId}/feed`, {
@@ -26,10 +26,11 @@ async function publishFacebook(pageId: string, token: string, post: SocialPost) 
     body: JSON.stringify(body),
   });
   const data = await res.json() as { id?: string; error?: { message: string } };
-  if (!res.ok || data.error) throw new Error(data.error?.message ?? 'Facebook publish failed');
+  if (!res.ok || data.error || !data.id) throw new Error(data.error?.message ?? 'Facebook publish failed');
+  return data.id;
 }
 
-async function publishInstagram(igUserId: string, token: string, post: SocialPost) {
+async function publishInstagram(igUserId: string, token: string, post: SocialPost): Promise<string> {
   if (!post.imageUrl) throw new Error('Instagram requires an image');
   const c = await fetch(`${META_GRAPH}/${igUserId}/media`, {
     method: 'POST',
@@ -42,7 +43,8 @@ async function publishInstagram(igUserId: string, token: string, post: SocialPos
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ creation_id: c.id, access_token: token }),
   }).then((r) => r.json()) as { id?: string; error?: { message: string } };
-  if (p.error) throw new Error(p.error.message);
+  if (p.error || !p.id) throw new Error(p.error?.message ?? 'IG publish failed');
+  return p.id;
 }
 
 export async function GET(request: NextRequest) {
@@ -86,16 +88,19 @@ export async function GET(request: NextRequest) {
 
           const accounts = accountsSnap.docs.map((d) => d.data() as SocialAccount);
           let anySuccess = false;
+          const externalIds: Record<string, string> = {};
 
           for (const platform of post.platforms) {
             const account = accounts.find((a) => a.platform === platform);
             if (!account) continue;
             try {
               if (platform === 'facebook') {
-                await publishFacebook(account.accountId, account.accessToken, post);
+                const externalId = await publishFacebook(account.accountId, account.accessToken, post);
+                externalIds.facebook = externalId;
                 anySuccess = true;
               } else if (platform === 'instagram') {
-                await publishInstagram(account.accountId, account.accessToken, post);
+                const externalId = await publishInstagram(account.accountId, account.accessToken, post);
+                externalIds.instagram = externalId;
                 anySuccess = true;
               }
             } catch (platformErr) {
@@ -106,6 +111,7 @@ export async function GET(request: NextRequest) {
           await postsService.update(tenantId, post.id, {
             status: anySuccess ? 'published' : 'failed',
             publishedAt: anySuccess ? now.toISOString() : null,
+            externalIds: anySuccess ? externalIds : undefined,
           });
 
           if (anySuccess) processed++;

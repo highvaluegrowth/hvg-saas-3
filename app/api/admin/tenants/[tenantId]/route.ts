@@ -53,7 +53,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
         const body = await request.json();
         const { status, name, aiApiKey } = body;
 
-        const update: Record<string, any> = {
+        const update: Record<string, string | null> = {
             updatedAt: new Date().toISOString()
         };
 

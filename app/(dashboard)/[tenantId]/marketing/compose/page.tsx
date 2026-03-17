@@ -2,6 +2,7 @@
 'use client';
 import { use, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { authService } from '@/features/auth/services/authService';
 import type { PostType, SocialPlatform, DraftPostResult } from '@/features/marketing/types';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 
@@ -56,9 +57,13 @@ export default function ComposePage({ params }: { params: Promise<{ tenantId: st
         setGenerating(true);
         setError('');
         try {
+            const token = await authService.getIdToken();
             const res = await fetch(`/api/tenants/${tenantId}/marketing/ai-draft`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ postType, context: contextText, tone, platform: selectedPlatforms[0] ?? 'facebook' }),
             });
             if (!res.ok) throw new Error(await res.text());
@@ -178,15 +183,15 @@ export default function ComposePage({ params }: { params: Promise<{ tenantId: st
             {/* Step 1: Post Type */}
             {step === 1 && (
                 <div className="space-y-4">
-                    <h2 className="text-xl font-bold text-gray-900">What type of post?</h2>
+                    <h2 className="text-xl font-bold text-white">What type of post?</h2>
                     <div className="grid grid-cols-1 gap-3">
                         {POST_TYPES.map(pt => (
                             <button key={pt.value} onClick={() => setPostType(pt.value)}
-                                className={`flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${postType === pt.value ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200 hover:border-gray-300'}`}>
+                                className={`flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${postType === pt.value ? 'border-emerald-500 bg-emerald-500/10' : 'border-white/10 bg-white/5 hover:border-white/20'}`}>
                                 <span className="text-2xl">{pt.icon}</span>
                                 <div>
-                                    <p className="font-semibold text-gray-900">{pt.label}</p>
-                                    <p className="text-sm text-gray-500">{pt.desc}</p>
+                                    <p className={`font-semibold ${postType === pt.value ? 'text-emerald-400' : 'text-white'}`}>{pt.label}</p>
+                                    <p className={`text-sm ${postType === pt.value ? 'text-emerald-400/70' : 'text-white/50'}`}>{pt.desc}</p>
                                 </div>
                             </button>
                         ))}
@@ -201,19 +206,19 @@ export default function ComposePage({ params }: { params: Promise<{ tenantId: st
             {/* Step 2: Context + Image */}
             {step === 2 && (
                 <div className="space-y-4">
-                    <h2 className="text-xl font-bold text-gray-900">Give the AI some context</h2>
+                    <h2 className="text-xl font-bold text-white">Give the AI some context</h2>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Describe what you want to say</label>
+                        <label className="block text-sm font-medium text-white/80 mb-1">Describe what you want to say</label>
                         <textarea value={contextText} onChange={e => setContextText(e.target.value)}
                             rows={5} placeholder={postType === 'bed_availability' ? 'e.g. We have 2 beds open for men in our downtown house, specializing in dual-diagnosis...' : 'Describe the post topic in your own words...'}
-                            className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none" />
+                            className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white placeholder-white/40 focus:ring-2 focus:ring-emerald-400 focus:outline-none scheme-dark" />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Tone</label>
+                        <label className="block text-sm font-medium text-white/80 mb-2">Tone</label>
                         <div className="flex flex-wrap gap-2">
                             {(['professional', 'warm', 'urgent', 'celebratory'] as const).map(t => (
                                 <button key={t} onClick={() => setTone(t)}
-                                    className={`px-3 py-1.5 rounded-full text-sm capitalize transition-colors ${tone === t ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}>
+                                    className={`px-3 py-1.5 rounded-full text-sm capitalize transition-colors ${tone === t ? 'bg-emerald-600 text-white' : 'bg-white/5 text-white/70 hover:bg-white/10'}`}>
                                     {t}
                                 </button>
                             ))}
@@ -222,8 +227,8 @@ export default function ComposePage({ params }: { params: Promise<{ tenantId: st
 
                     {/* Image Upload */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Post Image <span className="text-gray-400 font-normal">(optional — required for Instagram)</span>
+                        <label className="block text-sm font-medium text-white/80 mb-2">
+                            Post Image <span className="text-white/40 font-normal">(optional — required for Instagram)</span>
                         </label>
                         <ImageUpload
                             storagePath={`tenants/${tenantId}/marketing/posts/${Date.now()}`}
@@ -254,7 +259,7 @@ export default function ComposePage({ params }: { params: Promise<{ tenantId: st
             {/* Step 3: Edit & Approve */}
             {step === 3 && (
                 <div className="space-y-4">
-                    <h2 className="text-xl font-bold text-gray-900">Review & edit your post</h2>
+                    <h2 className="text-xl font-bold text-white">Review & edit your post</h2>
 
                     {/* Image preview */}
                     {imageUrl && (
@@ -265,15 +270,15 @@ export default function ComposePage({ params }: { params: Promise<{ tenantId: st
                     )}
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Caption</label>
+                        <label className="block text-sm font-medium text-white/80 mb-1">Caption</label>
                         <textarea value={draft} onChange={e => setDraft(e.target.value)} rows={7}
-                            className="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-emerald-400 focus:outline-none" />
-                        <p className="text-xs text-gray-400 mt-1">{draft.length} characters</p>
+                            className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white placeholder-white/40 focus:ring-2 focus:ring-emerald-400 focus:outline-none scheme-dark" />
+                        <p className="text-xs text-white/40 mt-1">{draft.length} characters</p>
                     </div>
 
                     {aiHashtags && (
                         <div className="space-y-3">
-                            <p className="text-sm font-medium text-gray-700">Hashtags (tap to toggle)</p>
+                            <p className="text-sm font-medium text-white/80">Hashtags (tap to toggle)</p>
                             {[
                                 { label: 'General Recovery', tags: aiHashtags.general, selected: selectedGeneralTags, setSelected: setSelectedGeneralTags },
                                 { label: 'House-Specific', tags: aiHashtags.houseSpecific, selected: selectedHouseTags, setSelected: setSelectedHouseTags },
@@ -324,9 +329,9 @@ export default function ComposePage({ params }: { params: Promise<{ tenantId: st
             {/* Step 4: Platforms & Timing */}
             {step === 4 && (
                 <div className="space-y-4">
-                    <h2 className="text-xl font-bold text-gray-900">Where & when?</h2>
+                    <h2 className="text-xl font-bold text-white">Where & when?</h2>
                     <div>
-                        <p className="text-sm font-medium text-gray-700 mb-2">Platforms</p>
+                        <p className="text-sm font-medium text-white/80 mb-2">Platforms</p>
                         <div className="flex flex-wrap gap-2">
                             {PLATFORMS.map(p => (
                                 <button key={p.value} onClick={() => togglePlatform(p.value)}
@@ -342,7 +347,7 @@ export default function ComposePage({ params }: { params: Promise<{ tenantId: st
                         )}
                     </div>
                     <div>
-                        <p className="text-sm font-medium text-gray-700 mb-2">Timing</p>
+                        <p className="text-sm font-medium text-white/80 mb-2">Timing</p>
                         <div className="flex gap-3">
                             {(['now', 'schedule'] as const).map(mode => (
                                 <button key={mode} onClick={() => setScheduleMode(mode)}

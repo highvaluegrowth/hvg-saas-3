@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   View,
   Text,
@@ -26,8 +26,8 @@ export function ProfileDrawer({ visible, onClose }: ProfileDrawerProps) {
   const { appUser, signOut } = useAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const translateX = useRef(new Animated.Value(-DRAWER_WIDTH)).current;
-  const overlayOpacity = useRef(new Animated.Value(0)).current;
+  const translateX = useMemo(() => new Animated.Value(-DRAWER_WIDTH), []);
+  const overlayOpacity = useMemo(() => new Animated.Value(0), []);
 
   useEffect(() => {
     if (visible) {
@@ -58,14 +58,21 @@ export function ProfileDrawer({ visible, onClose }: ProfileDrawerProps) {
         }),
       ]).start();
     }
-  }, [visible]);
+  }, [visible, translateX, overlayOpacity]);
 
-  const sobrietyDays = appUser?.sobrietyDate
-    ? Math.floor(
-        (Date.now() - new Date(appUser.sobrietyDate as unknown as string).getTime()) /
-          86400000
-      )
-    : null;
+  const [sobrietyDays, setSobrietyDays] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!appUser?.sobrietyDate) {
+      Promise.resolve().then(() => setSobrietyDays(null));
+      return;
+    }
+    const days = Math.floor(
+      (Date.now() - new Date(appUser.sobrietyDate as unknown as string).getTime()) /
+        86400000
+    );
+    Promise.resolve().then(() => setSobrietyDays(days));
+  }, [appUser?.sobrietyDate]);
 
   const initials = appUser?.displayName
     ? appUser.displayName

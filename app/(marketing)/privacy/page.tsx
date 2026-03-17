@@ -21,9 +21,9 @@ export default function PrivacyPolicyPage() {
           {/* 1. Introduction */}
           <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-3">1. Introduction</h2>
           <p className="text-gray-600 leading-relaxed">
-            High Value Growth LLC ("HVG," "we," "us," or "our") operates the High Value Growth platform,
+            High Value Growth LLC (&quot;HVG,&quot; &quot;we,&quot; &quot;us,&quot; or &quot;our&quot;) operates the High Value Growth platform,
             accessible at <span className="font-medium">hvg.app</span> and via the HVG mobile application
-            (collectively, the "Service"). This Privacy Policy explains how we collect, use, disclose, and
+            (collectively, the &quot;Service&quot;). This Privacy Policy explains how we collect, use, disclose, and
             safeguard your personal information when you use our Service.
           </p>
           <p className="text-gray-600 leading-relaxed mt-3">
@@ -101,9 +101,9 @@ export default function PrivacyPolicyPage() {
           </p>
           <ul className="list-disc list-inside space-y-2 text-gray-600 leading-relaxed mt-3">
             <li>
-              <span className="font-medium">Firebase / Google LLC</span> — cloud infrastructure, authentication,
-              database, and analytics. Data processed under Google's data processing agreements.
-            </li>
+              <span className="font-medium">Firebase / Google LLC</span> &mdash; cloud infrastructure, authentication,
+              database, and analytics. Data processed under Google&apos;s data processing agreements.
+              </li>
             <li>
               <span className="font-medium">Google Gemini AI</span> — AI chat transcripts are sent to the
               Gemini API for response generation. We transmit only the conversation context necessary to
@@ -136,7 +136,7 @@ export default function PrivacyPolicyPage() {
             information:
           </p>
           <ul className="list-disc list-inside space-y-2 text-gray-600 leading-relaxed mt-3">
-            <li>Firestore security rules enforce tenant isolation — no tenant can access another tenant's data.</li>
+            <li>Firestore security rules enforce tenant isolation &mdash; no tenant can access another tenant&apos;s data.</li>
             <li>Role-based access controls (RBAC) via Firebase custom claims limit data access by user role.</li>
             <li>OAuth access tokens are encrypted at rest using AES-256 encryption before storage.</li>
             <li>All data in transit is encrypted via TLS 1.2+.</li>

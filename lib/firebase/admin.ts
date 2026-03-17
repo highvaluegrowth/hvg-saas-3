@@ -13,7 +13,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import type { App } from 'firebase-admin/app';
 import type { Auth } from 'firebase-admin/auth';
-import type { Firestore, FieldValue as FieldValueType } from 'firebase-admin/firestore';
+import type { Firestore, FieldValue as FieldValueType, FieldPath as FieldPathType } from 'firebase-admin/firestore';
 import type { Storage } from 'firebase-admin/storage';
 
 let _adminApp: App | null = null;
@@ -65,7 +65,10 @@ function initializeAdminApp(): App {
     );
   }
 
-  _adminApp = initializeApp({ credential });
+  _adminApp = initializeApp({
+    credential,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  });
   return _adminApp!;
 }
 
@@ -80,7 +83,10 @@ export function getAdminAuth(): Auth {
 export function getAdminDb(): Firestore {
   if (!_adminDb) {
     const { getFirestore } = require('firebase-admin/firestore');
-    _adminDb = getFirestore(initializeAdminApp());
+    const db = getFirestore(initializeAdminApp());
+    // Enable ignoring undefined properties to prevent crashes on optional fields
+    db.settings({ ignoreUndefinedProperties: true });
+    _adminDb = db;
   }
   return _adminDb!;
 }
@@ -104,6 +110,13 @@ export const FieldValue: typeof FieldValueType = new Proxy({} as typeof FieldVal
   get: (_, prop) => {
     const { FieldValue: FV } = require('firebase-admin/firestore');
     return FV[prop as keyof typeof FieldValueType];
+  },
+});
+
+export const FieldPath: typeof FieldPathType = new Proxy({} as typeof FieldPathType, {
+  get: (_, prop) => {
+    const { FieldPath: FP } = require('firebase-admin/firestore');
+    return FP[prop as keyof typeof FieldPathType];
   },
 });
 

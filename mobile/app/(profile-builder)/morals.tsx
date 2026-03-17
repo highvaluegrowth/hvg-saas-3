@@ -157,7 +157,7 @@ export default function MoralsScreen() {
                 <View style={s.stepPill}><Text style={s.stepText}>Step 6 of 6</Text></View>
                 <Text style={s.title}>Morals & Values</Text>
                 <Text style={s.subtitle}>
-                    Answer at your own pace. You'll get 5 new questions each week to help us understand who you are over time.
+                    Answer at your own pace. You&apos;ll get 5 new questions each week to help us understand who you are over time.
                 </Text>
                 <View style={s.progressBar}>
                     <View style={[s.progressFill, { width: `${(answeredCount / total) * 100}%` }]} />
@@ -189,7 +189,7 @@ export default function MoralsScreen() {
                     {saving ? <ActivityIndicator color="#fff" /> : <Text style={s.btnTxt}>Complete Profile 🎉</Text>}
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handleSkip} style={s.skip} disabled={saving}>
-                    <Text style={s.skipTxt}>Skip — I'll answer later</Text>
+                    <Text style={s.skipTxt}>Skip &mdash; I&apos;ll answer later</Text>
                 </TouchableOpacity>
             </View>
         </View>

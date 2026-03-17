@@ -49,9 +49,9 @@ function calculateSobrietyDays(startDate: Date | string | null): number | null {
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <Card>
+    <Card className="bg-white/5 border-white/10">
       <CardHeader>
-        <CardTitle className="text-base">{title}</CardTitle>
+        <CardTitle className="text-base text-white">{title}</CardTitle>
       </CardHeader>
       <CardContent>{children}</CardContent>
     </Card>
@@ -60,9 +60,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex items-start py-2 border-b border-gray-100 last:border-0">
-      <dt className="w-40 shrink-0 text-sm text-gray-500">{label}</dt>
-      <dd className="text-sm text-gray-900 flex-1">{value ?? '—'}</dd>
+    <div className="flex items-start py-2 border-b border-white/5 last:border-0">
+      <dt className="w-40 shrink-0 text-sm text-white/50">{label}</dt>
+      <dd className="text-sm text-white/90 flex-1">{value ?? '—'}</dd>
     </div>
   );
 }
@@ -70,20 +70,20 @@ function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
 function LoadingSkeleton() {
   return (
     <div className="space-y-6">
-      <div className="h-8 w-48 bg-gray-200 rounded animate-pulse" />
+      <div className="h-8 w-48 bg-white/10 rounded animate-pulse" />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="bg-white border border-gray-200 rounded-lg p-6 space-y-3">
-              <div className="h-5 w-32 bg-gray-200 rounded animate-pulse" />
+            <div key={i} className="bg-white/5 border border-white/10 rounded-lg p-6 space-y-3">
+              <div className="h-5 w-32 bg-white/10 rounded animate-pulse" />
               {[1, 2, 3].map((j) => (
-                <div key={j} className="h-4 w-full bg-gray-100 rounded animate-pulse" />
+                <div key={j} className="h-4 w-full bg-white/5 rounded animate-pulse" />
               ))}
             </div>
           ))}
         </div>
         <div className="space-y-6">
-          <div className="bg-white border border-gray-200 rounded-lg p-6 h-48 animate-pulse" />
+          <div className="bg-white/5 border border-white/10 rounded-lg p-6 h-48 animate-pulse" />
         </div>
       </div>
     </div>
@@ -190,12 +190,12 @@ export default function ResidentProfilePage({ params }: ResidentProfilePageProps
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center space-x-3">
-            <Link href={`/${tenantId}/residents`} className="text-gray-400 hover:text-gray-600">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <Link href={`/${tenantId}/residents`} className="text-white/50 hover:text-white transition-colors">
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </Link>
-            <h1 className="text-2xl font-bold text-gray-900">
+            <h1 className="text-2xl font-bold text-white">
               {resident.firstName} {resident.lastName}
             </h1>
             {enrollment && (
@@ -204,10 +204,10 @@ export default function ResidentProfilePage({ params }: ResidentProfilePageProps
               </Badge>
             )}
           </div>
-          <p className="text-gray-500 mt-1 text-sm">Age {age} · {resident.primarySubstance}</p>
+          <p className="text-white/50 mt-1 text-sm">Age {age} · {resident.primarySubstance}</p>
         </div>
         <Link href={`/${tenantId}/residents/${residentId}/edit`}>
-          <Button variant="outline">Edit Profile</Button>
+          <Button variant="outline" className="border-white/10 text-white/70 hover:bg-white/10 bg-transparent">Edit Profile</Button>
         </Link>
       </div>
 
@@ -276,14 +276,14 @@ export default function ResidentProfilePage({ params }: ResidentProfilePageProps
                     {enrollment.status.charAt(0).toUpperCase() + enrollment.status.slice(1)}
                   </Badge>
                 } />
-                <InfoRow label="Phase" value={`Phase ${enrollment.phase}`} />
-                <InfoRow label="Move-In Date" value={formatDate(enrollment.moveInDate)} />
-                <InfoRow label="Sobriety Start" value={formatDate(enrollment.sobrietyStartDate)} />
+                <InfoRow label="Phase" value={<span className="text-white/90">Phase {enrollment.phase}</span>} />
+                <InfoRow label="Move-In Date" value={<span className="text-white/90">{formatDate(enrollment.moveInDate)}</span>} />
+                <InfoRow label="Sobriety Start" value={<span className="text-white/90">{formatDate(enrollment.sobrietyStartDate)}</span>} />
                 {sobrietyDays !== null && (
                   <InfoRow
                     label="Sobriety Days"
                     value={
-                      <span className="font-semibold text-green-700">
+                      <span className="font-semibold text-emerald-400">
                         {sobrietyDays} {sobrietyDays === 1 ? 'day' : 'days'}
                       </span>
                     }
@@ -292,10 +292,10 @@ export default function ResidentProfilePage({ params }: ResidentProfilePageProps
               </dl>
             </Section>
           ) : (
-            <Card>
-              <CardHeader><CardTitle className="text-base">Enrollment</CardTitle></CardHeader>
+            <Card className="bg-white/5 border-white/10">
+              <CardHeader><CardTitle className="text-base text-white">Enrollment</CardTitle></CardHeader>
               <CardContent>
-                <p className="text-sm text-gray-500">Not yet enrolled in this program.</p>
+                <p className="text-sm text-white/50">Not yet enrolled in this program.</p>
               </CardContent>
             </Card>
           )}
@@ -303,30 +303,30 @@ export default function ResidentProfilePage({ params }: ResidentProfilePageProps
           {/* Notes */}
           {resident.notes && (
             <Section title="Notes">
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">{resident.notes}</p>
+              <p className="text-sm text-white/70 whitespace-pre-wrap">{resident.notes}</p>
             </Section>
           )}
 
           {/* Link App User — for staff_admin+ only */}
           {userCanWrite && (
-            <Card>
+            <Card className="bg-white/5 border-white/10">
               <CardHeader>
-                <CardTitle className="text-base">Mobile App Link</CardTitle>
+                <CardTitle className="text-base text-white">Mobile App Link</CardTitle>
               </CardHeader>
               <CardContent>
                 {resident.firebaseUid ? (
                   <div className="flex items-center gap-2">
-                    <svg className="w-4 h-4 text-green-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-4 h-4 text-emerald-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     <div>
-                      <p className="text-sm text-green-700 font-medium">Linked to app user</p>
-                      <p className="text-xs text-gray-400 font-mono mt-0.5 truncate">{resident.firebaseUid}</p>
+                      <p className="text-sm text-emerald-400 font-medium">Linked to app user</p>
+                      <p className="text-xs text-white/40 font-mono mt-0.5 truncate">{resident.firebaseUid}</p>
                     </div>
                   </div>
                 ) : (
                   <div>
-                    <p className="text-sm text-gray-500 mb-3">
+                    <p className="text-sm text-white/50 mb-3">
                       Link this resident to their mobile app account by entering the email they registered with.
                     </p>
                     <form onSubmit={handleLinkUser} className="space-y-2">
@@ -336,20 +336,20 @@ export default function ResidentProfilePage({ params }: ResidentProfilePageProps
                         placeholder="resident@email.com"
                         value={linkEmail}
                         onChange={e => setLinkEmail(e.target.value)}
-                        className="w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                        className="w-full bg-white/5 border border-white/10 rounded-md px-3 py-2 text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-cyan-500"
                         required
                       />
                       <Button
                         type="submit"
                         size="sm"
-                        className="w-full"
+                        className="w-full bg-cyan-600 hover:bg-cyan-700 text-white"
                         disabled={linkLoading || !linkEmail.trim()}
                       >
                         {linkLoading ? 'Linking...' : 'Link App User'}
                       </Button>
                     </form>
                     {linkMessage && (
-                      <p className={`mt-2 text-xs ${linkMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+                      <p className={`mt-2 text-xs ${linkMessage.type === 'success' ? 'text-emerald-400' : 'text-rose-400'}`}>
                         {linkMessage.text}
                       </p>
                     )}

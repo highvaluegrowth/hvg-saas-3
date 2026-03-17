@@ -16,11 +16,11 @@ import {
 } from 'lucide-react';
 
 interface GlobalNavbarProps {
-    tenantName?: string;
-    onMenuClick?: () => void;
+    onMenuClick: () => void;
 }
 
-export function GlobalNavbar({ tenantName, onMenuClick }: GlobalNavbarProps) {
+export function GlobalNavbar({ onMenuClick }: GlobalNavbarProps) {
+
     const pathname = usePathname();
     const params = useParams();
     const tenantId = params.tenantId as string;
@@ -55,28 +55,20 @@ export function GlobalNavbar({ tenantName, onMenuClick }: GlobalNavbarProps) {
                 WebkitBackdropFilter: 'blur(12px)',
                 borderBottom: '1px solid rgba(255,255,255,0.07)',
             }}
-            className="h-16 flex items-center justify-between px-4 lg:px-6 sticky top-0 z-40 transition-all duration-300"
+            className="h-16 flex items-center justify-between px-4 lg:pr-6 lg:pl-0 sticky top-0 z-40 transition-all duration-300"
         >
-            {/* Left Section: Mobile Menu Toggle, Tenant Name & Global Search */}
-            <div className="flex items-center space-x-4 flex-1">
+            {/* Left Section: Mobile Menu Toggle & Global Search */}
+            <div className="flex items-center flex-1">
                 <button
                     onClick={onMenuClick}
                     style={{ color: 'rgba(255,255,255,0.5)' }}
-                    className="lg:hidden hover:text-white focus:outline-none transition-colors"
+                    className="lg:hidden hover:text-white focus:outline-none transition-colors ml-4 mr-4"
                     title="Open Menu"
                 >
                     <Menu className="w-6 h-6" />
                 </button>
 
-                {tenantName && (
-                    <div className="hidden lg:block shrink-0 mr-2">
-                        <h1 className="text-base font-semibold" style={{ color: 'rgba(255,255,255,0.9)' }}>
-                            {tenantName}
-                        </h1>
-                    </div>
-                )}
-
-                <div className="hidden sm:block w-full max-w-sm xl:max-w-md">
+                <div className="w-full max-w-sm xl:max-w-md">
                     <GlobalSearch />
                 </div>
             </div>

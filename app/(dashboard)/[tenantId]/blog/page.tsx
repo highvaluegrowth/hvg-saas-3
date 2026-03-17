@@ -77,14 +77,14 @@ export default function BlogDashboardPage({ params }: { params: Promise<{ tenant
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Blog Posts</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-3xl font-bold tracking-tight text-white">Blog Posts</h1>
+          <p className="text-white/60 mt-1">
             Create and manage public blog content for your organisation.
           </p>
         </div>
         <Link
           href={`/${resolvedParams.tenantId}/blog/new`}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium text-sm transition-colors"
+          className="bg-cyan-600 text-white hover:bg-cyan-700 px-4 py-2 rounded-md font-medium text-sm transition-colors shadow-lg shadow-cyan-900/20"
         >
           New Post
         </Link>
@@ -93,24 +93,24 @@ export default function BlogDashboardPage({ params }: { params: Promise<{ tenant
       {/* Loading state */}
       {loading && (
         <div className="py-12 text-center">
-          <p className="text-muted-foreground">Loading posts...</p>
+          <p className="text-white/60">Loading posts...</p>
         </div>
       )}
 
       {/* Error state */}
       {error && (
-        <div className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-md p-3">
+        <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-md p-3">
           {error}
         </div>
       )}
 
       {/* Empty state */}
       {!loading && !error && posts.length === 0 && (
-        <div className="py-20 text-center border border-dashed border-border rounded-xl">
-          <p className="text-muted-foreground text-lg mb-4">No blog posts yet.</p>
+        <div className="py-20 text-center border border-dashed border-white/10 rounded-xl">
+          <p className="text-white text-lg mb-4 font-semibold">No blog posts yet.</p>
           <Link
             href={`/${resolvedParams.tenantId}/blog/new`}
-            className="text-primary hover:underline text-sm font-medium"
+            className="text-cyan-400 hover:text-cyan-300 transition-colors text-sm font-medium"
           >
             Write your first post
           </Link>

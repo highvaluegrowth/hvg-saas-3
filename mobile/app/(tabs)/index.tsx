@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
   ScrollView,
@@ -58,13 +58,18 @@ export default function HomeScreen() {
 
   const events = data?.events ?? [];
   const { appUser } = useAuth();
+  const [sobrietyDays, setSobrietyDays] = useState<number | null>(null);
 
-  const sobrietyDays = useMemo(() => {
-    if (!appUser?.sobrietyDate) return null;
-    return Math.floor(
+  useEffect(() => {
+    if (!appUser?.sobrietyDate) {
+      setSobrietyDays(null);
+      return;
+    }
+    const days = Math.floor(
       (Date.now() - new Date(appUser.sobrietyDate as unknown as string).getTime()) /
-        86400000,
+        86400000
     );
+    setSobrietyDays(days);
   }, [appUser?.sobrietyDate]);
 
   const isAdmin = ['super_admin', 'admin', 'tenant_admin', 'staff_admin', 'staff', 'house_manager'].includes(appUser?.role || '');
@@ -105,7 +110,7 @@ export default function HomeScreen() {
             <Text style={styles.sectionTitle}>Administrative Tools</Text>
             <TouchableOpacity
               style={styles.applyCard}
-              onPress={() => router.push('/(tabs)/admin' as any)}
+              onPress={() => router.push('/(tabs)/admin' as never)}
               activeOpacity={0.75}
             >
               <Text style={styles.applyCardIcon}>🛡️</Text>

@@ -10,7 +10,9 @@ export type QuestionType =
     | 'MATCHING'
     | 'ORDERING'
     | 'RATING'
-    | 'IMAGE_CHOICE';
+    | 'IMAGE_CHOICE'
+    | 'FILE_UPLOAD'
+    | 'HOTSPOT';
 
 export interface QuizQuestion {
     id: string;

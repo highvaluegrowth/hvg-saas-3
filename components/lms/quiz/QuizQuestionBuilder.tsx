@@ -677,10 +677,12 @@ const QUESTION_LABELS: Record<QuestionType, string> = {
     ORDERING:        'Ordering / Sequence',
     RATING:          'Star Rating',
     IMAGE_CHOICE:    'Image Choice',
+    FILE_UPLOAD:     'File Upload (Submission)',
+    HOTSPOT:         'Image Hotspot',
 };
 
 // These types use manual grading / no points system
-const NO_POINTS_TYPES: QuestionType[] = ['SHORT_ANSWER', 'LONG_ANSWER', 'LIKERT_SCALE', 'RATING'];
+const NO_POINTS_TYPES: QuestionType[] = ['SHORT_ANSWER', 'LONG_ANSWER', 'LIKERT_SCALE', 'RATING', 'FILE_UPLOAD'];
 
 export function QuizQuestionBuilder({ question, onChange, onDelete, storagePath }: QuizQuestionBuilderProps) {
     const renderConfig = () => {
@@ -695,6 +697,8 @@ export function QuizQuestionBuilder({ question, onChange, onDelete, storagePath 
             case 'ORDERING':        return <OrderingConfig question={question} onChange={onChange} />;
             case 'RATING':          return <RatingConfig question={question} onChange={onChange} />;
             case 'IMAGE_CHOICE':    return <ImageChoiceConfig question={question} onChange={onChange} storagePath={storagePath} />;
+            case 'FILE_UPLOAD':     return <div className="p-4 bg-muted/30 rounded-lg text-xs italic text-muted-foreground text-center border border-dashed">File upload configuration coming soon.</div>;
+            case 'HOTSPOT':         return <div className="p-4 bg-muted/30 rounded-lg text-xs italic text-muted-foreground text-center border border-dashed">Image hotspot configuration coming soon.</div>;
         }
     };
 

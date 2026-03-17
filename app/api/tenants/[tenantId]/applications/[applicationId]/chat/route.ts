@@ -38,7 +38,7 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
             .where('participants', 'array-contains', applicantId)
             .get();
 
-        let chat = chatsSnap.docs.find(d => d.data().participants.includes(token.uid));
+        const chat = chatsSnap.docs.find(d => d.data().participants.includes(token.uid));
 
         if (!chat) {
             // Create new chat

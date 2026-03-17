@@ -44,21 +44,21 @@ function LoadingSkeleton() {
   return (
     <div className="space-y-6 animate-pulse">
       <div className="flex items-center justify-between">
-        <div className="h-8 w-48 bg-gray-200 rounded" />
-        <div className="h-10 w-28 bg-gray-200 rounded" />
+        <div className="h-8 w-48 bg-white/10 rounded" />
+        <div className="h-10 w-28 bg-white/10 rounded" />
       </div>
-      <div className="bg-white border border-gray-200 rounded-lg p-6 space-y-4">
-        <div className="h-5 w-64 bg-gray-200 rounded" />
-        <div className="h-5 w-48 bg-gray-200 rounded" />
-        <div className="h-5 w-32 bg-gray-200 rounded" />
+      <div className="bg-white/5 border border-white/10 rounded-lg p-6 space-y-4">
+        <div className="h-5 w-64 bg-white/10 rounded" />
+        <div className="h-5 w-48 bg-white/10 rounded" />
+        <div className="h-5 w-32 bg-white/10 rounded" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {[1, 2].map((i) => (
-          <div key={i} className="bg-white border border-gray-200 rounded-lg p-6 space-y-3">
-            <div className="h-6 w-32 bg-gray-200 rounded" />
+          <div key={i} className="bg-white/5 border border-white/10 rounded-lg p-6 space-y-3">
+            <div className="h-6 w-32 bg-white/10 rounded" />
             <div className="flex gap-2">
-              <div className="h-6 w-20 bg-gray-200 rounded-full" />
-              <div className="h-6 w-20 bg-gray-200 rounded-full" />
+              <div className="h-6 w-20 bg-white/10 rounded-full" />
+              <div className="h-6 w-20 bg-white/10 rounded-full" />
             </div>
           </div>
         ))}
@@ -138,22 +138,23 @@ function AddRoomModal({
     <Modal isOpen={isOpen} onClose={handleClose} title="Add Room" size="sm">
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="rounded-md bg-red-50 border border-red-200 p-3">
-            <p className="text-sm text-red-700">{error}</p>
+          <div className="rounded-md bg-red-500/10 border border-red-500/20 p-3">
+            <p className="text-sm text-red-400">{error}</p>
           </div>
         )}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-white/80 mb-1">
             Room Name <span className="text-red-500">*</span>
           </label>
           <Input
             value={roomName}
             onChange={(e) => setRoomName(e.target.value)}
             placeholder="e.g. Room 1, Master Suite"
+            className="bg-white/5 border-white/10 text-white placeholder-white/40"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-white/80 mb-1">
             Capacity <span className="text-red-500">*</span>
           </label>
           <Input
@@ -162,10 +163,11 @@ function AddRoomModal({
             placeholder="4"
             type="number"
             min="1"
+            className="bg-white/5 border-white/10 text-white placeholder-white/40"
           />
         </div>
         <div className="flex items-center justify-end gap-3 pt-2">
-          <Button type="button" variant="outline" onClick={handleClose} disabled={submitting}>
+          <Button type="button" variant="outline" onClick={handleClose} disabled={submitting} className="border-white/10 text-white/70 hover:bg-white/10 bg-transparent">
             Cancel
           </Button>
           <Button
@@ -249,22 +251,23 @@ function AddBedModal({
     <Modal isOpen={isOpen} onClose={handleClose} title="Add Bed" size="sm">
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="rounded-md bg-red-50 border border-red-200 p-3">
-            <p className="text-sm text-red-700">{error}</p>
+          <div className="rounded-md bg-red-500/10 border border-red-500/20 p-3">
+            <p className="text-sm text-red-400">{error}</p>
           </div>
         )}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-white/80 mb-1">
             Bed Label <span className="text-red-500">*</span>
           </label>
           <Input
             value={label}
             onChange={(e) => setLabel(e.target.value)}
             placeholder="e.g. Bed A, Bed 1, Top Bunk"
+            className="bg-white/5 border-white/10 text-white placeholder-white/40"
           />
         </div>
         <div className="flex items-center justify-end gap-3 pt-2">
-          <Button type="button" variant="outline" onClick={handleClose} disabled={submitting}>
+          <Button type="button" variant="outline" onClick={handleClose} disabled={submitting} className="border-white/10 text-white/70 hover:bg-white/10 bg-transparent">
             Cancel
           </Button>
           <Button
@@ -300,17 +303,18 @@ function RoomCard({
   }
 
   return (
-    <Card>
+    <Card className="bg-white/5 border border-white/10">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div>
-            <CardTitle className="text-base">{room.name}</CardTitle>
-            <p className="text-sm text-gray-500 mt-0.5">Capacity: {room.capacity}</p>
+            <CardTitle className="text-base text-white">{room.name}</CardTitle>
+            <p className="text-sm text-white/50 mt-0.5">Capacity: {room.capacity}</p>
           </div>
           <Button
             variant="outline"
             size="sm"
             onClick={openAddBed}
+            className="border-white/10 text-white/70 hover:bg-white/10 bg-transparent"
           >
             Add Bed
           </Button>
@@ -326,7 +330,7 @@ function RoomCard({
             ))}
           </div>
         ) : (
-          <p className="text-sm text-gray-400 italic">No beds yet. Add a bed to get started.</p>
+          <p className="text-sm text-white/40 italic">No beds yet. Add a bed to get started.</p>
         )}
       </CardContent>
 
@@ -379,8 +383,8 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
 
   if (error || !house) {
     return (
-      <div className="rounded-md bg-red-50 border border-red-200 p-4">
-        <p className="text-sm text-red-700">{error || 'House not found.'}</p>
+      <div className="rounded-md bg-red-500/10 border border-red-500/20 p-4">
+        <p className="text-sm text-red-400">{error || 'House not found.'}</p>
         <Link href={`/${tenantId}/houses`} className="mt-2 inline-block text-sm text-cyan-600 hover:underline">
           Back to houses
         </Link>
@@ -396,59 +400,59 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Link href={`/${tenantId}/houses`} className="text-sm text-gray-500 hover:text-cyan-600">
+            <Link href={`/${tenantId}/houses`} className="text-sm text-white/50 hover:text-cyan-400">
               Houses
             </Link>
-            <span className="text-gray-400">/</span>
-            <span className="text-sm text-gray-900">{house.name}</span>
+            <span className="text-white/20">/</span>
+            <span className="text-sm text-white/90">{house.name}</span>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">{house.name}</h1>
+          <h1 className="text-2xl font-bold text-white">{house.name}</h1>
         </div>
         <Link href={`/${tenantId}/houses/${houseId}/edit`}>
-          <Button variant="outline">Edit House</Button>
+          <Button variant="outline" className="border-white/10 text-white/70 hover:bg-white/10 bg-transparent">Edit House</Button>
         </Link>
       </div>
 
       {/* House Details */}
-      <Card>
+      <Card className="bg-white/5 border border-white/10">
         <CardHeader>
-          <CardTitle className="text-lg">Details</CardTitle>
+          <CardTitle className="text-lg text-white">Details</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Address</p>
+              <p className="text-xs font-medium text-white/40 uppercase tracking-wider mb-1">Address</p>
               {house.address ? (
                 <>
-                  <p className="text-sm text-gray-900">{house.address.street}</p>
-                  <p className="text-sm text-gray-900">
+                  <p className="text-sm text-white/90">{house.address.street}</p>
+                  <p className="text-sm text-white/90">
                     {house.address.city}, {house.address.state} {house.address.zip}
                   </p>
                 </>
               ) : (
-                <p className="text-sm text-gray-400 italic">No address provided</p>
+                <p className="text-sm text-white/30 italic">No address provided</p>
               )}
             </div>
             {house.phone && (
               <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Phone</p>
-                <p className="text-sm text-gray-900">{house.phone}</p>
+                <p className="text-xs font-medium text-white/40 uppercase tracking-wider mb-1">Phone</p>
+                <p className="text-sm text-white/90">{house.phone}</p>
               </div>
             )}
             <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Capacity</p>
-              <p className="text-sm text-gray-900">{house.capacity} beds</p>
+              <p className="text-xs font-medium text-white/40 uppercase tracking-wider mb-1">Capacity</p>
+              <p className="text-sm text-white/90">{house.capacity} beds</p>
             </div>
             <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Status</p>
+              <p className="text-xs font-medium text-white/40 uppercase tracking-wider mb-1">Status</p>
               <Badge variant={statusVariant}>
                 {house.status === 'active' ? 'Active' : 'Inactive'}
               </Badge>
             </div>
             <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">Manager</p>
-              <p className="text-sm text-gray-900">
-                {house.managerId || <span className="text-gray-400 italic">Unassigned</span>}
+              <p className="text-xs font-medium text-white/40 uppercase tracking-wider mb-1">Manager</p>
+              <p className="text-sm text-white/90">
+                {house.managerId || <span className="text-white/30 italic">Unassigned</span>}
               </p>
             </div>
           </div>
@@ -458,10 +462,10 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
       {/* Rooms Section */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">
+          <h2 className="text-lg font-semibold text-white">
             Rooms
             {house.rooms && house.rooms.length > 0 && (
-              <span className="ml-2 text-sm font-normal text-gray-500">
+              <span className="ml-2 text-sm font-normal text-white/40">
                 ({house.rooms.length})
               </span>
             )}
@@ -475,9 +479,9 @@ export default function HouseDetailPage({ params }: HouseDetailPageProps) {
         </div>
 
         {!house.rooms || house.rooms.length === 0 ? (
-          <div className="text-center py-10 bg-white border border-gray-200 rounded-lg">
-            <p className="text-gray-500 text-sm">No rooms yet.</p>
-            <p className="text-gray-400 text-sm mt-1">Add a room to start tracking beds and occupancy.</p>
+          <div className="text-center py-10 bg-white/5 border border-white/10 rounded-lg">
+            <p className="text-white/50 text-sm">No rooms yet.</p>
+            <p className="text-white/30 text-sm mt-1">Add a room to start tracking beds and occupancy.</p>
             <Button
               className="mt-4 bg-cyan-600 hover:bg-cyan-700 text-white"
               onClick={() => setAddRoomOpen(true)}

@@ -107,6 +107,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
     <div className="min-h-screen flex overflow-hidden" style={{ background: '#0C1A2E' }}>
       <Sidebar
         tenantId={tenantId}
+        tenantName={tenantName}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         isCollapsed={isSidebarCollapsed}
@@ -134,7 +135,6 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
           </div>
         )}
         <GlobalNavbar
-          tenantName={tenantName}
           onMenuClick={() => setSidebarOpen(true)}
         />
 

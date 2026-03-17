@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { authService } from '@/features/auth/services/authService';
 import { ResidentSelector } from '@/components/ui/ResidentSelector';
 import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 
 export default function NewChorePage({ params }: { params: Promise<{ tenantId: string }> }) {
@@ -67,13 +68,12 @@ export default function NewChorePage({ params }: { params: Promise<{ tenantId: s
           <CardContent className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-white/80 mb-1">Title *</label>
-              <input
-                type="text"
+              <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g. Clean kitchen, Mow lawn"
                 required
-                className="w-full rounded-md border border-white/10 bg-white/5 text-white placeholder-white/40 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 scheme-dark"
+                className="bg-white/5 border-white/10 text-white placeholder-white/40 scheme-dark"
               />
             </div>
 
@@ -96,9 +96,9 @@ export default function NewChorePage({ params }: { params: Promise<{ tenantId: s
                   onChange={(e) => setPriority(e.target.value as 'low' | 'medium' | 'high')}
                   className="w-full rounded-md border border-white/10 bg-white/5 text-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500 scheme-dark"
                 >
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
+                  <option value="low" className="bg-[#0C1A2E]">Low</option>
+                  <option value="medium" className="bg-[#0C1A2E]">Medium</option>
+                  <option value="high" className="bg-[#0C1A2E]">High</option>
                 </select>
               </div>
               <div>

@@ -9,13 +9,14 @@ import { LogOut } from 'lucide-react';
 
 interface SidebarProps {
   tenantId: string;
+  tenantName?: string;
   isOpen?: boolean;
   onClose?: () => void;
   isCollapsed?: boolean;
   onToggleCollapse?: () => void;
 }
 
-export function Sidebar({ tenantId, isOpen = true, onClose, isCollapsed = false, onToggleCollapse }: SidebarProps) {
+export function Sidebar({ tenantId, tenantName, isOpen = true, onClose, isCollapsed = false, onToggleCollapse }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
@@ -74,8 +75,8 @@ export function Sidebar({ tenantId, isOpen = true, onClose, isCollapsed = false,
                 <span className="text-white font-bold text-sm">HVG</span>
               </div>
               {!isCollapsed && (
-                <span className="font-semibold truncate" style={{ color: 'rgba(255,255,255,0.9)' }}>
-                  High Value Growth
+                <span className="font-semibold truncate max-w-[140px]" style={{ color: 'rgba(255,255,255,0.9)' }}>
+                  {tenantName || 'High Value Growth'}
                 </span>
               )}
             </Link>

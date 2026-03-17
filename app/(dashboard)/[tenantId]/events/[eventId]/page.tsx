@@ -121,9 +121,11 @@ export default function EventDetailPage({ params }: EventDetailPageProps) {
           throw new Error(`Failed to load events (status ${response.status})`);
         }
         const json = await response.json();
-        const data: Array<ProgramEvent & { scheduledAt: string; createdAt: string; updatedAt: string }> =
-          Array.isArray(json) ? json : (json.events ?? []);
-        const found = data.find((e) => e.id === eventId);
+        const data = Array.isArray(json) ? json : (json?.events || []);
+        if (!Array.isArray(data)) {
+          throw new Error('Invalid data format received from server.');
+        }
+        const found = data.find((e: { id: string; [key: string]: unknown }) => e.id === eventId);
         if (!found) {
           throw new Error('Event not found.');
         }
