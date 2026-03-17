@@ -8,9 +8,10 @@ interface ChatInputProps {
     isLoading: boolean;
     userRole?: string;
     isDirector?: boolean;
+    suggestedPrompts?: string[];
 }
 
-export function ChatInput({ onSend, isLoading, userRole, isDirector }: ChatInputProps) {
+export function ChatInput({ onSend, isLoading, userRole, isDirector, suggestedPrompts = [] }: ChatInputProps) {
     const [value, setValue] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -25,6 +26,9 @@ export function ChatInput({ onSend, isLoading, userRole, isDirector }: ChatInput
         ? filteredCommands.filter(c => c.command.slice(1).startsWith(slashFilter))
         : [];
     const showMenu = suggestions.length > 0;
+
+    // Show suggested prompts only when input is empty and not loading
+    const showSuggestions = suggestedPrompts.length > 0 && !value && !isLoading;
 
     function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -46,6 +50,10 @@ export function ChatInput({ onSend, isLoading, userRole, isDirector }: ChatInput
         textareaRef.current?.focus();
     }
 
+    function selectPrompt(prompt: string) {
+        onSend(prompt);
+    }
+
     // Auto-resize textarea
     useEffect(() => {
         const ta = textareaRef.current;
@@ -59,6 +67,35 @@ export function ChatInput({ onSend, isLoading, userRole, isDirector }: ChatInput
             className="border-t p-3 relative"
             style={{ borderColor: isDirector ? 'rgba(217,70,239,0.15)' : 'rgba(8,145,178,0.15)', background: 'transparent' }}
         >
+            {/* Suggested Prompts */}
+            {showSuggestions && (
+                <div className="flex flex-wrap gap-2 mb-3 px-1 animate-in fade-in slide-in-from-bottom-2 duration-300">
+                    {suggestedPrompts.map((prompt, i) => (
+                        <button
+                            key={i}
+                            type="button"
+                            onClick={() => selectPrompt(prompt)}
+                            className="text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full border transition-all duration-200"
+                            style={{ 
+                                background: 'rgba(255,255,255,0.03)', 
+                                borderColor: 'rgba(255,255,255,0.1)',
+                                color: isDirector ? '#E879F9' : '#67E8F9'
+                            }}
+                            onMouseEnter={(e) => { 
+                                (e.currentTarget as HTMLElement).style.background = isDirector ? 'rgba(217,70,239,0.1)' : 'rgba(8,145,178,0.1)';
+                                (e.currentTarget as HTMLElement).style.borderColor = isDirector ? 'rgba(217,70,239,0.3)' : 'rgba(8,145,178,0.3)';
+                            }}
+                            onMouseLeave={(e) => { 
+                                (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)';
+                                (e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)';
+                            }}
+                        >
+                            {prompt}
+                        </button>
+                    ))}
+                </div>
+            )}
+
             {/* Slash command autocomplete */}
             {showMenu && (
                 <div

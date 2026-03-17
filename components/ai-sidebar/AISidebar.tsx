@@ -6,6 +6,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useAISidebarStore } from '@/lib/stores/aiSidebarStore';
 import { sendChatMessage } from '@/lib/ai/chatService';
 import { fetchChatHistory } from '@/lib/ai/chatHistoryClient';
+import { getSemanticContext } from '@/lib/ai/routeContextMap';
 
 import { SidebarHeader } from './SidebarHeader';
 import { MessageList } from './MessageList';
@@ -14,6 +15,7 @@ import { ChatInput } from './ChatInput';
 export function AISidebar() {
     const { user } = useAuth();
     const pathname = usePathname();
+    const isDirector = user?.role === 'super_admin';
 
     const {
         isOpen,
@@ -32,6 +34,7 @@ export function AISidebar() {
 
     const listRef = useRef<HTMLDivElement>(null);
     const [hasHydrated, setHasHydrated] = useState(false);
+    const semanticContext = getSemanticContext(pathname ?? '');
 
     // Auto-set persona based on role
     useEffect(() => {
@@ -193,6 +196,8 @@ export function AISidebar() {
                     onSend={handleSend}
                     isLoading={isLoading}
                     userRole={user?.role}
+                    isDirector={isDirector}
+                    suggestedPrompts={semanticContext.suggestedPrompts}
                 />
             </div>
         </>
