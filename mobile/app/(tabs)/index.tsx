@@ -57,7 +57,6 @@ export default function HomeScreen() {
   const myHouses: TenantHouse[] = housesData?.houses ?? [];
 
   const events = data?.events ?? [];
-  const { appUser } = useAuth();
   const [sobrietyDays, setSobrietyDays] = useState<number | null>(null);
 
   useEffect(() => {
@@ -67,7 +66,7 @@ export default function HomeScreen() {
     }
     const days = Math.floor(
       (Date.now() - new Date(appUser.sobrietyDate as unknown as string).getTime()) /
-        86400000
+      86400000
     );
     setSobrietyDays(days);
   }, [appUser?.sobrietyDate]);

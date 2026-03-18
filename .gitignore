@@ -49,3 +49,12 @@ firebase-debug.log
 
 # OS Files
 .DS_Store
+
+# Android signing and credentials
+*.jks
+*.keystore
+credentials.json
+google-services.json
+google-play-service-account.json
+hvg-saas-3-*.json
+local.properties
