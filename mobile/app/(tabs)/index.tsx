@@ -11,7 +11,7 @@ import {
 import { useRouter } from 'expo-router';
 import { userApi, tenantApi, TenantHouse } from '@/lib/api/routes';
 import { useAuth } from '@/lib/auth/AuthContext';
-import { format } from 'date-fns';
+import { safeFormat } from '@/lib/utils/date';
 import { AppHeader } from '@/components/AppHeader';
 import { ProfileDrawer } from '@/components/drawers/ProfileDrawer';
 import { SettingsDrawer } from '@/components/drawers/SettingsDrawer';
@@ -57,6 +57,7 @@ export default function HomeScreen() {
   const myHouses: TenantHouse[] = housesData?.houses ?? [];
 
   const events = data?.events ?? [];
+  const chores = data?.chores ?? [];
   const [sobrietyDays, setSobrietyDays] = useState<number | null>(null);
 
   useEffect(() => {
@@ -171,7 +172,7 @@ export default function HomeScreen() {
               <View key={e.id} style={styles.card}>
                 <Text style={styles.cardTitle}>{e.title}</Text>
                 <Text style={styles.cardSub}>
-                  {format(new Date(e.scheduledAt), 'EEE, MMM d · h:mm a')}
+                  {safeFormat(e.scheduledAt, 'EEE, MMM d · h:mm a')}
                 </Text>
                 {e.location ? <Text style={styles.cardMeta}>{e.location}</Text> : null}
               </View>
@@ -193,7 +194,7 @@ export default function HomeScreen() {
                 </View>
                 {c.dueDate ? (
                   <Text style={styles.cardSub}>
-                    Due {format(new Date(c.dueDate), 'MMM d')}
+                    Due {safeFormat(c.dueDate, 'MMM d')}
                   </Text>
                 ) : null}
               </View>

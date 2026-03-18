@@ -11,6 +11,7 @@ import {
 import { useRouter } from 'expo-router';
 import { applicationApi } from '@/lib/api/routes';
 import { Ionicons } from '@expo/vector-icons';
+import { safeFormat } from '@/lib/utils/date';
 
 interface Application {
     id: string;
@@ -150,7 +151,7 @@ export default function ApplicationStatusScreen() {
                                 <View style={styles.cardBody}>
                                     <Text style={styles.appName}>{app.applicantName}</Text>
                                     <Text style={styles.appDate}>
-                                        Submitted on: {new Date(app.createdAt).toLocaleDateString()}
+                                        Submitted on: {safeFormat(app.createdAt, 'MMM d, yyyy')}
                                     </Text>
                                     {app.zipCode && (
                                         <Text style={styles.appDetail}>ZIP: {app.zipCode}</Text>

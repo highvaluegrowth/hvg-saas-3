@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { ScrollView, View, Text, StyleSheet, RefreshControl } from 'react-native';
 import { userApi } from '@/lib/api/routes';
-import { format } from 'date-fns';
+import { safeFormat } from '@/lib/utils/date';
 
 export default function ScheduleScreen() {
   const { data, isLoading, refetch, isRefetching } = useQuery({
@@ -17,7 +17,7 @@ export default function ScheduleScreen() {
   // Group by date
   const grouped: Record<string, typeof events> = {};
   for (const e of events) {
-    const key = format(new Date(e.scheduledAt), 'yyyy-MM-dd');
+    const key = safeFormat(e.scheduledAt, 'yyyy-MM-dd');
     if (!grouped[key]) grouped[key] = [];
     grouped[key].push(e);
   }
@@ -40,12 +40,12 @@ export default function ScheduleScreen() {
         Object.entries(grouped).map(([dateKey, dayEvents]) => (
           <View key={dateKey} style={styles.dayGroup}>
             <Text style={styles.dateLabel}>
-              {format(new Date(dateKey + 'T00:00:00'), 'EEEE, MMMM d')}
+              {safeFormat(dateKey + 'T00:00:00', 'EEEE, MMMM d')}
             </Text>
             {dayEvents.map((e) => (
               <View key={e.id} style={styles.eventCard}>
                 <Text style={styles.eventTime}>
-                  {format(new Date(e.scheduledAt), 'h:mm a')}
+                  {safeFormat(e.scheduledAt, 'h:mm a')}
                 </Text>
                 <View style={styles.eventBody}>
                   <Text style={styles.eventTitle}>{e.title}</Text>

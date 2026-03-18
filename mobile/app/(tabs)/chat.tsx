@@ -18,6 +18,7 @@ import { useAuth } from '@/lib/auth/AuthContext';
 import { useTabBarHeight } from '@/lib/constants/layout';
 import { useContextStore, buildProactiveGreeting } from '@/lib/store/contextStore';
 import { buildContextSnapshot } from '@/lib/ai/contextEngine';
+import { safeFormat } from '@/lib/utils/date';
 import type { ChatMessage } from '@/lib/api/routes';
 
 // ─── Recovery-focused quick action suggestions ───────────────────────────────
@@ -134,7 +135,7 @@ function ChoreCard({ data }: { data: unknown }) {
             <Text style={cards.choreName}>{c.title}</Text>
             {c.dueDate ? (
               <Text style={cards.choreDate}>
-                Due: {new Date(c.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                Due: {safeFormat(c.dueDate, 'MMM d')}
               </Text>
             ) : null}
           </View>
@@ -162,9 +163,8 @@ function EventCard({ data }: { data: unknown }) {
         <View key={i} style={cards.eventRow}>
           <Text style={cards.eventName}>{e.title}</Text>
           <Text style={cards.eventTime}>
-            {new Date(e.scheduledAt).toLocaleDateString('en-US', {
-              weekday: 'short', month: 'short', day: 'numeric',
-            })}{e.location ? ` · ${e.location}` : ''}
+            {safeFormat(e.scheduledAt, 'EEE, MMM d')}
+            {e.location ? ` · ${e.location}` : ''}
           </Text>
         </View>
       ))}
@@ -296,12 +296,19 @@ export default function ChatScreen() {
     if (!tenantId || !firebaseUser) return;
 
     let cleanup: (() => void) | null = null;
+    let isActive = true;
 
-    buildContextSnapshot(tenantId, () => firebaseUser.getIdToken(true)).then(
-      (unsubscribe) => { cleanup = unsubscribe; }
+    buildContextSnapshot(tenantId, () => firebaseUser.getIdToken(false)).then(
+      (unsubscribe) => { 
+        if (isActive) cleanup = unsubscribe;
+        else unsubscribe(); 
+      }
     );
 
-    return () => { cleanup?.(); };
+    return () => { 
+      isActive = false;
+      cleanup?.(); 
+    };
   }, [appUser?.tenantIds, firebaseUser]);
 
   // ── Auto-scroll on new messages ────────────────────────────────────────────

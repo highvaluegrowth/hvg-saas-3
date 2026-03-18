@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 import { tenantApi } from '@/lib/api/routes';
-import { format } from 'date-fns';
+import { safeFormat } from '@/lib/utils/date';
 
 const STATUS_COLORS: Record<string, string> = {
   requested: '#D946EF',
@@ -77,7 +77,7 @@ export default function TenantRidesScreen() {
               </View>
             </View>
             <Text style={styles.time}>
-              {format(new Date(r.requestedAt), 'MMM d, h:mm a')}
+              {safeFormat(r.requestedAt, 'MMM d, h:mm a')}
             </Text>
             {r.notes ? <Text style={styles.notes}>{r.notes}</Text> : null}
           </View>

@@ -14,7 +14,7 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Ionicons } from '@expo/vector-icons';
-import { format } from 'date-fns';
+import { safeFormat } from '@/lib/utils/date';
 import { tenantApi } from '@/lib/api/routes';
 
 const TYPE_LABELS: Record<string, string> = {
@@ -150,10 +150,10 @@ export default function EventDetailScreen() {
                 <View style={styles.rowContent}>
                   <Text style={styles.rowLabel}>Date &amp; Time</Text>
                   <Text style={styles.rowValue}>
-                    {format(new Date(event.scheduledAt), "EEEE, MMMM d, yyyy")}
+                    {safeFormat(event.scheduledAt, "EEEE, MMMM d, yyyy")}
                   </Text>
                   <Text style={styles.rowValue}>
-                    {format(new Date(event.scheduledAt), "h:mm a")}
+                    {safeFormat(event.scheduledAt, "h:mm a")}
                   </Text>
                 </View>
               </View>

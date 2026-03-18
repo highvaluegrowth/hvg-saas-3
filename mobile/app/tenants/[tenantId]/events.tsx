@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { tenantApi } from '@/lib/api/routes';
-import { format } from 'date-fns';
+import { safeFormat } from '@/lib/utils/date';
 
 export default function TenantEventsScreen() {
   const { tenantId } = useLocalSearchParams<{ tenantId: string }>();
@@ -48,7 +48,7 @@ export default function TenantEventsScreen() {
         >
           <Text style={styles.title}>{e.title}</Text>
           <Text style={styles.time}>
-            {format(new Date(e.scheduledAt), 'EEE, MMM d · h:mm a')}
+            {safeFormat(e.scheduledAt, 'EEE, MMM d · h:mm a')}
           </Text>
           {e.location ? <Text style={styles.meta}>{e.location}</Text> : null}
           <View style={styles.footer}>

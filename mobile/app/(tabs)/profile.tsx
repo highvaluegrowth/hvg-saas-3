@@ -10,7 +10,8 @@ import { useAuth } from '@/lib/auth/AuthContext';
 import { userApi } from '@/lib/api/routes';
 import { API_BASE_URL } from '@/lib/config';
 import { useTabBarHeight } from '@/lib/constants/layout';
-import { format, differenceInDays, differenceInMonths, differenceInYears } from 'date-fns';
+import { safeFormat } from '@/lib/utils/date';
+import { differenceInDays, differenceInMonths, differenceInYears } from 'date-fns';
 
 // ─── Recovery Goal Tag Options ────────────────────────────────────────────────
 
@@ -31,7 +32,7 @@ export default function ProfileScreen() {
   const [displayName, setDisplayName] = useState(appUser?.displayName ?? '');
   const [sobrietyDateStr, setSobrietyDateStr] = useState(
     appUser?.sobrietyDate
-      ? format(new Date(appUser.sobrietyDate as unknown as string), 'yyyy-MM-dd')
+      ? safeFormat(appUser.sobrietyDate as unknown as string, 'yyyy-MM-dd')
       : ''
   );
   const [goals, setGoals] = useState<string[]>(appUser?.recoveryGoals ?? []);
@@ -153,7 +154,7 @@ export default function ProfileScreen() {
               <Text style={styles.sobrietyBreakdown}>{years}y {months}m</Text>
             )}
             <Text style={styles.sobrietySince}>
-              Since {sobrietyDate ? format(sobrietyDate, 'MMMM d, yyyy') : ''}
+              Since {sobrietyDate ? safeFormat(sobrietyDate, 'MMMM d, yyyy') : ''}
             </Text>
           </>
         ) : (

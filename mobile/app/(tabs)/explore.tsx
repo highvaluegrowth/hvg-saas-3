@@ -24,7 +24,7 @@ import {
 import { AppHeader } from '@/components/AppHeader';
 import { ProfileDrawer } from '@/components/drawers/ProfileDrawer';
 import { SettingsDrawer } from '@/components/drawers/SettingsDrawer';
-import { format } from 'date-fns';
+import { safeFormat } from '@/lib/utils/date';
 
 const CATEGORIES = ['All', 'Houses', 'Programs', 'Staff Jobs', 'Events', 'Courses'] as const;
 type Category = (typeof CATEGORIES)[number];
@@ -340,7 +340,7 @@ export default function ExploreScreen() {
                           {event.title}
                         </Text>
                         <Text style={styles.houseLocation} numberOfLines={1}>
-                          {format(new Date(event.scheduledAt), 'EEE, MMM d · h:mm a')}
+                          {safeFormat(event.scheduledAt, 'EEE, MMM d · h:mm a')}
                         </Text>
                         <Text style={styles.houseDesc} numberOfLines={1}>
                           {event.tenantName}

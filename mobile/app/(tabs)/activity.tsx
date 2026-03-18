@@ -8,7 +8,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { userApi, ProgressData, MoodEntry } from '@/lib/api/routes';
-import { format } from 'date-fns';
+import { safeFormat } from '@/lib/utils/date';
 
 // ─── Sobriety Ring ─────────────────────────────────────────────────────────────
 
@@ -200,7 +200,7 @@ export default function ActivityScreen() {
   const events = feedData?.events ?? [];
   const grouped: Record<string, typeof events> = {};
   events.slice(0, 10).forEach((e) => {
-    const key = format(new Date(e.scheduledAt), 'yyyy-MM-dd');
+    const key = safeFormat(e.scheduledAt, 'yyyy-MM-dd');
     if (!grouped[key]) grouped[key] = [];
     grouped[key].push(e);
   });
@@ -281,12 +281,12 @@ export default function ActivityScreen() {
           Object.entries(grouped).map(([dateKey, dayEvents]) => (
             <View key={dateKey}>
               <Text style={styles.dateHeader}>
-                {format(new Date(dateKey), 'EEEE, MMM d')}
+                {safeFormat(dateKey, 'EEEE, MMM d')}
               </Text>
               {dayEvents.map((e) => (
                 <View key={e.id} style={styles.eventCard}>
                   <Text style={styles.eventTime}>
-                    {format(new Date(e.scheduledAt), 'h:mm a')}
+                    {safeFormat(e.scheduledAt, 'h:mm a')}
                   </Text>
                   <View style={styles.eventBody}>
                     <Text style={styles.eventTitle} numberOfLines={1}>
