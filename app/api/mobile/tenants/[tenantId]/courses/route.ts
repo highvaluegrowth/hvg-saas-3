@@ -16,28 +16,34 @@ export async function GET(request: NextRequest, { params }: { params: Params }) 
     const { tenantId } = await params;
     const uid = token.uid;
 
-    // Fetch published courses + user's enrollments in parallel
+    // Fetch published courses + user's course enrollments in parallel.
+    // Course enrollments are stored at users/${uid}/courseEnrollments/${courseId}
+    // (NOT in tenants/.../enrollments which is the resident bed/house enrollment).
     const [courses, enrollSnap] = await Promise.all([
       courseService.list(tenantId),
       adminDb
-        .collection('tenants')
-        .doc(tenantId)
-        .collection('enrollments')
-        .where('userId', '==', uid)
+        .collection(`users/${uid}/courseEnrollments`)
+        .where('tenantId', '==', tenantId)
         .get(),
     ]);
 
-    // Map enrollment courseId → enrollment data
+    // Map courseId → enrollment data. The document ID IS the courseId.
     const enrollmentMap: Record<string, { progress: number; status: string; completedLessons: number }> = {};
     enrollSnap.docs.forEach((d) => {
       const data = d.data();
-      if (data.courseId) {
-        enrollmentMap[data.courseId] = {
-          progress: data.progress ?? 0,
-          status: data.status ?? 'ENROLLED',
-          completedLessons: data.completedLessons ?? 0,
-        };
-      }
+      const completedArr: string[] = Array.isArray(data.completedLessons) ? data.completedLessons : [];
+
+      // Normalize status to match mobile type contract (ENROLLED | IN_PROGRESS | COMPLETED)
+      let enrollmentStatus: string;
+      if (data.status === 'completed') enrollmentStatus = 'COMPLETED';
+      else if (completedArr.length > 0) enrollmentStatus = 'IN_PROGRESS';
+      else enrollmentStatus = 'ENROLLED';
+
+      enrollmentMap[d.id] = {
+        progress: data.progress ?? 0,
+        status: enrollmentStatus,
+        completedLessons: completedArr.length,
+      };
     });
 
     const published = courses.filter((c) => c.published);

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { useAISidebarStore } from '@/lib/stores/aiSidebarStore';
 import { sendChatMessage } from '@/lib/ai/chatService';
@@ -16,7 +16,14 @@ import { OutletVoice } from './OutletVoice';
 export function AISidebar() {
     const { user } = useAuth();
     const pathname = usePathname();
+    const router = useRouter();
     const isDirector = user?.role === 'super_admin';
+
+    // Tools that write data and should cause a UI refresh after execution
+    const WRITE_ACTION_TOOLS = new Set([
+        'build_lms_course', 'create_event', 'assign_chore',
+        'draft_incident_report', 'log_mood', 'log_meeting_attendance',
+    ]);
 
     const {
         isOpen,
@@ -132,6 +139,20 @@ export function AISidebar() {
                     componentData: res.componentData
                 } : {})
             });
+
+            // Refresh UI after write-action tool completions
+            if (res.component && WRITE_ACTION_TOOLS.has(res.component)) {
+                router.refresh();
+
+                // For new LMS courses, navigate to the LMS page
+                if (res.component === 'build_lms_course' && res.componentData) {
+                    const data = res.componentData as { courseId?: string };
+                    const tenantMatch = pathname?.match(/^\/([^/]+)\//);
+                    if (data.courseId && tenantMatch) {
+                        router.push(`/${tenantMatch[1]}/lms`);
+                    }
+                }
+            }
 
             // Voice response if in voice mode
             if (isVoiceMode && typeof window !== 'undefined') {

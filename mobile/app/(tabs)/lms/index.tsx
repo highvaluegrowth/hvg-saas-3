@@ -93,7 +93,7 @@ export default function LMSIndex() {
   const tenantId = appUser?.tenantIds?.[0];
 
   const { data, isLoading, isRefetching, refetch, error } = useQuery({
-    queryKey: ['mobile-courses', tenantId],
+    queryKey: ['lms', 'courses', tenantId],
     queryFn: () => lmsApi.getCourses(tenantId!),
     enabled: !!tenantId,
     staleTime: 5 * 60 * 1000,

@@ -8,7 +8,6 @@ import { adminDb } from '@/lib/firebase/admin';
 
 export const dynamic = 'force-dynamic';
 
-
 /**
  * Map Stripe subscription status to our internal status.
  */
@@ -38,25 +37,38 @@ function planFromPriceId(priceId: string): 'free' | 'starter' | 'professional' |
 }
 
 /**
- * Update tenant subscription in Firestore from a Stripe Subscription object.
+ * Update tenant subscription fields in Firestore from a Stripe Subscription object.
+ * Also accepts the Stripe customer ID so it can be persisted on first checkout.
  */
 async function updateTenantSubscription(
   tenantId: string,
-  subscription: Stripe.Subscription
+  subscription: Stripe.Subscription,
+  stripeCustomerId?: string
 ): Promise<void> {
   const priceId = subscription.items.data[0]?.price?.id ?? '';
   const plan = planFromPriceId(priceId);
   const status = mapStripeStatus(subscription.status);
-  const currentPeriodEnd = new Date(
-    (subscription as unknown as { current_period_end: number }).current_period_end * 1000
-  ).toISOString();
 
-  await adminDb.collection('tenants').doc(tenantId).update({
+  // current_period_end is a Unix timestamp. In the clover preview API the
+  // TypeScript types omit it at the top level, so we cast safely.
+  const subAny = subscription as unknown as Record<string, unknown>;
+  const rawEnd = typeof subAny.current_period_end === 'number' ? subAny.current_period_end : null;
+  const currentPeriodEnd = rawEnd ? new Date(rawEnd * 1000).toISOString() : null;
+
+  const update: Record<string, unknown> = {
     'subscription.plan': plan,
     'subscription.status': status,
     'subscription.currentPeriodEnd': currentPeriodEnd,
     'subscription.stripeSubscriptionId': subscription.id,
-  });
+  };
+
+  // Persist customer ID when provided (first checkout) so we can look up
+  // billing portal sessions, invoices, etc. later.
+  if (stripeCustomerId) {
+    update['subscription.stripeCustomerId'] = stripeCustomerId;
+  }
+
+  await adminDb.collection('tenants').doc(tenantId).update(update);
 }
 
 export async function POST(request: NextRequest) {
@@ -90,20 +102,25 @@ export async function POST(request: NextRequest) {
           break;
         }
 
-        // Retrieve the full subscription to get current status + price
+        // Retrieve the full subscription to get current status + price.
         const subscriptionId = session.subscription as string;
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+        const customerId = session.customer as string;
 
-        await updateTenantSubscription(tenantId, subscription);
+        await updateTenantSubscription(tenantId, subscription, customerId);
+
+        // Flip the tenant's top-level status from 'trial' → 'active' on first successful checkout.
+        await adminDb.collection('tenants').doc(tenantId).update({ status: 'active' });
         break;
       }
 
+      case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
         const tenantId = subscription.metadata?.tenantId;
 
         if (!tenantId) {
-          console.warn('customer.subscription.updated: missing tenantId in metadata');
+          console.warn(`${event.type}: missing tenantId in metadata`);
           break;
         }
 

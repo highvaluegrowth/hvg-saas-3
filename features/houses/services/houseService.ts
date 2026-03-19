@@ -123,17 +123,69 @@ class HouseService extends BaseRepository<House> {
     bedId: string,
     residentId: string
   ): Promise<void> {
-    await this.updateBed(houseId, roomId, bedId, {
-      residentId,
-      status: 'occupied',
-    });
+    const now = new Date();
+    const batch = adminDb.batch();
+
+    // Update the new bed to occupied
+    const bedRef = adminDb.collection(this.bedsPath(houseId, roomId)).doc(bedId);
+    batch.update(bedRef, { residentId, status: 'occupied', updatedAt: now });
+
+    // Find the resident's active enrollment
+    const enrollmentSnap = await adminDb
+      .collection(`tenants/${this.tenantId}/enrollments`)
+      .where('residentId', '==', residentId)
+      .where('status', '==', 'active')
+      .limit(1)
+      .get();
+
+    if (!enrollmentSnap.empty) {
+      const enrollmentDoc = enrollmentSnap.docs[0];
+      const prev = enrollmentDoc.data();
+
+      // If previously assigned to a different bed, clear it
+      if (prev.bedId && (prev.bedId !== bedId || prev.roomId !== roomId || prev.houseId !== houseId)) {
+        const oldBedRef = adminDb
+          .collection(`tenants/${this.tenantId}/houses/${prev.houseId}/rooms/${prev.roomId}/beds`)
+          .doc(prev.bedId);
+        batch.update(oldBedRef, { residentId: null, status: 'available', updatedAt: now });
+      }
+
+      batch.update(enrollmentDoc.ref, { houseId, roomId, bedId, updatedAt: now });
+    }
+
+    await batch.commit();
   }
 
   async unassignResident(houseId: string, roomId: string, bedId: string): Promise<void> {
-    await this.updateBed(houseId, roomId, bedId, {
-      residentId: null,
-      status: 'available',
-    });
+    const now = new Date();
+
+    // Read the bed first to get the residentId
+    const bedRef = adminDb.collection(this.bedsPath(houseId, roomId)).doc(bedId);
+    const bedSnap = await bedRef.get();
+    const residentId = bedSnap.data()?.residentId as string | null;
+
+    const batch = adminDb.batch();
+    batch.update(bedRef, { residentId: null, status: 'available', updatedAt: now });
+
+    if (residentId) {
+      const enrollmentSnap = await adminDb
+        .collection(`tenants/${this.tenantId}/enrollments`)
+        .where('residentId', '==', residentId)
+        .where('status', '==', 'active')
+        .limit(1)
+        .get();
+
+      if (!enrollmentSnap.empty) {
+        batch.update(enrollmentSnap.docs[0].ref, {
+          houseId: null,
+          roomId: null,
+          bedId: null,
+          updatedAt: now,
+        });
+      }
+    }
+
+    await batch.commit();
   }
 }
 

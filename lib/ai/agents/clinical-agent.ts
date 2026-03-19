@@ -1,5 +1,6 @@
 import { Type, Tool } from '@google/genai';
 import { adminDb } from '@/lib/firebase/admin';
+import { courseService } from '@/features/lms/services/courseService';
 
 export const clinicalTools: Tool[] = [
     {
@@ -248,16 +249,32 @@ export async function executeClinicalTool(
 
     if (toolName === 'build_lms_course') {
         if (!tenantId) return { error: 'Tenant context required' };
-        const ref = adminDb.collection(`tenants/${tenantId}/courses`).doc();
-        await ref.set({
-            title: args.title,
-            description: args.description,
-            modules: args.modules,
-            status: 'draft',
-            createdBy: uid,
-            createdAt: now,
-        });
-        return { success: true, courseId: ref.id, title: args.title, message: 'LMS Course drafted successfully' };
+        try {
+            const course = await courseService.create(tenantId, uid, {
+                title: args.title as string,
+                description: args.description as string,
+                visibility: 'tenant',
+            });
+            const moduleTitles = (args.modules as string[]) ?? [];
+            const curriculum = moduleTitles.map((moduleTitle, i) => ({
+                id: adminDb.collection('_').doc().id,
+                title: moduleTitle,
+                order: i + 1,
+                lessons: [],
+            }));
+            if (curriculum.length > 0) {
+                await courseService.saveCurriculum(tenantId, course.id, curriculum);
+            }
+            return {
+                success: true,
+                courseId: course.id,
+                title: course.title,
+                moduleCount: curriculum.length,
+                message: `Course "${course.title}" created as a draft with ${curriculum.length} module(s). It is now visible in the LMS dashboard.`,
+            };
+        } catch (err) {
+            return { error: err instanceof Error ? err.message : 'Failed to create LMS course' };
+        }
     }
 
     if (toolName === 'create_journal_entry') {

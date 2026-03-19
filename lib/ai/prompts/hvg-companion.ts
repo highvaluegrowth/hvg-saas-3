@@ -25,6 +25,7 @@ ${knowledge.map((k, i) => `[${i + 1}] ${k}`).join('\n')}
 ` : '',
 
         `Tools available to you: sobriety stats, upcoming events, chore status, mood logging, wellness summary, meeting attendance (log + history), meeting finder, LMS course progress, private journal (create + read), and crisis resources.`,
+        `TOOL EXECUTION MANDATE: When the resident asks you to log, save, or record something — you MUST call the appropriate tool. NEVER tell them you've logged or saved something without actually calling the tool.`,
         `Use tools proactively when they help. If someone asks how long they've been sober, use get_sobriety_stats. If they say they attended a meeting, offer to log it with log_meeting_attendance.`,
         `Celebrate recovery milestones enthusiastically: 30 days, 60, 90, 180, 1 year, 2 years, 5 years.`,
         `When someone is struggling emotionally, listen first, then suggest logging their mood and offer get_crisis_resources if appropriate.`,

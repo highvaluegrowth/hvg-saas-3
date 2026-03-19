@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Timestamp } from 'firebase-admin/firestore';
 import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
-import { residentService } from '@/features/residents/services/residentService';
 import { CreateResidentSchema } from '@/features/residents/schemas/resident.schemas';
 import { canWrite } from '@/lib/utils/permissions';
 import type { UserRole } from '@/features/auth/types/auth.types';
-import { adminDb, FieldValue, FieldPath } from '@/lib/firebase/admin';
+import { adminDb, FieldPath } from '@/lib/firebase/admin';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,44 +45,38 @@ export async function GET(
        return NextResponse.json({ residents: [] });
     }
 
-    // Fetch the global user profiles for these IDs
+    // Fetch resident profiles from the global /residents collection
     // Firebase 'in' queries are limited to 30 items
     const residents: any[] = [];
-    
+
     for (let i = 0; i < uniqueIds.length; i += 30) {
       const chunk = uniqueIds.slice(i, i + 30);
-      const usersSnap = await adminDb.collection('users').where(FieldPath.documentId(), 'in', chunk).get();
-      
-      // Also attempt to fetch from legacy residents collection just in case
-      // This bridges the gap between the old siloed data and the new global user data
-      const legacySnap = await adminDb.collection(`tenants/${tenantId}/residents`).where(FieldPath.documentId(), 'in', chunk).get();
-      
-      const userMap = new Map();
-      usersSnap.docs.forEach(d => userMap.set(d.id, d.data()));
-      legacySnap.docs.forEach(d => {
-        if (!userMap.has(d.id)) userMap.set(d.id, d.data());
-      });
+      const profilesSnap = await adminDb.collection('residents').where(FieldPath.documentId(), 'in', chunk).get();
+
+      const profileMap = new Map<string, FirebaseFirestore.DocumentData>();
+      profilesSnap.docs.forEach(d => profileMap.set(d.id, d.data()));
 
       enrollmentsSnap.docs.forEach(eDoc => {
         const eData = eDoc.data();
         if (chunk.includes(eData.residentId)) {
-           const profile = userMap.get(eData.residentId);
-           if (profile) {
-              const name = profile.displayName || profile.name || `${profile.firstName} ${profile.lastName}` || 'Unknown Resident';
-              if (!search || name.toLowerCase().includes(search)) {
-                residents.push({
-                  id: eData.residentId, // Use the user's ID as the resident ID for consistency
-                  enrollmentId: eDoc.id,
-                  name: name,
-                  email: profile.email,
-                  phone: profile.phone,
-                  status: eData.status,
-                  houseId: eData.houseId,
-                  // Keep legacy fields available if they exist in the joined profile
-                  ...profile,
-                });
-              }
-           }
+          const profile = profileMap.get(eData.residentId);
+          if (profile) {
+            const nameParts = [profile.firstName, profile.lastName].filter(Boolean);
+            const name = nameParts.length > 0 ? nameParts.join(' ') : (profile.displayName || profile.name || 'Unknown Resident');
+            if (!search || name.toLowerCase().includes(search)) {
+              residents.push({
+                id: eData.residentId,
+                enrollmentId: eDoc.id,
+                name,
+                email: profile.email ?? null,
+                phone: profile.phone ?? null,
+                status: eData.status,
+                houseId: eData.houseId ?? null,
+                phase: eData.phase ?? null,
+                moveInDate: eData.moveInDate ?? null,
+              });
+            }
+          }
         }
       });
     }
@@ -116,22 +110,44 @@ export async function POST(
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
     }
 
-    const resident = await residentService.createResident(parsed.data);
+    // Atomically create the resident profile and their enrollment
+    const now = Timestamp.now();
+    const residentRef = adminDb.collection('residents').doc();
+    const enrollmentRef = adminDb.collection(`tenants/${tenantId}/enrollments`).doc();
 
-    // Create a default enrollment for this resident in this tenant
-    const now = new Date();
-    await adminDb.collection(`tenants/${tenantId}/enrollments`).add({
-      residentId: resident.id,
+    const residentData = {
+      ...parsed.data,
+      secondarySubstances: parsed.data.secondarySubstances ?? [],
+      treatmentHistory: parsed.data.treatmentHistory ?? '',
+      allergies: parsed.data.allergies ?? [],
+      medications: parsed.data.medications ?? [],
+      diagnosisCodes: parsed.data.diagnosisCodes ?? [],
+      notes: parsed.data.notes ?? '',
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    const enrollmentData = {
+      residentId: residentRef.id,
       tenantId,
       status: 'active',
       phase: 1,
+      houseId: null,
+      roomId: null,
+      bedId: null,
       sobrietyStartDate: null,
       moveInDate: now,
       moveOutDate: null,
       createdAt: now,
       updatedAt: now,
-    });
+    };
 
+    const batch = adminDb.batch();
+    batch.set(residentRef, residentData);
+    batch.set(enrollmentRef, enrollmentData);
+    await batch.commit();
+
+    const resident = { id: residentRef.id, ...residentData };
     return NextResponse.json({ resident }, { status: 201 });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: error.statusCode ?? 500 });

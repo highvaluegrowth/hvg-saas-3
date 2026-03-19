@@ -3,6 +3,7 @@
 import React, { use } from 'react';
 import Link from 'next/link';
 import { useHouses } from '@/features/houses/hooks/useHouses';
+import { useEnrollments } from '@/features/enrollments/hooks/useEnrollments';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Table, TableHeader, TableBody, TableRow, TableCell } from '@/components/ui/Table';
@@ -63,8 +64,7 @@ function EmptyState({ tenantId, userCanManage }: { tenantId: string; userCanMana
   );
 }
 
-function HouseRow({ house, tenantId }: { house: House; tenantId: string }) {
-  const occupancy = 0; // Will be derived from residents in future
+function HouseRow({ house, tenantId, occupancy }: { house: House; tenantId: string; occupancy: number }) {
   const statusVariant = house.status === 'active' ? 'success' : 'default';
 
   return (
@@ -109,6 +109,12 @@ function HouseRow({ house, tenantId }: { house: House; tenantId: string }) {
 export default function HousesPage({ params }: HousesPageProps) {
   const { tenantId } = use(params);
   const { houses, loading, error } = useHouses(tenantId);
+  const { enrollments: activeEnrollments } = useEnrollments(tenantId, { status: 'active' });
+
+  const occupancyByHouse = activeEnrollments.reduce<Record<string, number>>((acc, e) => {
+    if (e.houseId) acc[e.houseId] = (acc[e.houseId] ?? 0) + 1;
+    return acc;
+  }, {});
 
   const { user } = useAuth();
   const userCanManage = user?.role ? canManageStaff(user.role as UserRole) : false;
@@ -168,7 +174,7 @@ export default function HousesPage({ params }: HousesPageProps) {
               </TableHeader>
               <TableBody>
                 {houses.map((house) => (
-                  <HouseRow key={house.id} house={house} tenantId={tenantId} />
+                  <HouseRow key={house.id} house={house} tenantId={tenantId} occupancy={occupancyByHouse[house.id] ?? 0} />
                 ))}
               </TableBody>
             </Table>

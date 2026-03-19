@@ -32,6 +32,15 @@ service cloud.firestore {
               request.auth.token.role == 'staff');
     }
 
+    function isStaffOrAbove() {
+      return isAuthenticated() && (
+        request.auth.token.role == 'super_admin' ||
+        request.auth.token.role == 'tenant_admin' ||
+        request.auth.token.role == 'staff_admin' ||
+        request.auth.token.role == 'staff'
+      );
+    }
+
     // ─── Tenants ────────────────────────────────────────────────────────────
     match /tenants/{tenantId} {
       allow read: if isSuperAdmin() || isTenantMember(tenantId);
@@ -81,33 +90,46 @@ service cloud.firestore {
     }
 
     // ─── Residents (global — not tenant-scoped) ──────────────────────────────
-    // Residents can exist independently and move between tenants.
-    // Any authenticated tenant member can read resident records.
-    // Only staff_admin+ can create/update residents.
+    // Residents can exist independently and move between tenants, but their
+    // resident record carries a `tenantId` field set at creation time.
+    // Staff may only read/write residents belonging to their own tenant.
+    // (API routes use Admin SDK and bypass these rules entirely.)
     match /residents/{residentId} {
-      allow read: if isAuthenticated();
-      allow create: if isAuthenticated() &&
-                      (request.auth.token.role == 'tenant_admin' ||
-                       request.auth.token.role == 'staff_admin' ||
-                       request.auth.token.role == 'super_admin');
-      allow update: if isAuthenticated() &&
-                      (request.auth.token.role == 'tenant_admin' ||
-                       request.auth.token.role == 'staff_admin' ||
-                       request.auth.token.role == 'super_admin');
+      // Only staff of the *same* tenant may read resident PII; SuperAdmin reads all.
+      allow read: if isSuperAdmin() ||
+                     (isStaffOrAbove() &&
+                      request.auth.token.tenant_id == resource.data.tenantId);
+      // On create, the tenantId field must match the requester's own tenant.
+      allow create: if isSuperAdmin() || (
+        (request.auth.token.role == 'tenant_admin' ||
+         request.auth.token.role == 'staff_admin') &&
+        request.resource.data.tenantId == request.auth.token.tenant_id
+      );
+      // On update, the existing document must belong to the requester's tenant.
+      allow update: if isSuperAdmin() || (
+        (request.auth.token.role == 'tenant_admin' ||
+         request.auth.token.role == 'staff_admin') &&
+        resource.data.tenantId == request.auth.token.tenant_id
+      );
       allow delete: if isSuperAdmin();
 
       // Personal resident events (appointments, drug tests, etc.)
+      // Inherit tenant check from the parent resident document via get().
       match /events/{eventId} {
-        allow read: if isAuthenticated();
-        allow create: if isAuthenticated() &&
-                        (request.auth.token.role == 'tenant_admin' ||
-                         request.auth.token.role == 'staff_admin' ||
-                         request.auth.token.role == 'staff' ||
-                         request.auth.token.role == 'super_admin');
-        allow update: if isAuthenticated() &&
-                        (request.auth.token.role == 'tenant_admin' ||
-                         request.auth.token.role == 'staff_admin' ||
-                         request.auth.token.role == 'super_admin');
+        allow read: if isSuperAdmin() ||
+          (isStaffOrAbove() &&
+           request.auth.token.tenant_id ==
+             get(/databases/$(database)/documents/residents/$(residentId)).data.tenantId);
+        allow create: if isSuperAdmin() ||
+          (isStaffOrAbove() &&
+           request.auth.token.tenant_id ==
+             get(/databases/$(database)/documents/residents/$(residentId)).data.tenantId);
+        allow update: if isSuperAdmin() || (
+          (request.auth.token.role == 'tenant_admin' ||
+           request.auth.token.role == 'staff_admin') &&
+          request.auth.token.tenant_id ==
+            get(/databases/$(database)/documents/residents/$(residentId)).data.tenantId
+        );
         allow delete: if isSuperAdmin();
       }
     }
@@ -118,6 +140,16 @@ service cloud.firestore {
       allow create: if isAuthenticated() && request.auth.uid == uid;
       allow update: if isAuthenticated() && request.auth.uid == uid;
       allow delete: if isSuperAdmin();
+
+      // LMS course enrollments — user owns their own; SuperAdmin can read all.
+      // Progress writes are allowed client-side for offline tracking;
+      // the API route (Admin SDK) is the authoritative writer for grading.
+      match /courseEnrollments/{courseId} {
+        allow read: if isAuthenticated() && (request.auth.uid == uid || isSuperAdmin());
+        allow create: if isAuthenticated() && request.auth.uid == uid;
+        allow update: if isAuthenticated() && request.auth.uid == uid;
+        allow delete: if isSuperAdmin();
+      }
     }
 
     // ─── Join Requests (resident applying to join a tenant) ──────────────────

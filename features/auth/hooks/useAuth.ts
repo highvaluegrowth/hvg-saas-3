@@ -40,6 +40,15 @@ export function useAuth(): UseAuthReturn {
         loading: false,
         error: null,
       });
+
+      // Set a routing-hint cookie so Next.js edge middleware can redirect
+      // unauthenticated/wrong-tenant requests before the page loads.
+      // This is NOT a security token — real enforcement is Firestore rules + verifyAuthToken().
+      if (typeof document !== 'undefined') {
+        const sessionTenantId = user.tenantId ?? '';
+        const sessionRole = user.role ?? 'resident';
+        document.cookie = `hvg-session=${sessionTenantId}|${sessionRole}; path=/; SameSite=Strict; Max-Age=3600`;
+      }
     } catch (error: any) {
       setState({
         user: null,
@@ -62,6 +71,10 @@ export function useAuth(): UseAuthReturn {
             loading: false,
             error: null,
           });
+          // Clear the routing-hint cookie on sign-out
+          if (typeof document !== 'undefined') {
+            document.cookie = 'hvg-session=; path=/; Max-Age=0; SameSite=Strict';
+          }
         }
       },
       (error) => {

@@ -1,2 +1,3 @@
-json_key_file("/Users/peter/Desktop/hvg-saas-3/hvg-saas-3-17fa178dc2c5.json") # Path to the json secret file - Follow https://docs.fastlane.tools/actions/supply/#setup to get one
-package_name("com.hvg_saas_3.mobile") # e.g. com.krausefx.app
+# Use PLAY_STORE_JSON_KEY_PATH env var on CI; falls back to the key file at project root for local dev.
+json_key_file(ENV["PLAY_STORE_JSON_KEY_PATH"] || File.expand_path("../../../hvg-saas-3-17fa178dc2c5.json", __dir__))
+package_name("com.hvg_saas_3.mobile")
