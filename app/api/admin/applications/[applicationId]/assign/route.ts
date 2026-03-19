@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { adminDb as db } from '@/lib/firebase/admin';
+import { notificationService } from '@/lib/firebase/notificationService';
 
 export const dynamic = 'force-dynamic';
 
@@ -55,6 +56,18 @@ export async function POST(
                 assignedAt: now,
                 status: 'assigned_to_tenant',
             });
+
+        // Notify the tenant admin that a new application has been assigned to them
+        await notificationService.createNotification({
+            tenantId: tenantId,
+            userId: tenantId,
+            type: 'application',
+            title: 'New Application Assigned',
+            preview: `${appData.applicantName || 'An applicant'} — review in Applications.`,
+            refId: applicationId,
+            refCollection: 'applications',
+            priority: 'high',
+        });
 
         return NextResponse.json({ success: true });
     } catch (error) {

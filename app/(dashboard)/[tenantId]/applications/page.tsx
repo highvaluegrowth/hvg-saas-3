@@ -2,6 +2,7 @@
 
 import { use, useEffect, useState, useCallback, useMemo } from 'react';
 import { authService } from '@/features/auth/services/authService';
+import { useAuth } from '@/features/auth/hooks/useAuth';
 import type { Application, ApplicationStatus, ApplicationType } from '@/features/applications/types';
 import {
   DndContext,
@@ -300,11 +301,20 @@ function KanbanColumn({ id, label, color, applications, onCardClick }: { id: str
 
 export default function ApplicationsPage({ params }: { params: Promise<{ tenantId: string }> }) {
   const { tenantId } = use(params);
+  const { user } = useAuth();
 
+  const [view, setView] = useState<'kanban' | 'tenant_apps'>('kanban');
   const [applications, setApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeApp, setActiveApp] = useState<Application | null>(null);
   const [selectedApp, setSelectedApp] = useState<Application | null>(null);
+
+  // Tenant Apps tab state (super_admin only)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [tenantApps, setTenantApps] = useState<any[]>([]);
+  const [tenantAppsLoading, setTenantAppsLoading] = useState(false);
+  const [rejectModal, setRejectModal] = useState<{ id: string; name: string } | null>(null);
+  const [rejectReason, setRejectReason] = useState('');
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -336,6 +346,57 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
   useEffect(() => {
     fetchApplications();
   }, [fetchApplications]);
+
+  const fetchTenantApps = useCallback(async () => {
+    setTenantAppsLoading(true);
+    try {
+      const token = await authService.getIdToken();
+      const res = await fetch('/api/admin/applications?type=tenant&status=pending_triage', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const json = await res.json();
+      setTenantApps(json.applications ?? []);
+    } catch (err) {
+      console.error('Fetch tenant apps error:', err);
+    } finally {
+      setTenantAppsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (view === 'tenant_apps' && user?.role === 'super_admin') fetchTenantApps();
+  }, [view, user?.role, fetchTenantApps]);
+
+  const handleApproveTenant = async (appId: string) => {
+    if (!confirm('Approve this tenant application?')) return;
+    try {
+      const token = await authService.getIdToken();
+      await fetch(`/api/admin/applications/${appId}/approve-tenant`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      fetchTenantApps();
+    } catch (err) {
+      console.error('Approve error:', err);
+    }
+  };
+
+  const handleRejectTenant = async () => {
+    if (!rejectModal) return;
+    try {
+      const token = await authService.getIdToken();
+      await fetch(`/api/admin/applications/${rejectModal.id}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ reason: rejectReason }),
+      });
+      setRejectModal(null);
+      setRejectReason('');
+      fetchTenantApps();
+    } catch (err) {
+      console.error('Reject error:', err);
+    }
+  };
 
   const updateAppStatus = async (appId: string, newStatus: ApplicationStatus) => {
     try {
@@ -401,14 +462,71 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
 
   return (
     <div className="p-6 space-y-8">
-      <div>
-        <h1 className="text-3xl font-black text-white tracking-tighter">APPLICATION PIPELINE</h1>
-        <p className="text-slate-500 text-sm font-medium mt-1 uppercase tracking-widest">
-          Manage resident admission and staff onboarding
-        </p>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-black text-white tracking-tighter">APPLICATION PIPELINE</h1>
+          <p className="text-slate-500 text-sm font-medium mt-1 uppercase tracking-widest">
+            Manage resident admission and staff onboarding
+          </p>
+        </div>
+        {user?.role === 'super_admin' && (
+          <div className="flex items-center gap-1 p-1 bg-white/5 rounded-xl border border-white/10 self-start sm:self-auto">
+            <button
+              onClick={() => setView('kanban')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${view === 'kanban' ? 'bg-cyan-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+            >
+              Pipeline
+            </button>
+            <button
+              onClick={() => setView('tenant_apps')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${view === 'tenant_apps' ? 'bg-fuchsia-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
+            >
+              Tenant Apps
+            </button>
+          </div>
+        )}
       </div>
 
-      {loading ? (
+      {view === 'tenant_apps' && user?.role === 'super_admin' ? (
+        <div className="space-y-4">
+          {tenantAppsLoading ? (
+            <div className="flex justify-center py-20">
+              <div className="w-10 h-10 border-4 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : tenantApps.length === 0 ? (
+            <div className="text-center py-20 text-slate-500 text-sm font-bold uppercase tracking-widest">
+              No pending tenant applications
+            </div>
+          ) : tenantApps.map((app) => (
+            <div key={app.id} className="bg-white/5 border border-white/10 rounded-2xl p-6 flex flex-col sm:flex-row sm:items-center gap-4 hover:bg-white/10 transition-all">
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-bold text-base truncate">{app.applicantName || 'Unknown Applicant'}</p>
+                <p className="text-slate-400 text-xs mt-0.5 truncate">{app.applicantEmail}</p>
+                {app.data?.organizationName && (
+                  <p className="text-fuchsia-400 text-xs font-bold mt-1 uppercase tracking-widest truncate">{app.data.organizationName}</p>
+                )}
+              </div>
+              <div className="flex items-center gap-2 text-xs text-slate-500 font-medium shrink-0">
+                {app.submittedAt ? new Date(app.submittedAt).toLocaleDateString() : '—'}
+              </div>
+              <div className="flex gap-2 shrink-0">
+                <button
+                  onClick={() => handleApproveTenant(app.id)}
+                  className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                >
+                  Approve
+                </button>
+                <button
+                  onClick={() => { setRejectModal({ id: app.id, name: app.applicantName }); setRejectReason(''); }}
+                  className="bg-rose-600/20 hover:bg-rose-600/40 text-rose-400 border border-rose-500/20 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                >
+                  Reject
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : loading ? (
         <div className="flex justify-center py-20">
           <div className="w-10 h-10 border-4 border-fuchsia-500 border-t-transparent rounded-full animate-spin" />
         </div>
@@ -447,6 +565,36 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
               ) : null}
             </DragOverlay>
           </DndContext>
+        </div>
+      )}
+
+      {rejectModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md bg-[#0D1117] border border-white/10 rounded-3xl p-8 space-y-6 shadow-2xl">
+            <h3 className="text-lg font-black text-white uppercase tracking-tight">Reject Application</h3>
+            <p className="text-slate-400 text-sm">Rejecting <span className="text-white font-bold">{rejectModal.name}</span></p>
+            <textarea
+              value={rejectReason}
+              onChange={(e) => setRejectReason(e.target.value)}
+              placeholder="Reason for rejection (optional)"
+              rows={3}
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white resize-none focus:outline-none focus:ring-2 focus:ring-rose-500"
+            />
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setRejectModal(null)}
+                className="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRejectTenant}
+                className="bg-rose-600 hover:bg-rose-500 text-white px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+              >
+                Confirm Reject
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

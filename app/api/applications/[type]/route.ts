@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { verifyAuthToken } from '@/lib/middleware/authMiddleware';
 import { adminDb as db, FieldValue } from '@/lib/firebase/admin';
 import type { ApplicationType } from '@/features/applications/types';
+import { notificationService } from '@/lib/firebase/notificationService';
 
 export const dynamic = 'force-dynamic';
 
 
-const VALID_TYPES: ApplicationType[] = ['bed', 'staff', 'course', 'event'];
+const VALID_TYPES: ApplicationType[] = ['bed', 'staff', 'course', 'event', 'tenant'];
 
 export async function POST(
     request: NextRequest,
@@ -63,6 +64,27 @@ export async function POST(
         // but for now returning FieldValue is fine or we can omit it from the response.
 
         await docRef.set(application);
+
+        // Notify all super_admins when a new tenant application arrives
+        if (type === 'tenant') {
+            const superAdminsSnap = await db.collection('users')
+                .where('role', '==', 'super_admin')
+                .limit(10)
+                .get();
+
+            await Promise.all(superAdminsSnap.docs.map((userDoc) =>
+                notificationService.createNotification({
+                    tenantId: userDoc.id,
+                    userId: userDoc.id,
+                    type: 'application',
+                    title: 'New Tenant Application',
+                    preview: `${application.applicantName || 'New applicant'} — review in Tenant Approvals.`,
+                    refId: docRef.id,
+                    refCollection: 'applications',
+                    priority: 'high',
+                })
+            ));
+        }
 
         return NextResponse.json({ applicationId: docRef.id, application }, { status: 201 });
     } catch (error) {

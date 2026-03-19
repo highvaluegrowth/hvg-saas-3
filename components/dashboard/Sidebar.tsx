@@ -5,7 +5,14 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { authService } from '@/features/auth/services/authService';
 import { getNavigationForRole, iconPaths } from '@/lib/constants/navigation';
-import { LogOut } from 'lucide-react';
+import { LogOut, Inbox, Building2, CircleDollarSign, ServerCrash } from 'lucide-react';
+
+const PLATFORM_ADMIN_ITEMS = [
+  { href: '/superadmin/applications', label: 'Tenant Approvals', Icon: Inbox },
+  { href: '/superadmin/tenants', label: 'All Tenants', Icon: Building2 },
+  { href: '/superadmin/financials', label: 'Financials', Icon: CircleDollarSign },
+  { href: '/superadmin/system', label: 'System Health', Icon: ServerCrash },
+] as const;
 
 interface SidebarProps {
   tenantId: string;
@@ -188,6 +195,62 @@ export function Sidebar({ tenantId, tenantName, isOpen = true, onClose, isCollap
               );
             })}
           </nav>
+
+          {/* Platform Admin Section — super_admin only */}
+          {user?.role === 'super_admin' && (
+            <div className="px-3 pb-3">
+              {/* Divider with label */}
+              <div className="flex items-center gap-2 mb-2 mt-1">
+                <div className="flex-1 h-px" style={{ background: 'rgba(217,70,239,0.25)' }} />
+                {!isCollapsed && (
+                  <span
+                    className="text-[9px] font-black uppercase tracking-widest shrink-0"
+                    style={{ color: 'rgba(217,70,239,0.55)' }}
+                  >
+                    Platform Admin
+                  </span>
+                )}
+                <div className="flex-1 h-px" style={{ background: 'rgba(217,70,239,0.25)' }} />
+              </div>
+
+              <div className="space-y-0.5">
+                {PLATFORM_ADMIN_ITEMS.map((item) => {
+                  const isActive = pathname.startsWith(`/${tenantId}${item.href}`);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={`/${tenantId}${item.href}`}
+                      className={`flex items-center rounded-lg text-sm font-medium transition-colors duration-150 ${isCollapsed ? 'justify-center py-3 px-2' : 'px-3 py-2.5'}`}
+                      style={{
+                        background: isActive ? 'rgba(217,70,239,0.12)' : 'transparent',
+                        color: isActive ? '#E879F9' : 'rgba(255,255,255,0.45)',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isActive) {
+                          (e.currentTarget as HTMLElement).style.background = 'rgba(217,70,239,0.07)';
+                          (e.currentTarget as HTMLElement).style.color = 'rgba(217,70,239,0.85)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isActive) {
+                          (e.currentTarget as HTMLElement).style.background = 'transparent';
+                          (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.45)';
+                        }
+                      }}
+                      onClick={onClose}
+                      title={isCollapsed ? item.label : undefined}
+                    >
+                      <item.Icon
+                        className={`shrink-0 w-5 h-5 ${isCollapsed ? '' : 'mr-3'}`}
+                        style={{ color: isActive ? '#E879F9' : 'rgba(217,70,239,0.5)' }}
+                      />
+                      {!isCollapsed && <span>{item.label}</span>}
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* User info */}
           <div
