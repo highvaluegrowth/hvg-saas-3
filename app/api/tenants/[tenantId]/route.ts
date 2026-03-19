@@ -9,12 +9,14 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ tenantId: string }> }
 ) {
+  let token;
   try {
-    const token = await verifyAuthToken(request);
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    token = await verifyAuthToken(request);
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
+  try {
     const { tenantId } = await params;
 
     let tenant = await tenantService.getById(tenantId);
@@ -28,8 +30,8 @@ export async function GET(
       return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
     }
 
-    // Only allow access to the user's own tenant, super_admin, or if the user is the draft owner
-    if (token.tenant_id !== tenantId && token.role !== 'super_admin' && tenant.ownerId !== token.uid) {
+    // Allow super_admin, the tenant's own members, or the draft owner
+    if (token.role !== 'super_admin' && token.tenant_id !== tenantId && tenant.ownerId !== token.uid) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -44,12 +46,14 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ tenantId: string }> }
 ) {
+  let token;
   try {
-    const token = await verifyAuthToken(request);
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    token = await verifyAuthToken(request);
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
 
+  try {
     const { tenantId } = await params;
     const updates = await request.json();
 
@@ -62,7 +66,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Tenant not found' }, { status: 404 });
     }
 
-    if (token.tenant_id !== tenantId && token.role !== 'super_admin' && tenant.ownerId !== token.uid) {
+    if (token.role !== 'super_admin' && token.tenant_id !== tenantId && tenant.ownerId !== token.uid) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 

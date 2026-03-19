@@ -86,6 +86,29 @@ export async function POST(
             ));
         }
 
+        // Notify the facility's admins when a bed or staff application targets their tenant
+        if ((type === 'bed' || type === 'staff') && application.requestedTenantId) {
+            const facilityAdminsSnap = await db.collection('users')
+                .where('tenantId', '==', application.requestedTenantId)
+                .where('role', 'in', ['tenant_admin', 'staff_admin'])
+                .limit(20)
+                .get();
+
+            const typeLabel = type === 'bed' ? 'Bed' : 'Staff';
+            await Promise.all(facilityAdminsSnap.docs.map((userDoc) =>
+                notificationService.createNotification({
+                    tenantId: application.requestedTenantId!,
+                    userId: userDoc.id,
+                    type: 'application',
+                    title: `New ${typeLabel} Application`,
+                    preview: `${application.applicantName || 'New applicant'} — review in Applications.`,
+                    refId: docRef.id,
+                    refCollection: 'applications',
+                    priority: 'high',
+                })
+            ));
+        }
+
         return NextResponse.json({ applicationId: docRef.id, application }, { status: 201 });
     } catch (error) {
         console.error('POST /api/applications/[type]:', error);

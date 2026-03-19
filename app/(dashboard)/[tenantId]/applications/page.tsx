@@ -137,7 +137,7 @@ function TenantChat({ tenantId, applicationId, applicantName }: { tenantId: stri
 }
 
 const COLUMNS: { id: ApplicationStatus; label: string; color: string }[] = [
-  { id: 'assigned', label: 'New', color: '#93C5FD' },
+  { id: 'assigned_to_tenant', label: 'New', color: '#93C5FD' },
   { id: 'reviewing', label: 'Reviewing', color: '#67E8F9' },
   { id: 'waitlisted', label: 'Waitlisted', color: '#C4B5FD' },
   { id: 'accepted', label: 'Admitted', color: '#6EE7B7' },
@@ -315,6 +315,16 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
   const [tenantAppsLoading, setTenantAppsLoading] = useState(false);
   const [rejectModal, setRejectModal] = useState<{ id: string; name: string } | null>(null);
   const [rejectReason, setRejectReason] = useState('');
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [rejectLoading, setRejectLoading] = useState(false);
+
+  // Bed/staff reject modal (uses tenant PATCH endpoint with notes)
+  const [bedRejectModal, setBedRejectModal] = useState<{ id: string; name: string } | null>(null);
+  const [bedRejectReason, setBedRejectReason] = useState('');
+  const [bedRejectLoading, setBedRejectLoading] = useState(false);
+
+  // Detail modal action loading ('accept' | 'waitlist')
+  const [detailActionLoading, setDetailActionLoading] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -368,7 +378,8 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
   }, [view, user?.role, fetchTenantApps]);
 
   const handleApproveTenant = async (appId: string) => {
-    if (!confirm('Approve this tenant application?')) return;
+    if (!confirm('Approve this tenant application? This will create their organization and set custom claims.')) return;
+    setApprovingId(appId);
     try {
       const token = await authService.getIdToken();
       await fetch(`/api/admin/applications/${appId}/approve-tenant`, {
@@ -378,27 +389,58 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
       fetchTenantApps();
     } catch (err) {
       console.error('Approve error:', err);
+    } finally {
+      setApprovingId(null);
     }
   };
 
   const handleRejectTenant = async () => {
-    if (!rejectModal) return;
+    if (!rejectModal || !rejectReason.trim()) return;
+    setRejectLoading(true);
     try {
       const token = await authService.getIdToken();
       await fetch(`/api/admin/applications/${rejectModal.id}/reject`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ reason: rejectReason }),
+        body: JSON.stringify({ reason: rejectReason.trim() }),
       });
       setRejectModal(null);
       setRejectReason('');
       fetchTenantApps();
     } catch (err) {
       console.error('Reject error:', err);
+    } finally {
+      setRejectLoading(false);
     }
   };
 
-  const updateAppStatus = async (appId: string, newStatus: ApplicationStatus) => {
+  const handleBedReject = async () => {
+    if (!bedRejectModal || !bedRejectReason.trim()) return;
+    setBedRejectLoading(true);
+    try {
+      await updateAppStatus(bedRejectModal.id, 'rejected', bedRejectReason.trim());
+      setBedRejectModal(null);
+      setBedRejectReason('');
+      setSelectedApp(null);
+    } catch (err) {
+      console.error('Bed/staff reject error:', err);
+    } finally {
+      setBedRejectLoading(false);
+    }
+  };
+
+  const handleDetailAction = async (action: 'accepted' | 'reviewing' | 'waitlisted') => {
+    if (!selectedApp) return;
+    setDetailActionLoading(action);
+    try {
+      await updateAppStatus(selectedApp.id, action);
+      setSelectedApp(null);
+    } finally {
+      setDetailActionLoading(null);
+    }
+  };
+
+  const updateAppStatus = async (appId: string, newStatus: ApplicationStatus, notes?: string) => {
     try {
       const token = await authService.getIdToken();
       await fetch(`/api/tenants/${tenantId}/applications`, {
@@ -407,7 +449,7 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ applicationId: appId, status: newStatus }),
+        body: JSON.stringify({ applicationId: appId, status: newStatus, ...(notes ? { notes } : {}) }),
       });
       await fetchApplications();
     } catch (err) {
@@ -512,13 +554,16 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
               <div className="flex gap-2 shrink-0">
                 <button
                   onClick={() => handleApproveTenant(app.id)}
-                  className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                  disabled={approvingId === app.id}
+                  className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2"
                 >
+                  {approvingId === app.id && <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />}
                   Approve
                 </button>
                 <button
                   onClick={() => { setRejectModal({ id: app.id, name: app.applicantName }); setRejectReason(''); }}
-                  className="bg-rose-600/20 hover:bg-rose-600/40 text-rose-400 border border-rose-500/20 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                  disabled={approvingId === app.id}
+                  className="bg-rose-600/20 hover:bg-rose-600/40 disabled:opacity-50 disabled:cursor-not-allowed text-rose-400 border border-rose-500/20 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
                 >
                   Reject
                 </button>
@@ -571,26 +616,68 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
       {rejectModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-md bg-[#0D1117] border border-white/10 rounded-3xl p-8 space-y-6 shadow-2xl">
-            <h3 className="text-lg font-black text-white uppercase tracking-tight">Reject Application</h3>
+            <h3 className="text-lg font-black text-white uppercase tracking-tight">Reject Tenant Application</h3>
             <p className="text-slate-400 text-sm">Rejecting <span className="text-white font-bold">{rejectModal.name}</span></p>
-            <textarea
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="Reason for rejection (optional)"
-              rows={3}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm text-white resize-none focus:outline-none focus:ring-2 focus:ring-rose-500"
-            />
+            <div>
+              <textarea
+                value={rejectReason}
+                onChange={(e) => setRejectReason(e.target.value)}
+                placeholder="Reason for rejection (required)"
+                rows={3}
+                className={`w-full bg-white/5 border rounded-xl px-4 py-3 text-sm text-white resize-none focus:outline-none focus:ring-2 focus:ring-rose-500 ${!rejectReason.trim() ? 'border-rose-500/40' : 'border-white/10'}`}
+              />
+              {!rejectReason.trim() && <p className="text-rose-400 text-[10px] font-bold mt-1 uppercase tracking-widest">A reason is required</p>}
+            </div>
             <div className="flex gap-3 justify-end">
               <button
-                onClick={() => setRejectModal(null)}
-                className="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors"
+                onClick={() => { setRejectModal(null); setRejectReason(''); }}
+                disabled={rejectLoading}
+                className="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleRejectTenant}
-                className="bg-rose-600 hover:bg-rose-500 text-white px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all"
+                disabled={rejectLoading || !rejectReason.trim()}
+                className="bg-rose-600 hover:bg-rose-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2"
               >
+                {rejectLoading && <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                Confirm Reject
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {bedRejectModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md bg-[#0D1117] border border-white/10 rounded-3xl p-8 space-y-6 shadow-2xl">
+            <h3 className="text-lg font-black text-white uppercase tracking-tight">Reject Application</h3>
+            <p className="text-slate-400 text-sm">Rejecting <span className="text-white font-bold">{bedRejectModal.name}</span></p>
+            <div>
+              <textarea
+                value={bedRejectReason}
+                onChange={(e) => setBedRejectReason(e.target.value)}
+                placeholder="Reason for rejection (required)"
+                rows={3}
+                className={`w-full bg-white/5 border rounded-xl px-4 py-3 text-sm text-white resize-none focus:outline-none focus:ring-2 focus:ring-rose-500 ${!bedRejectReason.trim() ? 'border-rose-500/40' : 'border-white/10'}`}
+              />
+              {!bedRejectReason.trim() && <p className="text-rose-400 text-[10px] font-bold mt-1 uppercase tracking-widest">A reason is required</p>}
+            </div>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => { setBedRejectModal(null); setBedRejectReason(''); }}
+                disabled={bedRejectLoading}
+                className="px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest text-slate-400 hover:text-white transition-colors disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleBedReject}
+                disabled={bedRejectLoading || !bedRejectReason.trim()}
+                className="bg-rose-600 hover:bg-rose-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2"
+              >
+                {bedRejectLoading && <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />}
                 Confirm Reject
               </button>
             </div>
@@ -601,24 +688,55 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
       {selectedApp && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
           <div className="w-full max-w-4xl h-[80vh] transform overflow-hidden rounded-3xl bg-[#0D1117] border border-white/10 flex flex-col shadow-2xl">
-            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-white/5">
-              <div>
-                <div className="flex items-center gap-3">
+            <div className="p-6 border-b border-white/10 flex justify-between items-start gap-4 bg-white/5">
+              <div className="min-w-0">
+                <div className="flex items-center gap-3 flex-wrap">
                   <h2 className="text-xl font-bold text-white">{selectedApp.applicantName}</h2>
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${STATUS_CONFIG[selectedApp.status].badge.color === '#6EE7B7' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-white/5 text-slate-400 border border-white/10'}`}>
-                    {selectedApp.status.replace('_', ' ')}
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-white/5 text-slate-400 border border-white/10">
+                    {selectedApp.status.replace(/_/g, ' ')}
                   </span>
                 </div>
                 <p className="text-sm text-slate-400 mt-1">{selectedApp.applicantEmail} • {selectedApp.zipCode}</p>
               </div>
-              <button
-                onClick={() => setSelectedApp(null)}
-                className="p-2 hover:bg-white/10 rounded-full transition-colors"
-              >
-                <svg className="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div className="flex items-center gap-2 shrink-0">
+                {selectedApp.status !== 'accepted' && selectedApp.status !== 'rejected' && (
+                  <>
+                    <button
+                      onClick={() => handleDetailAction('accepted')}
+                      disabled={!!detailActionLoading}
+                      className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5"
+                    >
+                      {detailActionLoading === 'accepted' && <span className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />}
+                      Admit
+                    </button>
+                    {selectedApp.status !== 'waitlisted' && (
+                      <button
+                        onClick={() => handleDetailAction('waitlisted')}
+                        disabled={!!detailActionLoading}
+                        className="bg-purple-600/30 hover:bg-purple-600/50 disabled:opacity-50 disabled:cursor-not-allowed text-purple-300 border border-purple-500/30 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5"
+                      >
+                        {detailActionLoading === 'waitlisted' && <span className="w-3 h-3 border-2 border-purple-300 border-t-transparent rounded-full animate-spin" />}
+                        Waitlist
+                      </button>
+                    )}
+                    <button
+                      onClick={() => { setBedRejectModal({ id: selectedApp.id, name: selectedApp.applicantName }); setBedRejectReason(''); }}
+                      disabled={!!detailActionLoading}
+                      className="bg-rose-600/20 hover:bg-rose-600/40 disabled:opacity-50 disabled:cursor-not-allowed text-rose-400 border border-rose-500/20 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all"
+                    >
+                      Reject
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={() => setSelectedApp(null)}
+                  className="p-2 hover:bg-white/10 rounded-full transition-colors ml-1"
+                >
+                  <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             <div className="flex-1 flex overflow-hidden">

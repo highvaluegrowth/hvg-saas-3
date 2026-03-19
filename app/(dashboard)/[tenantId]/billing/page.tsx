@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
-import { auth } from '@/lib/firebase/client';
+import { authService } from '@/features/auth/services/authService';
 import { SubscriptionInfo } from '@/features/tenant/types/tenant.types';
 
 interface PlanDisplay {
@@ -56,7 +56,7 @@ export default function BillingPage() {
 
   const fetchSubscription = useCallback(async () => {
     try {
-      const token = await auth.currentUser?.getIdToken();
+      const token = await authService.getIdToken();
       const res = await fetch(`/api/tenants/${tenantId}`, { headers: { Authorization: `Bearer ${token}` } });
       if (!res.ok) throw new Error('Failed to fetch tenant');
       const data = await res.json();
@@ -72,7 +72,7 @@ export default function BillingPage() {
   const handleManageSubscription = async () => {
     setPortalLoading(true); setError(null);
     try {
-      const token = await auth.currentUser?.getIdToken();
+      const token = await authService.getIdToken();
       const res = await fetch(`/api/tenants/${tenantId}/billing/portal`, { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? 'Failed to open portal');
@@ -86,7 +86,7 @@ export default function BillingPage() {
     if (!priceId) { setError('Price ID not configured. Please contact support or set NEXT_PUBLIC_STRIPE_PRICE_* env vars.'); return; }
     setCheckoutLoading(planId); setError(null);
     try {
-      const token = await auth.currentUser?.getIdToken();
+      const token = await authService.getIdToken();
       const res = await fetch(`/api/tenants/${tenantId}/billing/checkout`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },

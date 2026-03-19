@@ -43,7 +43,7 @@ export default function InboxPage({
             console.error('An unexpected error occurred while setting up the inbox sync.');
         }
 
-        return () => unsubscribe();
+        return () => { if (typeof unsubscribe === 'function') unsubscribe(); };
     }, [tenantId]);
 
     const selectedNotification = notifications.find((n) => n.id === selectedId) || null;

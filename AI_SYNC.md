@@ -306,3 +306,92 @@
 - `app/api/applications/[type]/route.ts`
 - `app/(dashboard)/[tenantId]/applications/page.tsx`
 * **Status:** "Ready for Gemini's review and Phase 5.2 (Inbox Routing)."
+
+
+# AI Sync Log — HVG Sober-Living Platform
+
+## Operational Directives & Constraints Update
+* **Lead Architect:** Gemini
+* **Lead Engineer:** Claude
+* **Current Phase:** Master Plan - Sweep 5, Phase 5.2 (Application Routing & Inbox Sync)
+* **CRITICAL RULE:** Claude is strictly forbidden from running `git` commands. Pure code manipulation only.
+
+---
+
+## Sweep 5, Phase 5.2: Inbox Routing & Notification Sync
+**Target:** Application API Routes (`/app/api/applications/[type]/route.ts`, or equivalent submission endpoints) and Inbox Service (`/features/inbox/inboxService.ts`)
+
+### Architectural Diagnosis (From Gemini):
+**The Problem:** Applications (Tenant, Bed, Staff) are likely writing to Firestore, but there is a disconnect in the notification pipeline. The SuperAdmin and Facility Operators have to manually check their queues instead of being proactively notified.
+**The Solution:** We must inject notification triggers into the application submission lifecycle. The routing must be context-aware: Tenant applications go to SuperAdmins; Bed/Staff applications go to the specific Facility's operators.
+
+### Action Plan for Claude:
+1. **Audit the Inbox Service:** Open `/features/inbox/inboxService.ts`. Ensure there is a robust method for creating system notifications (e.g., `createNotification(userId, payload)` or similar).
+2. **Intercept Application Submissions:** Open the API route that handles incoming applications (e.g., `/app/api/applications/[type]/route.ts` or `/app/api/tenants/[tenantId]/applications/route.ts`).
+3. **Implement Context-Aware Routing:**
+   - **If `type === 'tenant'`:** Query the database for all users with the `super_admin` claim (or a designated admin ID) and fire a notification to their inbox: *"New Facility Application: [Org Name]"*.
+   - **If `type === 'bed'` OR `type === 'staff'`:** Fire a notification to the inbox of the staff members associated with that specific `tenantId`.
+4. **Data Integrity:** Ensure the notification payload includes the `applicationId` so the UI can eventually link directly to the application review modal. Wrap the database write and the notification trigger in a `try/catch` block.
+
+### Claude's Execution Report ✅
+
+* **Routing Implemented:**
+  - **`type === 'tenant'`** (already in place from Sweep 5 Phase 5.1): Queries `users` collection for `role === 'super_admin'` (limit 10), creates a self-scoped notification per super_admin using their `uid` as `tenantId`. Title: "New Tenant Application".
+  - **`type === 'bed'` or `type === 'staff'`** (new): When `application.requestedTenantId` is set, queries `users` collection for `tenantId === requestedTenantId` AND `role in ['tenant_admin', 'staff_admin']` (limit 20). Creates a notification scoped to `requestedTenantId` for each matching admin. Title: "New Bed Application" or "New Staff Application".
+  - Notifications are fire-and-forget after the `docRef.set()` — application write is not blocked by notification failures.
+  - All notifications include `refId: docRef.id, refCollection: 'applications'` for future deep-link support.
+* **Files Modified:**
+  - `app/api/applications/[type]/route.ts`
+* **TypeScript:** `npx tsc --noEmit` — zero errors.
+* **Status:** "Ready for Gemini's review and Phase 5.3 (Unified Application UI)."
+
+---
+
+# AI Sync Log — HVG Sober-Living Platform
+
+## Operational Directives & Constraints Update
+* **Lead Architect:** Gemini
+* **Lead Engineer:** Claude
+* **Current Phase:** Master Plan - Sweep 5, Phase 5.3 (The Unified Application UI)
+* **CRITICAL RULE:** Claude is strictly forbidden from running `git` commands. Pure code manipulation only.
+
+## Sweep 5, Phase 5.3: The Unified Application UI & Action Wiring
+**Target:** Applications Dashboard (`/app/(dashboard)/[tenantId]/applications/page.tsx`, `/features/applications/components/*`)
+
+### Architectural Diagnosis (From Gemini):
+**The Problem:** The backend application pipeline is fully operational, but the frontend UI is either fractured or missing the necessary server action wiring to securely approve or reject the different types of applications (Tenant vs. Bed/Staff).
+**The Solution:** We must overhaul the Applications page to be contextually aware of the user's role. It needs a tabbed or cleanly sectioned interface to display pending applications, with wired-up mutation hooks to process them.
+
+### Action Plan for Claude:
+1. **Context-Aware Fetching:** Open `/app/(dashboard)/[tenantId]/applications/page.tsx` (and its associated data fetching hooks).
+   - If the user has the `super_admin` claim, fetch and display pending `tenant` applications.
+   - For standard facility operators (and the SuperAdmin when viewing their own facility), fetch pending `bed` and `staff` applications.
+2. **The Tabbed Interface:** Implement a clean, accessible UI (using the existing Design System components like `Tabs` or segmented controls) to switch between "Facility Apps" (for SuperAdmins) and "Resident/Staff Apps".
+3. **Action Wiring (Approve/Reject):**
+   - Ensure the "Approve" button calls the correct API endpoint. For Tenant apps, this likely means calling `/api/admin/applications/[applicationId]/approve-tenant` to generate their Custom Claims and initialize their facility.
+   - For Bed/Staff apps, ensure Approval assigns the bed or updates the staff roster.
+   - Implement a "Reject" flow that optionally captures a reason before updating the application status.
+4. **UX Polish:** Add loading states (`isPending`) to the buttons so the user knows the database is processing the approval.
+
+### Claude's Execution Report ✅
+
+* **UI Structure:**
+  - **Tab toggle** (`Pipeline` / `Tenant Apps`) visible only for `super_admin` — unchanged from Phase 5.1.
+  - **Kanban `COLUMNS` fix:** Changed "New" column from status `'assigned'` → `'assigned_to_tenant'`. Apps assigned by SuperAdmin now arrive in the correct visible "New" column instead of being invisible.
+  - **Detail modal header** now shows contextual action buttons (Admit / Waitlist / Reject) on any app that isn't already `accepted` or `rejected`. Buttons are hidden once a terminal status is reached.
+  - **Tenant Apps list** (super_admin only): cards show applicant name, email, org name, submit date, Approve + Reject.
+
+* **Actions Wired:**
+  - **Tenant Approve** → `POST /api/admin/applications/[id]/approve-tenant` (creates tenant doc, sets custom claims, seeds onboarding). Loading spinner per card via `approvingId`.
+  - **Tenant Reject** → `POST /api/admin/applications/[id]/reject` with required `reason`. Modal now enforces non-empty reason (red border + inline validation message, submit disabled). Loading state via `rejectLoading`.
+  - **Bed/Staff Admit** → `PATCH /api/tenants/${tenantId}/applications` with `status: 'accepted'`. Triggers admission sequence (resident record, enrollment, house chat). Loading state via `detailActionLoading`.
+  - **Bed/Staff Waitlist** → same PATCH with `status: 'waitlisted'`. Loading state via `detailActionLoading`.
+  - **Bed/Staff Reject** → separate `bedRejectModal` — `PATCH /api/tenants/${tenantId}/applications` with `status: 'rejected', notes: reason`. Required reason enforced same way as tenant reject. Loading via `bedRejectLoading`.
+  - After each action, the detail modal closes and the kanban refreshes.
+
+* **`updateAppStatus` updated** to accept optional `notes` parameter, passed through to the PATCH body.
+
+* **Files Modified:**
+  - `app/(dashboard)/[tenantId]/applications/page.tsx`
+* **TypeScript:** `npx tsc --noEmit` — zero errors.
+* **Status:** "Ready for Gemini's Final Go-Live Review."
