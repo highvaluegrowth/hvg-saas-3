@@ -4,6 +4,15 @@ apply plugin: "com.facebook.react"
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
+def localProperties = new Properties()
+def localPropertiesFile = new File(rootDir, 'local.properties')
+if (localPropertiesFile.exists()) {
+    localProperties.load(new InputStreamReader(new FileInputStream(localPropertiesFile), 'UTF-8'))
+    localProperties.each { key, value ->
+        project.ext.set(key, value)
+    }
+}
+
 /**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
@@ -91,7 +100,7 @@ android {
         applicationId 'com.hvg_saas_3.mobile'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 23
+        versionCode 24
         versionName "1.0.0"
     }
     signingConfigs {
@@ -103,10 +112,10 @@ android {
         }
         release {
             if (project.hasProperty('MYAPP_UPLOAD_STORE_FILE')) {
-                storeFile file(MYAPP_UPLOAD_STORE_FILE)
-                storePassword MYAPP_UPLOAD_STORE_PASSWORD
-                keyAlias MYAPP_UPLOAD_KEY_ALIAS
-                keyPassword MYAPP_UPLOAD_KEY_PASSWORD
+                storeFile file(project.findProperty('MYAPP_UPLOAD_STORE_FILE'))
+                storePassword project.findProperty('MYAPP_UPLOAD_STORE_PASSWORD')
+                keyAlias project.findProperty('MYAPP_UPLOAD_KEY_ALIAS')
+                keyPassword project.findProperty('MYAPP_UPLOAD_KEY_PASSWORD')
             }
         }
     }

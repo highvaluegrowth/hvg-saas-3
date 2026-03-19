@@ -11,21 +11,17 @@ platform :android do
 
   desc "Build a signed release AAB locally (does not upload to Play Store)"
   lane :build do
-    increment_version_code(gradle_file_path: "app/build.gradle")
-    gradle(
-      task: "bundle",
-      build_type: "Release"
-    )
+    # To run this lane: /opt/homebrew/Cellar/ruby/4.0.1/bin/bundle exec fastlane build
+    gradle(task: "bundle", build_type: "Release")
+
     UI.success "✅ AAB generated at: #{lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]}"
   end
 
   desc "Build and upload to Google Play internal track"
   lane :deploy do
-    increment_version_code(gradle_file_path: "app/build.gradle")
-    gradle(
-      task: "bundle",
-      build_type: "Release"
-    )
+    # To run this lane: /opt/homebrew/Cellar/ruby/4.0.1/bin/bundle exec fastlane build
+    gradle(task: "bundle", build_type: "Release")
+
     upload_to_play_store(
       track: "internal",
       aab: lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]

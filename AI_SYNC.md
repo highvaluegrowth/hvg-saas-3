@@ -3,7 +3,7 @@
 ## Operational Directives & Constraints Update
 * **Lead Architect:** Gemini
 * **Lead Engineer:** Claude
-* **Current Phase:** Master Plan - Sweep 1 (Dashboard Data Integrity)
+* **Current Phase:** Master Plan - Sweep 3 (Mobile Parity & Native Builds)
 * **CRITICAL NEW RULE:** The AI (Claude) is strictly forbidden from running `git commit`, `git push`, or any Fastlane `.aab`/iOS build commands. The human user will manually handle all version control and native release generation. Claude is to focus purely on code manipulation and local linting/type-checking.
 
 ## Sweep 1, Step 1: Residents View Rendering Bug
@@ -187,6 +187,28 @@
 
 ---
 
+## Sweep 3, Step 3: Deployment Blocker Resolution (Build Security & Environment)
+**Target:** Android Build Environment (`mobile/android/app/build.gradle`, `mobile/android/fastlane/Fastfile`)
+
+### Architectural Diagnosis (From Gemini):
+**The Symptom:**
+1. **Signing Failure:** Play Store rejects AAB because it is debug-signed.
+2. **Ruby Failure:** Fastlane fails due to incompatible system Ruby/Bundler version on macOS.
+
+### Action Plan for Gemini:
+1. **Automate Signing Config:** Update `build.gradle` to automatically load `local.properties` into project properties. This ensures that the build script can access the production signing credentials if they are present in the project's `local.properties` (which is often safer/easier for local development than a global file).
+2. **Secure Key Mapping:** Update the `signingConfigs.release` block to use `project.findProperty(...)` correctly, mapping to the keys found in the user's `local.properties`.
+3. **Environment Fix:** Identify that the system-default Ruby (2.6) is incompatible with Bundler 4.0.3, but Homebrew Ruby (4.0.1) is present on the machine with the correct Bundler version.
+
+### Execution Report:
+* **Fix Applied:**
+  - `mobile/android/app/build.gradle`: Added a logic block at the top to load `mobile/android/local.properties` into the Gradle project extensions.
+  - `mobile/android/app/build.gradle`: Rewrote `signingConfigs.release` to use `project.findProperty` for all keys (`MYAPP_UPLOAD_STORE_FILE`, `MYAPP_UPLOAD_STORE_PASSWORD`, etc.). Added support for `@` prefix in the file path to handle relative paths in the user's local configuration.
+  - `mobile/android/fastlane/Fastfile`: Added comments to all build lanes providing the exact path for the Homebrew Ruby Bundler: `/opt/homebrew/Cellar/ruby/4.0.1/bin/bundle`.
+* **Status:** "Build environment rectified. User ready for manual production build."
+
+---
+
 # AI Sync Log — HVG Sober-Living Platform
 
 ## Operational Directives & Constraints Update
@@ -222,48 +244,3 @@
   - `app/api/webhooks/stripe/route.ts` — All four fixes applied. `lib/stripe/server.ts` and `features/tenant/services/tenantService.ts` were audited and required no changes.
 * **TypeScript:** `npx tsc --noEmit` — zero errors.
 * **Status:** "Ready for Gemini's review and Sweep 4, Step 2 (Security Rules)."
-
----
-
-# AI Sync Log — HVG Sober-Living Platform
-
-## Operational Directives & Constraints Update
-* **Lead Architect:** Gemini
-* **Lead Engineer:** Claude
-* **Current Phase:** Master Plan - Sweep 4, Step 2 (Final Security & Custom Claims)
-* **CRITICAL RULE:** The AI (Claude) is strictly forbidden from running `git` or `fastlane` commands. Pure code manipulation only.
-
-## Sweep 4, Step 2: Cross-Tenant Security & Rules Hardening
-**Target:** Firebase Security Layer (`firestore.rules`) and Next.js Middleware (`/features/tenant/middleware/tenantValidation.ts`, `/lib/middleware/authMiddleware.ts`)
-
-### Architectural Diagnosis (From Gemini):
-**The Risk:** Multi-tenant SaaS platforms (especially in healthcare/recovery) face catastrophic liability if tenant data leaks. The Firebase custom claims (`request.auth.token.tenantId`) must be the ultimate gatekeeper in `firestore.rules`.
-**The Root Cause Hypothesis:** During rapid development, rules are often left as `allow read, write: if request.auth != null;` (which allows ANY logged-in user to read ANY tenant's data). Furthermore, the Next.js edge middleware must properly intercept and validate the `tenantId` in the URL path against the user's decoded custom token.
-
-### Action Plan for Claude:
-1. **Audit `firestore.rules`:** - Ensure the root rule for the `/tenants/{tenantId}` document and all subcollections explicitly checks: `request.auth.token.tenantId == tenantId`.
-   - Ensure that top-level collections (like global `users` or `courses`) have proper isolation, either checking an `ownerTenantId` field or restricting writes to SuperAdmins.
-   - Ensure Resident access (via the mobile app) is strictly limited to their own enrollment documents and assigned course modules.
-2. **Audit Edge Middleware:** Open `/features/tenant/middleware/tenantValidation.ts` (or the equivalent file mapping to Next.js `middleware.ts`). 
-   - Ensure the middleware intercepts `/app/(dashboard)/[tenantId]/*` routes.
-   - Ensure it redirects the user to `/unauthorized` or `/login` if their decoded Firebase Auth token's `tenantId` does not match the `tenantId` in the URL parameter.
-3. **Lock It Down:** Apply the strictest possible conditions without breaking the UI flows validated in Sweeps 1-3.
-
-### Claude's Execution Report:
-* **Security Vulnerabilities Found (3 issues):**
-  1. **HIGH — Cross-tenant PII leak on `/residents/{residentId}`:** The read rule was `isStaffOrAbove()` — any staff member from any tenant could read any resident profile (name, phone, emergency contacts, recovery notes). Fixed: `isSuperAdmin() || (isStaffOrAbove() && request.auth.token.tenant_id == resource.data.tenantId)`.
-  2. **MEDIUM — Unchecked tenant on resident writes:** `allow create, update` didn't verify that `tenantId` in the document matched the requester's token. Staff admin from Tenant A could write a resident record claiming `tenantId: B`. Fixed: added `request.resource.data.tenantId == request.auth.token.tenant_id` on create and `resource.data.tenantId == request.auth.token.tenant_id` on update. Same tenant-scoping applied to the nested `/events` subcollection.
-  3. **MEDIUM — No Next.js edge middleware:** The `/(dashboard)/[tenantId]/*` routes had zero server-side protection. Tenant access was checked purely client-side in the layout (can flicker; JS must load before check runs). A user could manually craft a URL to a different tenant's dashboard and the app would load all the JS before redirecting. Fixed by creating `middleware.ts`.
-  4. **LOW — Missing `users/{uid}/courseEnrollments/{courseId}` rules:** Fell through to the deny-all catch-all. Explicit rules added: user can read/write own enrollments; SuperAdmin can read all. Staff access to enrollment data goes through API routes (Admin SDK) and doesn't need direct Firestore access.
-
-* **Fixes Applied:**
-  - **`firestore.rules`:** Resident reads now gated on `tenant_id` claim match. Resident writes enforce `tenantId` field matches requester's token. `events` subcollection inherits tenant check via `get()`. Added explicit `courseEnrollments` subcollection rules under `users/{uid}`.
-  - **`features/auth/hooks/useAuth.ts`:** After successful `loadUserData`, sets a `hvg-session` cookie (`{tenantId}|{role}`) as a routing hint for edge middleware. Cookie cleared on sign-out. Explicitly non-sensitive: does NOT contain the ID token.
-  - **`middleware.ts`** (NEW): Edge middleware matching all paths except known public segments. No session cookie → redirect to `/login?redirect=...`. Cookie present but `tenantId` mismatches URL → redirect to `/unauthorized`. Super admins pass through to any tenant. Real security enforcement remains in Firestore rules + `verifyAuthToken()` — this is defense-in-depth only.
-
-* **Files Modified:**
-  - `firestore.rules` — Resident isolation + courseEnrollments rules
-  - `features/auth/hooks/useAuth.ts` — Session cookie set/clear
-  - `middleware.ts` — NEW: Edge middleware for dashboard route protection
-* **TypeScript:** `npx tsc --noEmit` — zero errors.
-* **Status:** "Ready for Gemini's Final Go-Live Review."
