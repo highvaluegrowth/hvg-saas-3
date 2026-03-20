@@ -6,8 +6,7 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { authService } from '@/features/auth/services/authService';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { GlobalNavbar } from '@/components/layout/GlobalNavbar';
-import { AISidebar } from '@/components/ai-sidebar/AISidebar';
-import { useAISidebarStore } from '@/lib/stores/aiSidebarStore';
+import { GlobalDrawerContainer } from '@/features/chat/components/GlobalDrawerContainer';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -22,7 +21,6 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [tenantName, setTenantName] = useState<string>('');
   const [tenantStatus, setTenantStatus] = useState<string | null>(null);
-  const { isOpen, sidebarWidth } = useAISidebarStore();
   const pathname = usePathname();
 
   useEffect(() => {
@@ -115,13 +113,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
       />
 
       <div
-        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'
-          }`}
-        style={
-          isOpen && typeof window !== 'undefined' && window.innerWidth >= 1024
-            ? { paddingRight: `${sidebarWidth}px`, transition: 'padding-right 0.3s ease' }
-            : { transition: 'padding-right 0.3s ease' }
-        }
+        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}
       >
         {user?.isImpersonating && (
           <div className="bg-amber-500 text-black px-4 py-2 text-center text-[10px] font-black uppercase flex items-center justify-center gap-4 z-[60] tracking-widest shadow-xl">
@@ -166,7 +158,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
         </main>
       </div>
 
-      <AISidebar />
+      <GlobalDrawerContainer currentUserId={user?.uid ?? ''} />
     </div>
   );
 }

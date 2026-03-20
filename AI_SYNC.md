@@ -458,3 +458,120 @@ We are building a Universal Communications Hub. We need a polymorphic `conversat
   - `features/chat/services/chatService.ts` (created)
 * **TypeScript:** `npx tsc --noEmit` — zero errors.
 * **Status:** "Ready for Phase 6.2 (Global Drawer UI)."
+
+---
+
+# AI Sync Log — HVG Sober-Living Platform
+
+## Operational Directives & Constraints Update
+* **Lead Architect:** Gemini
+* **Lead Engineer:** Claude
+* **Current Phase:** Master Plan - Sweep 6, Phase 6.2 (Global Drawer State & UI Shell)
+* **CRITICAL RULE:** Claude is strictly forbidden from running `git` commands. Pure code manipulation only.
+
+## Sweep 6, Phase 6.2: Global Drawer State & UI Shell
+**Target:** Zustand Store (`/lib/stores/useChatStore.ts`), Chat Components (`/features/chat/components/*`), and Layout Integration (`/app/(dashboard)/[tenantId]/layout.tsx`).
+
+### Architectural Diagnosis (From Gemini):
+We need a unified, global drawer to replace the disparate inbox views and the legacy AI sidebar. This drawer will act as the user's universal communication hub, housing both human-to-human threads and AI chats.
+
+### Action Plan for Claude:
+
+1. **Create the Zustand Store (`/lib/stores/useChatStore.ts`):**
+   - Manage the global state of the drawer.
+   - State properties: `isOpen` (boolean), `activeConversationId` (string | null), `filterType` ('all' | 'ai' | 'alerts' | 'dms').
+   - Actions: `openDrawer()`, `closeDrawer()`, `setActiveConversation(id)`, `setFilterType(type)`.
+
+2. **Build the Chat UI Components (`/features/chat/components/`):**
+   - **`GlobalDrawerContainer.tsx`**: A fixed, right-side sliding drawer (use Tailwind for smooth translate-x transitions). Must respect the platform's dark mode, glassmorphism, and gradient design tokens.
+   - **`DrawerRouter.tsx`**: Conditionally renders `ThreadList` if `activeConversationId` is null, otherwise renders `ActiveThread`.
+   - **`ThreadList.tsx`**: Build the UI shell for the list of conversations (can use mock data for now). Include a header with filter tabs (All, AI, Alerts).
+   - **`ActiveThread.tsx`**: Build the UI shell for a specific chat. Must include a "Back to List" button in the header, a scrollable message area, and a placeholder for the input.
+
+3. **Layout Integration & Cleanup:**
+   - Open `/app/(dashboard)/[tenantId]/layout.tsx`.
+   - Mount the `<GlobalDrawerContainer />` so it is globally accessible across the dashboard.
+   - **Crucial:** Remove the legacy `<AISidebar />` component and any legacy "Inbox" or "Join Requests" navigation links from the main sidebar (`Sidebar.tsx`) to avoid UI clutter and confusion. Let the new drawer handle it.
+
+### Claude's Execution Report ✅
+
+* **Store Created:** `lib/stores/useChatStore.ts` — Zustand store with `isOpen`, `activeConversationId`, `filterType` state. Actions: `openDrawer`, `closeDrawer`, `toggleDrawer`, `setActiveConversation`, `setFilterType`. Exports `ChatFilterType = 'all' | 'ai' | 'alerts' | 'dms'`.
+
+* **Components Built:**
+  - `features/chat/components/GlobalDrawerContainer.tsx` — Fixed right-side overlay, 380px wide, `translateX` slide-in/out transition. Glassmorphism: `rgba(6,14,26,0.97)` bg + `backdropFilter: blur(24px)`. Mobile backdrop overlay on tap-outside. Escape key listener. Subscribes to `subscribeToUserConversations(currentUserId)` for real-time data.
+  - `features/chat/components/DrawerRouter.tsx` — Conditionally renders `ActiveThread` when `activeConversationId` is set; falls back to `ThreadList`.
+  - `features/chat/components/ThreadList.tsx` — Header with "MESSAGES" label + filter tabs (All / DMs / AI / Alerts). Conversation list with emoji type avatars, title, last-message preview, timestamp. Loading skeleton (5 pulse rows) and empty state.
+  - `features/chat/components/ActiveThread.tsx` — Back button → `setActiveConversation(null)`. Real-time `subscribeToMessages` listener with auto-scroll to bottom via `bottomRef`. Own messages: cyan-600 right-aligned; others: white/10 left-aligned. Send form with inline spinner.
+
+* **Layout Updated:**
+  - `app/(dashboard)/[tenantId]/layout.tsx` — Replaced `<AISidebar />` with `<GlobalDrawerContainer currentUserId={user?.uid ?? ''} />`. Removed `AISidebar` import and all legacy `useAISidebarStore` usage. Main content div no longer adjusts padding for the old sidebar width.
+  - `lib/constants/navigation.ts` — Removed "Join Requests" entry from `navigationItems`.
+
+* **TypeScript:** `npx tsc --noEmit` — zero errors.
+* **Status:** "Ready for Phase 6.3 (Data Wiring & Migration)."
+
+---
+
+# AI Sync Log — HVG Sober-Living Platform
+
+## Operational Directives & Constraints Update
+* **Lead Architect:** Gemini
+* **Lead Engineer:** Claude
+* **Current Phase:** Master Plan - Sweep 6, Phase 6.3 (Data Wiring, Migration & Polymorphic Handling)
+* **CRITICAL RULE:** Claude is strictly forbidden from running `git` commands. Pure code manipulation only.
+
+## Sweep 6, Phase 6.3: Data Wiring & Polymorphic Input
+**Target:** `/features/chat/components/MessageInput.tsx`, Application API Routes, and Application Review UI.
+
+### Architectural Diagnosis (From Gemini):
+The global drawer is rendering the threads, but we need a polymorphic input that intelligently routes payloads. Human messages go straight to Firestore. AI messages trigger the Vercel AI SDK and persist the response. Finally, we must assimilate the legacy Application pipeline so that new applications automatically spawn a dedicated chat thread.
+
+### Action Plan for Claude:
+
+1. **Build the Polymorphic `MessageInput.tsx`:**
+   - Create the input component to sit at the bottom of `ActiveThread.tsx`.
+   - Read the `activeConversation.type` from the passed props or Zustand store.
+   - **If Human Thread (`dm`, `application_thread`, etc.):** On submit, call `chatService.sendMessage()` to write to Firestore.
+   - **If AI Thread (`ai_chat`):** On submit, save the user's message to Firestore, then pipe the payload to the existing AI API route (via Vercel AI SDK's `useChat` or a direct fetch). Once the AI stream completes, save the AI's response back to the Firestore `messages` subcollection as `senderId: 'system_ai'`.
+
+2. **Assimilate the Application Pipeline:**
+   - Open `/app/api/applications/[type]/route.ts` (modified in Sweep 5.2).
+   - In addition to firing the `system_alert` inbox notification, automatically instantiate a new conversation using `chatService.createConversation()`.
+   - Set `type: 'application_thread'`. 
+   - Set `participants`: `[applicantUid, ...facilityAdminUids]`.
+   - Set `metadata`: `{ applicationId: newApplicationId }`.
+
+3. **Wire the Application Review Modal:**
+   - Open the Application Review Modal (`/app/(dashboard)/[tenantId]/applications/page.tsx` or its modal component).
+   - Add a "Message Applicant" button next to the Reject/Admit buttons.
+   - On click, this button must call `useChatStore.getState().setActiveConversation(threadId)` and `openDrawer()`, instantly sliding out the chat drawer loaded with that specific applicant's thread.
+
+### Claude's Execution Report ✅
+
+* **Input Wired:** `features/chat/components/MessageInput.tsx` (created) — polymorphic input:
+  - **Human threads** (`dm`, `application_thread`, `group`, `event`, `course`, `system_alert`): calls `chatService.sendMessage(conversationId, currentUserId, text)` directly.
+  - **AI threads** (`ai_chat`): saves user message to Firestore first, then POSTs to `/api/ai/outlet/operator` with the user's Bearer token, reads the `reply` JSON field, and saves the AI response to Firestore with `senderId: 'system_ai'`. Renders a fuchsia "AI" badge in the input row when in AI mode, and shows a spinner while waiting for the AI response.
+  - `ActiveThread.tsx` updated to accept `conversationType: ConversationType` prop; replaced inline send form with `<MessageInput>`.
+  - `DrawerRouter.tsx` updated to pass `conversationType={active?.type ?? 'dm'}` to `<ActiveThread>`.
+
+* **Pipeline Assimilated:** `app/api/applications/[type]/route.ts` — after creating the application doc and sending notifications, spawns an `application_thread` conversation using the Admin SDK:
+  - Re-uses the already-fetched admin UID arrays (superAdmins for `tenant` type; facilityAdmins for `bed`/`staff` type).
+  - Creates a `conversations` doc with `{ type: 'application_thread', participants: [applicantId, ...adminUids], title: 'Application: {name}', metadata: { applicationId, applicationType } }`.
+  - Updates the application doc with `{ threadId }` for UI deep-linking.
+  - Skipped entirely for anonymous applicants or when no admins are found. Non-blocking (`try/catch`).
+  - `features/applications/types.ts` — added `threadId?: string` to `BaseApplication`.
+
+* **UI Hooked:** `app/(dashboard)/[tenantId]/applications/page.tsx`:
+  - Imports `useChatStore` and destructures `openDrawer`, `setActiveConversation`.
+  - Detail modal header: "Message" button (cyan accent, chat bubble icon) renders when `selectedApp.threadId` is present.
+  - On click: calls `setActiveConversation(threadId)` + `openDrawer()`, closes the modal — instantly slides out the comms drawer pre-loaded to the applicant's thread.
+
+* **Files Modified/Created:**
+  - `features/chat/components/MessageInput.tsx` (created)
+  - `features/chat/components/ActiveThread.tsx`
+  - `features/chat/components/DrawerRouter.tsx`
+  - `features/applications/types.ts`
+  - `app/api/applications/[type]/route.ts`
+  - `app/(dashboard)/[tenantId]/applications/page.tsx`
+* **TypeScript:** `npx tsc --noEmit` — zero errors.
+* **Status:** "Sweep 6 Complete. Ready for Final Go-Live Review."

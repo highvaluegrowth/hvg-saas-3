@@ -3,7 +3,8 @@
 import { use, useEffect, useState, useCallback, useMemo } from 'react';
 import { authService } from '@/features/auth/services/authService';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import type { Application, ApplicationStatus, ApplicationType } from '@/features/applications/types';
+import { useChatStore } from '@/lib/stores/useChatStore';
+import type { Application, ApplicationStatus, ApplicationType, BaseApplication } from '@/features/applications/types';
 import {
   DndContext,
   DragOverlay,
@@ -302,6 +303,7 @@ function KanbanColumn({ id, label, color, applications, onCardClick }: { id: str
 export default function ApplicationsPage({ params }: { params: Promise<{ tenantId: string }> }) {
   const { tenantId } = use(params);
   const { user } = useAuth();
+  const { openDrawer, setActiveConversation } = useChatStore();
 
   const [view, setView] = useState<'kanban' | 'tenant_apps'>('kanban');
   const [applications, setApplications] = useState<Application[]>([]);
@@ -699,6 +701,22 @@ export default function ApplicationsPage({ params }: { params: Promise<{ tenantI
                 <p className="text-sm text-slate-400 mt-1">{selectedApp.applicantEmail} • {selectedApp.zipCode}</p>
               </div>
               <div className="flex items-center gap-2 shrink-0">
+                {(selectedApp as BaseApplication & { threadId?: string }).threadId && (
+                  <button
+                    onClick={() => {
+                      const threadId = (selectedApp as BaseApplication & { threadId?: string }).threadId!;
+                      setActiveConversation(threadId);
+                      openDrawer();
+                      setSelectedApp(null);
+                    }}
+                    className="bg-cyan-600/20 hover:bg-cyan-600/40 text-cyan-400 border border-cyan-500/20 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-1.5"
+                  >
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    Message
+                  </button>
+                )}
                 {selectedApp.status !== 'accepted' && selectedApp.status !== 'rejected' && (
                   <>
                     <button

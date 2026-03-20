@@ -66,11 +66,18 @@ export async function POST(
         await docRef.set(application);
 
         // Notify all super_admins when a new tenant application arrives
+        // Also spawn an application_thread conversation if applicant is authenticated
+        let threadAdminUids: string[] = [];
+        let threadTenantId: string | null = null;
+
         if (type === 'tenant') {
             const superAdminsSnap = await db.collection('users')
                 .where('role', '==', 'super_admin')
                 .limit(10)
                 .get();
+
+            threadAdminUids = superAdminsSnap.docs.map(d => d.id);
+            threadTenantId = null;
 
             await Promise.all(superAdminsSnap.docs.map((userDoc) =>
                 notificationService.createNotification({
@@ -94,6 +101,9 @@ export async function POST(
                 .limit(20)
                 .get();
 
+            threadAdminUids = facilityAdminsSnap.docs.map(d => d.id);
+            threadTenantId = application.requestedTenantId;
+
             const typeLabel = type === 'bed' ? 'Bed' : 'Staff';
             await Promise.all(facilityAdminsSnap.docs.map((userDoc) =>
                 notificationService.createNotification({
@@ -107,6 +117,28 @@ export async function POST(
                     priority: 'high',
                 })
             ));
+        }
+
+        // Spawn an application_thread conversation for direct messaging
+        // Only when applicant is authenticated (has a real UID) and admins were found
+        if (applicantId !== 'anonymous' && threadAdminUids.length > 0) {
+            try {
+                const threadRef = db.collection('conversations').doc();
+                await threadRef.set({
+                    id: threadRef.id,
+                    type: 'application_thread',
+                    participants: [applicantId, ...threadAdminUids],
+                    tenantId: threadTenantId,
+                    title: `Application: ${application.applicantName || 'Applicant'}`,
+                    lastMessage: null,
+                    updatedAt: new Date(),
+                    metadata: { applicationId: docRef.id, applicationType: type },
+                });
+                await docRef.update({ threadId: threadRef.id });
+            } catch (threadErr) {
+                console.error('Failed to create application thread:', threadErr);
+                // Non-blocking — application was already created
+            }
         }
 
         return NextResponse.json({ applicationId: docRef.id, application }, { status: 201 });

@@ -83,13 +83,6 @@ export const navigationItems: NavigationItem[] = [
     description: 'Rides and transportation',
   },
   {
-    label: 'Join Requests',
-    href: '/join-requests',
-    icon: 'inbox',
-    roles: ['tenant_admin', 'staff_admin', 'super_admin'],
-    description: 'Resident join requests from the mobile app',
-  },
-  {
     label: 'Applications',
     href: '/applications',
     icon: 'filetext',

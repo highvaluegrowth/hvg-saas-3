@@ -18,6 +18,7 @@ export interface BaseApplication {
     assignedTenantId?: string;
     assignedAt?: string;
     notes?: string;
+    threadId?: string;
 }
 
 export interface BedApplication extends BaseApplication {
