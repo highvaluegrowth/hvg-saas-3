@@ -83,11 +83,11 @@ export const navigationItems: NavigationItem[] = [
     description: 'Rides and transportation',
   },
   {
-    label: 'Applications',
-    href: '/applications',
-    icon: 'filetext',
+    label: 'Operations',
+    href: '/operations',
+    icon: 'layout',
     roles: ['tenant_admin', 'staff_admin', 'super_admin'],
-    description: 'Bed and staff applications assigned to your house',
+    description: 'Unified operations board — applications, chores, and tasks',
   },
   {
     label: 'Marketing',

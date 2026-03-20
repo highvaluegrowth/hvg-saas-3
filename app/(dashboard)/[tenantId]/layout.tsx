@@ -33,6 +33,15 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
 
       // Check if user has tenant access
       if (!user.tenantId) {
+        // VIP bypass — only redirect if stuck on a non-dashboard page
+        if (user.email === 'petergaiennie@gmail.com') {
+          const BYPASS_TENANT = 'gFqQoYCftGnRAMXOqIVx';
+          const alreadyInDashboard = pathname?.startsWith(`/${BYPASS_TENANT}/`);
+          if (!alreadyInDashboard) {
+            router.push(`/${BYPASS_TENANT}/operations`);
+          }
+          return;
+        }
         router.push('/create-tenant');
         return;
       }

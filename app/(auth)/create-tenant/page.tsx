@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/Input';
 
 export default function CreateTenantPage() {
   const router = useRouter();
-  const { refreshToken } = useAuth();
+  const { user, refreshToken } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [formData, setFormData] = useState({
@@ -32,6 +32,11 @@ export default function CreateTenantPage() {
       name,
       slug: generateSlug(name),
     });
+  };
+
+  const handleLogout = async () => {
+    await authService.logout();
+    router.push('/login');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -81,6 +86,15 @@ export default function CreateTenantPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="max-w-md w-full space-y-8">
+        {user?.email === 'petergaiennie@gmail.com' && (
+          <button
+            onClick={() => router.push('/gFqQoYCftGnRAMXOqIVx/operations')}
+            className="w-full py-3 px-4 rounded-lg font-black text-sm uppercase tracking-widest text-white transition-all"
+            style={{ background: 'linear-gradient(135deg, #D946EF, #67E8F9)' }}
+          >
+            ⚡ FORCE ENTER DASHBOARD
+          </button>
+        )}
         <div className="text-center">
           <h2 className="text-3xl font-bold text-gray-900">
             Create Your Organization
@@ -149,6 +163,15 @@ export default function CreateTenantPage() {
             {isLoading ? 'Creating...' : 'Create Organization'}
           </Button>
         </form>
+
+        <div className="text-center">
+          <button
+            onClick={handleLogout}
+            className="text-sm text-gray-400 hover:text-white transition-colors"
+          >
+            Sign out
+          </button>
+        </div>
       </div>
     </div>
   );
