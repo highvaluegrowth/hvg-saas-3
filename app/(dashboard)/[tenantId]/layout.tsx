@@ -33,6 +33,13 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
         return;
       }
 
+      // Residents don't belong in the operator dashboard — send to their portal
+      if (user.role === 'resident') {
+        const residentTenantId = user.tenantId ?? tenantId;
+        router.push(`/${residentTenantId}/portal`);
+        return;
+      }
+
       // Check if user has tenant access
       if (!user.tenantId) {
         // VIP bypass — only redirect if stuck on a non-dashboard page

@@ -102,7 +102,21 @@ export async function proxy(request: NextRequest) {
   // Super admins can navigate to any tenant's dashboard
   if (role === 'super_admin') return NextResponse.next();
 
-  // Tenant mismatch — user is trying to access a different tenant's dashboard
+  // ─── Resident Wall ────────────────────────────────────────────────────────
+  // Residents are confined to /{tenantId}/portal (and sub-paths).
+  // Staff and above may visit resident routes to preview the UI.
+  const STAFF_ROLES = new Set(['tenant_admin', 'staff_admin', 'staff']);
+  if (role === 'resident') {
+    const residentRoot = `/${cookieTenantId}/portal`;
+    const isOnResidentPath = pathname === residentRoot || pathname.startsWith(`${residentRoot}/`);
+    if (!isOnResidentPath) {
+      return NextResponse.redirect(new URL(residentRoot, request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // ─── Operator Guard ───────────────────────────────────────────────────────
+  // Tenant mismatch — operator is trying to access a different tenant's dashboard
   if (cookieTenantId !== urlTenantId) {
     return NextResponse.redirect(new URL('/unauthorized', request.url));
   }
