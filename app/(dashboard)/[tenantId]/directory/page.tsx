@@ -6,7 +6,7 @@ import { authService } from '@/features/auth/services/authService';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 
 interface DirectoryProfile {
-  listed: boolean; bio: string; logoUrl: string; website: string;
+  name: string; listed: boolean; bio: string; logoUrl: string; website: string;
   specializations: string[]; amenities: string[]; acceptedFunding: string[];
 }
 
@@ -46,7 +46,7 @@ const inputStyle: React.CSSProperties = { background: 'rgba(255,255,255,0.06)', 
 export default function DirectoryPage() {
   const { tenantId } = useParams<{ tenantId: string }>();
 
-  const [profile, setProfile] = useState<DirectoryProfile>({ listed: false, bio: '', logoUrl: '', website: '', specializations: [], amenities: [], acceptedFunding: [] });
+  const [profile, setProfile] = useState<DirectoryProfile>({ name: '', listed: false, bio: '', logoUrl: '', website: '', specializations: [], amenities: [], acceptedFunding: [] });
   const [profileLoading, setProfileLoading] = useState(true);
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
@@ -62,8 +62,19 @@ export default function DirectoryPage() {
   const loadProfile = useCallback(async () => {
     try {
       const token = await authService.getIdToken();
-      const res = await fetch(`/api/tenants/${tenantId}/directory`, { headers: { Authorization: `Bearer ${token}` } });
-      if (res.ok) { const data = await res.json(); setProfile(data.profile); }
+      const [profileRes, tenantRes] = await Promise.all([
+        fetch(`/api/tenants/${tenantId}/directory`, { headers: { Authorization: `Bearer ${token}` } }),
+        fetch(`/api/tenants/${tenantId}`, { headers: { Authorization: `Bearer ${token}` } })
+      ]);
+
+      if (profileRes.ok && tenantRes.ok) {
+        const profileData = await profileRes.json();
+        const tenantData = await tenantRes.json();
+        setProfile({
+          ...profileData.profile,
+          name: tenantData.tenant?.name || ''
+        });
+      }
     } catch { /* fail silently */ }
     finally { setProfileLoading(false); }
   }, [tenantId]);
@@ -83,11 +94,30 @@ export default function DirectoryPage() {
     e.preventDefault(); setProfileSaving(true); setProfileError(''); setProfileSaved(false);
     try {
       const token = await authService.getIdToken();
-      const res = await fetch(`/api/tenants/${tenantId}/directory`, {
-        method: 'PATCH', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(profile),
-      });
-      if (!res.ok) { const data = await res.json(); setProfileError(data.error ?? 'Failed to save'); }
-      else { setProfileSaved(true); setTimeout(() => setProfileSaved(false), 3000); }
+      const { name, ...directoryData } = profile;
+
+      const [profileRes, tenantRes] = await Promise.all([
+        fetch(`/api/tenants/${tenantId}/directory`, {
+          method: 'PATCH', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(directoryData),
+        }),
+        fetch(`/api/tenants/${tenantId}`, {
+          method: 'PATCH', headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ name }),
+        })
+      ]);
+
+      if (!profileRes.ok || !tenantRes.ok) {
+        const pData = await profileRes.json().catch(() => ({}));
+        const tData = await tenantRes.json().catch(() => ({}));
+        setProfileError(pData.error || tData.error || 'Failed to save');
+      }
+      else {
+        setProfileSaved(true);
+        // If we want the sidebar to update immediately, we need a refresh or a store update
+        // Reloading is the simplest way to ensure all layout components catch the change
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
     } catch { setProfileError('Network error — please try again'); }
     finally { setProfileSaving(false); }
   }
@@ -160,6 +190,13 @@ export default function DirectoryPage() {
           <div className="px-6 py-12 text-center text-sm" style={{ color: 'rgba(255,255,255,0.35)' }}>Loading profile…</div>
         ) : (
           <form onSubmit={handleSaveProfile} className="px-6 py-6 space-y-6">
+            {/* Name */}
+            <div>
+              <label className="block text-sm font-medium mb-1.5" style={{ color: 'rgba(255,255,255,0.65)' }}>Organisation Name</label>
+              <input type="text" value={profile.name} onChange={e => setProfile(p => ({ ...p, name: e.target.value }))}
+                placeholder="e.g. Sunrise Recovery" className={inputCls} style={inputStyle} required />
+            </div>
+
             {/* Listed toggle */}
             <div className="flex items-center justify-between p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
               <div>

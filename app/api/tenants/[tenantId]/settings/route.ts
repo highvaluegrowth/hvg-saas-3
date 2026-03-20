@@ -23,6 +23,9 @@ export async function GET(request: NextRequest, { params }: RouteParams) {
     const data = doc.data() ?? {};
     // Only reveal whether a key exists, never the value
     return NextResponse.json({
+        tenant: {
+            name: data.name || '',
+        },
         settings: {
             aiApiKey: data.aiApiKey ? true : false,
             stageContracts: data.stageContracts || {},

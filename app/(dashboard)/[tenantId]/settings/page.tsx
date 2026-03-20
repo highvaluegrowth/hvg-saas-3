@@ -23,6 +23,10 @@ export default function SettingsPage() {
     const [avatarUrl, setAvatarUrl] = useState('');
     const [avatarSaved, setAvatarSaved] = useState(false);
 
+    const [orgName, setOrgName] = useState('');
+    const [orgNameSaving, setOrgNameSaving] = useState(false);
+    const [orgNameSaved, setOrgNameSaved] = useState(false);
+
     const [templates, setTemplates] = useState<{ id: string; title: string }[]>([]);
     const [stageContracts, setStageContracts] = useState<Record<string, string>>({});
     const [workflowSaving, setWorkflowSaving] = useState(false);
@@ -44,6 +48,7 @@ export default function SettingsPage() {
                     if (data.settings?.logoUrl) setLogoUrl(data.settings.logoUrl);
                     if (data.settings?.coverUrl) setCoverUrl(data.settings.coverUrl);
                     if (data.settings?.stageContracts) setStageContracts(data.settings.stageContracts);
+                    if (data.tenant?.name) setOrgName(data.tenant.name);
                 }
 
                 if (templatesRes.ok) {
@@ -55,6 +60,27 @@ export default function SettingsPage() {
         }
         loadSettings();
     }, [tenantId]);
+
+    async function handleSaveOrgName(e: React.FormEvent) {
+        e.preventDefault();
+        if (!orgName.trim()) return;
+        setOrgNameSaving(true);
+        try {
+            const token = await authService.getIdToken();
+            const res = await fetch(`/api/tenants/${tenantId}`, {
+                method: 'PATCH',
+                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: orgName.trim() })
+            });
+            if (res.ok) {
+                setOrgNameSaved(true);
+                setTimeout(() => setOrgNameSaved(false), 3000);
+                // Trigger a page refresh to update the sidebar/layout state
+                window.location.reload();
+            }
+        } catch { /* fail silently */ }
+        finally { setOrgNameSaving(false); }
+    }
 
     async function handleSaveWorkflow(e: React.FormEvent) {
         e.preventDefault();
@@ -145,6 +171,30 @@ export default function SettingsPage() {
                     </div>
                 </div>
                 <div className="px-6 py-5 grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="col-span-1 sm:col-span-2">
+                        <form onSubmit={handleSaveOrgName} className="space-y-2">
+                            <label className="block text-sm font-medium" style={{ color: 'rgba(255,255,255,0.65)' }}>Organisation Name</label>
+                            <div className="flex gap-2">
+                                <input 
+                                    type="text" 
+                                    value={orgName} 
+                                    onChange={e => setOrgName(e.target.value)}
+                                    placeholder="e.g. Sunrise Recovery"
+                                    className="flex-1 px-3 py-2 text-sm rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-cyan-500 placeholder-white/25"
+                                    style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)' }}
+                                />
+                                <button 
+                                    type="submit" 
+                                    disabled={orgNameSaving || !orgName.trim()}
+                                    className="px-4 py-2 text-sm font-medium text-white rounded-xl disabled:opacity-50 transition-all hover:opacity-90 shrink-0"
+                                    style={{ background: 'linear-gradient(135deg,#0891B2,#059669)' }}
+                                >
+                                    {orgNameSaving ? 'Saving...' : 'Save Name'}
+                                </button>
+                            </div>
+                            {orgNameSaved && <div className="mt-1"><SavedBadge label="Name updated" /></div>}
+                        </form>
+                    </div>
                     <div>
                         <label className="block text-sm font-medium mb-2" style={{ color: 'rgba(255,255,255,0.65)' }}>Organisation Logo</label>
                         <ImageUpload storagePath={`tenants/${tenantId}/logo`} onUpload={handleSaveLogo} currentUrl={logoUrl || undefined} />
