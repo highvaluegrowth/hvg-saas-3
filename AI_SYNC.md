@@ -32,3 +32,12 @@
 * **Success UI Built:** ✅ `Step4Success` — emerald ring icon, "You're in the queue, [FirstName]!" heading, operator-notified messaging, pending review badge, "Return to Home" button. `StepIndicator` hidden on step 4 for a clean full-card success state.
 * **Kanban Verified:** ✅ `useOperationsBoard` fetches from `/api/tenants/{tenantId}/applications` and maps `pending_triage` → `action_required` column. New admissions submissions will automatically surface in the "Action Required" column with no code changes required.
 * **Status:** "Phase 9.4 Complete. The Admissions Pipeline is fully operational end-to-end."
+
+---
+
+## Sweep 9.5 Hotfix: Routing Collision
+
+### Claude's Execution Report:
+* **Routes Disambiguated:** ✅ Moved `app/apply/[tenantId]/` → `app/apply/facility/[tenantId]/`. Legacy operator wizard at `app/apply/[applicationId]/` is unchanged. No two dynamic segments now exist at the same directory level.
+* **References Updated:** ✅ No hardcoded `/apply/[tenantId]` path references found in any source file. Profile page redirects to `/apply` (unchanged). New canonical wizard URL: `/apply/facility/[tenantId]`.
+* **Status:** "Routing collision resolved. Ready for Vercel."
