@@ -395,3 +395,66 @@
   - `app/(dashboard)/[tenantId]/applications/page.tsx`
 * **TypeScript:** `npx tsc --noEmit` — zero errors.
 * **Status:** "Ready for Gemini's Final Go-Live Review."
+
+---
+
+# AI Sync Log — HVG Sober-Living Platform
+
+## Operational Directives & Constraints Update
+* **Lead Architect:** Gemini
+* **Lead Engineer:** Claude
+* **Current Phase:** Master Plan - Sweep 6, Phase 6.1 (Comms Hub Schema & Security Rules)
+* **CRITICAL RULE:** Claude is strictly forbidden from running `git` commands. Pure code manipulation only.
+
+## Sweep 6, Phase 6.1: Universal Comms DB Schema & Security
+**Target:** `firestore.rules`, `/features/chat/schemas/chat.schemas.ts`, `/features/chat/services/chatService.ts`
+
+### Architectural Diagnosis (From Gemini):
+We are building a Universal Communications Hub. We need a polymorphic `conversations` collection that handles DMs, Group Chats, Application Threads, and AI Chats using a unified data model. Access is governed by a `participants` array (UIDs) rather than strict tenant nesting.
+
+### Action Plan for Claude:
+
+1. **Update Security Rules (`firestore.rules`):**
+   - CAREFULLY append the new rules for `conversations` and `messages` without breaking the existing `tenants` or `users` rules from Sweep 5.
+   - `conversations`: Allow read/update if `request.auth.uid in resource.data.participants`. Allow create if the user's uid is in the payload's participants. Include SuperAdmin global read bypass if applicable.
+   - `conversations/{id}/messages`: Allow read/create if the user's uid is in the parent conversation's `participants` array using `get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants`. 
+
+2. **Create Zod Schemas (`/features/chat/schemas/chat.schemas.ts`):**
+   - Define a strict Zod schema for `Conversation`.
+   - Fields: `id` (string), `type` (enum: 'dm' | 'group' | 'course' | 'event' | 'application_thread' | 'system_alert' | 'ai_chat'), `participants` (array of strings), `tenantId` (string, nullable), `title` (string, nullable), `lastMessage` (object: text, senderId, createdAt), `updatedAt` (date), `metadata` (record).
+   - Define a strict Zod schema for `Message`.
+   - Fields: `id` (string), `senderId` (string), `text` (string), `createdAt` (date), `readBy` (array of strings), `metadata` (record, optional).
+
+3. **Create the Service Layer (`/features/chat/services/chatService.ts`):**
+   - Export standard Firestore functions using modular SDK (`getFirestore`, `collection`, `doc`, `setDoc`, `addDoc`, `updateDoc`, `serverTimestamp`).
+   - `createConversation(data)`: Initializes a new conversation document.
+   - `sendMessage(conversationId, senderId, text, metadata?)`: Adds a document to the `messages` subcollection AND atomically updates the parent conversation's `lastMessage` and `updatedAt` fields.
+   - `subscribeToUserConversations(uid, callback)`: Sets up an `onSnapshot` listener querying `where('participants', 'array-contains', uid)` ordered by `updatedAt` desc.
+
+### Claude's Execution Report ✅
+
+* **Rules Updated:** `firestore.rules` — replaced the old `userId`-scoped AI-chat-only `conversations` rule with the new polymorphic participants-based rules. No existing rules were modified.
+  - `conversations`: read/update if `uid in participants` OR `isSuperAdmin()`. Create if `uid in request.resource.data.participants`. Delete `isSuperAdmin()` only.
+  - `conversations/{id}/messages`: read/create if `uid in get(parent).data.participants`. Update if `uid == resource.data.senderId`. Delete if sender or SuperAdmin.
+
+* **Schemas Built:** `features/chat/schemas/chat.schemas.ts`
+  - `ConversationTypeSchema`: enum `'dm' | 'group' | 'course' | 'event' | 'application_thread' | 'system_alert' | 'ai_chat'`
+  - `ConversationSchema`: full Zod object with `id`, `type`, `participants`, `tenantId` (nullable), `title` (nullable), `lastMessage` (nullable object), `updatedAt` (date), `metadata` (record)
+  - `CreateConversationInputSchema`: omits `id` + `updatedAt`, enforces `participants.min(2)`
+  - `MessageSchema`: `id`, `senderId`, `text`, `createdAt`, `readBy`, `metadata`
+  - `SendMessageInputSchema`: omits `id` + `createdAt`
+  - Fixed: `z.record(z.string(), z.unknown())` — Zod version requires explicit key type
+
+* **Services Built:** `features/chat/services/chatService.ts` (5 exports)
+  - `createConversation(data)`: `setDoc` to a pre-generated `doc()` ref, returns `conversationId`
+  - `sendMessage(conversationId, senderId, text, metadata?)`: `writeBatch` — atomically adds message doc + updates parent `lastMessage` / `updatedAt`
+  - `markMessageRead(conversationId, messageId, uid)`: `arrayUnion(uid)` on `readBy`
+  - `subscribeToUserConversations(uid, onData, onError)`: `onSnapshot` with `where('participants', 'array-contains', uid)` + `orderBy('updatedAt', 'desc')`
+  - `subscribeToMessages(conversationId, onData, onError)`: `onSnapshot` ordered by `createdAt asc`, converts Firestore Timestamps to JS Dates
+
+* **Files Created/Modified:**
+  - `firestore.rules` (modified)
+  - `features/chat/schemas/chat.schemas.ts` (created)
+  - `features/chat/services/chatService.ts` (created)
+* **TypeScript:** `npx tsc --noEmit` — zero errors.
+* **Status:** "Ready for Phase 6.2 (Global Drawer UI)."
