@@ -411,7 +411,7 @@ export default function DashboardPage({ params }: DashboardPageProps) {
             </div>
             <p className="text-slate-400 text-xs mb-3">Your AI house manager — ask anything about operations, residents, or analytics.</p>
             <button
-              onClick={() => { setFilterType('ai'); openDrawer(); }}
+              onClick={() => { setFilterType('outlet'); openDrawer(); }}
               className="w-full bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold py-2 rounded-lg transition-colors"
             >
               Open Outlet →

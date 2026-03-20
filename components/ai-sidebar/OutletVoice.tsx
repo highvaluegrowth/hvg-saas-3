@@ -7,9 +7,10 @@ import { Mic, X, Volume2, Activity } from 'lucide-react';
 interface OutletVoiceProps {
     onSpeechProcessed: (text: string) => void;
     isDirector?: boolean;
+    onClose?: () => void;
 }
 
-export function OutletVoice({ onSpeechProcessed, isDirector }: OutletVoiceProps) {
+export function OutletVoice({ onSpeechProcessed, isDirector, onClose }: OutletVoiceProps) {
     const { setVoiceMode } = useAISidebarStore();
     const [isListening, setIsListening] = useState(false);
     const [transcript, setTranscript] = useState('');
@@ -61,8 +62,8 @@ export function OutletVoice({ onSpeechProcessed, isDirector }: OutletVoiceProps)
     return (
         <div className="absolute inset-0 z-50 flex flex-col items-center justify-center p-8 text-center bg-[#060e1a]/95 backdrop-blur-3xl animate-in fade-in duration-500">
             {/* Close */}
-            <button 
-                onClick={() => setVoiceMode(false)}
+            <button
+                onClick={() => onClose ? onClose() : setVoiceMode(false)}
                 className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:bg-white/10 hover:text-white/80 transition-all"
             >
                 <X size={20} />

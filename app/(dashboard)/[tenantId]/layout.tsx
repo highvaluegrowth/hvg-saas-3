@@ -7,6 +7,7 @@ import { authService } from '@/features/auth/services/authService';
 import { Sidebar } from '@/components/dashboard/Sidebar';
 import { GlobalNavbar } from '@/components/layout/GlobalNavbar';
 import { GlobalDrawerContainer } from '@/features/chat/components/GlobalDrawerContainer';
+import { useLayoutStore } from '@/lib/stores/useLayoutStore';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -19,6 +20,7 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
   const { user, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const { sidebarWidth } = useLayoutStore();
   const [tenantName, setTenantName] = useState<string>('');
   const [tenantStatus, setTenantStatus] = useState<string | null>(null);
   const pathname = usePathname();
@@ -122,7 +124,8 @@ export default function DashboardLayout({ children, params }: DashboardLayoutPro
       />
 
       <div
-        className={`flex-1 flex flex-col min-h-screen transition-all duration-300 ${isSidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'}`}
+        className="flex-1 flex flex-col min-h-screen transition-all duration-300"
+        style={{ paddingLeft: isSidebarCollapsed ? 80 : sidebarWidth }}
       >
         {user?.isImpersonating && (
           <div className="bg-amber-500 text-black px-4 py-2 text-center text-[10px] font-black uppercase flex items-center justify-center gap-4 z-[60] tracking-widest shadow-xl">

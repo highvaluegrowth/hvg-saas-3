@@ -1,10 +1,12 @@
 'use client';
 
+import { useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { authService } from '@/features/auth/services/authService';
 import { getNavigationForRole, iconPaths } from '@/lib/constants/navigation';
+import { useLayoutStore } from '@/lib/stores/useLayoutStore';
 import { LogOut, Inbox, Building2, CircleDollarSign, ServerCrash, LayoutDashboard, Bug, BookOpen, CalendarDays, BarChart3 } from 'lucide-react';
 
 const PLATFORM_ADMIN_ITEMS = [
@@ -32,6 +34,26 @@ export function Sidebar({ tenantId, tenantName, isOpen = true, onClose, isCollap
   const pathname = usePathname();
   const router = useRouter();
   const { user } = useAuth();
+  const { sidebarWidth, setSidebarWidth } = useLayoutStore();
+
+  const handleDragStart = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      const startX = e.clientX;
+      const startWidth = sidebarWidth;
+
+      const onMouseMove = (ev: MouseEvent) => {
+        setSidebarWidth(startWidth + ev.clientX - startX);
+      };
+      const onMouseUp = () => {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+      };
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    },
+    [sidebarWidth, setSidebarWidth]
+  );
 
   const handleLogout = async () => {
     await authService.logout();
@@ -62,12 +84,12 @@ export function Sidebar({ tenantId, tenantName, isOpen = true, onClose, isCollap
       <aside
         className={`
           fixed inset-y-0 left-0 z-30
-          transition-all duration-300 ease-in-out
+          transition-transform duration-300 ease-in-out
           lg:translate-x-0
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
-          ${isCollapsed ? 'w-20' : 'w-64'}
         `}
         style={{
+          width: isCollapsed ? 80 : sidebarWidth,
           background: '#060E1A',
           borderRight: '1px solid rgba(255,255,255,0.07)',
         }}
@@ -326,6 +348,15 @@ export function Sidebar({ tenantId, tenantName, isOpen = true, onClose, isCollap
           </div>
 
         </div>
+
+        {/* Drag handle — right edge, desktop only, visible when not collapsed */}
+        {!isCollapsed && (
+          <div
+            onMouseDown={handleDragStart}
+            className="hidden lg:block absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-cyan-500/30 transition-colors z-10"
+            title="Drag to resize"
+          />
+        )}
       </aside>
     </>
   );
