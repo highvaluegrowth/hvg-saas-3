@@ -1,5 +1,6 @@
 'use client';
 
+import type React from 'react';
 import { usePathname, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/features/auth/hooks/useAuth';
@@ -13,6 +14,14 @@ import {
     Menu,
     Bug,
 } from 'lucide-react';
+
+interface NavItem {
+    name: string;
+    href: string;
+    icon: React.ElementType;
+    roles: string[];
+    badge?: number;
+}
 
 interface GlobalNavbarProps {
     onMenuClick: () => void;
@@ -28,7 +37,7 @@ export function GlobalNavbar({ onMenuClick }: GlobalNavbarProps) {
     const { unreadCount } = useInboxStore();
 
     const isAdminRoute = pathname?.startsWith('/admin');
-    const navLinks = isAdminRoute ? [
+    const navLinks: NavItem[] = isAdminRoute ? [
         { name: 'Calendar', href: `/admin/events`, icon: Calendar, roles: ['super_admin'] },
         { name: 'Settings', href: `/admin/system`, icon: Settings, roles: ['super_admin'] },
     ] : [
