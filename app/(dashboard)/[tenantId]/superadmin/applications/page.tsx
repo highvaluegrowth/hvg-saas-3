@@ -49,13 +49,13 @@ const TYPE_BADGE: Record<string, string> = {
     bed: 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/30',
     staff: 'bg-violet-500/20 text-violet-300 border border-violet-500/30',
     course: 'bg-teal-500/20 text-teal-300 border border-teal-500/30',
-    event: 'bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30',
+    event: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
     tenant: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30',
 };
 
 const STATUS_BADGE: Record<string, string> = {
     pending_triage: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
-    pending: 'bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30',
+    pending: 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30',
     assigned_to_tenant: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
     assigned: 'bg-blue-500/20 text-blue-300 border border-blue-500/30',
     accepted: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/20',
@@ -256,7 +256,7 @@ export default function SuperAdminApplicationsPage() {
                     <div className="flex items-center gap-3">
                         <h2 className="text-2xl font-black tracking-tighter text-white uppercase italic">Tenant Approvals</h2>
                         {pendingTriageCount > 0 && (
-                            <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-fuchsia-500/20 text-fuchsia-300 border border-fuchsia-500/30">
+                            <span className="px-2.5 py-0.5 rounded-full text-xs font-black bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
                                 {pendingTriageCount} pending
                             </span>
                         )}
@@ -279,7 +279,7 @@ export default function SuperAdminApplicationsPage() {
                             key={id}
                             onClick={() => setStatusFilter(id)}
                             className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${statusFilter === id
-                                ? 'bg-fuchsia-600 text-white shadow-lg'
+                                ? 'bg-cyan-700 text-white shadow-lg'
                                 : 'text-slate-400 hover:bg-white/10 hover:text-white'
                             }`}
                         >
@@ -290,7 +290,7 @@ export default function SuperAdminApplicationsPage() {
                 <select
                     value={typeFilter}
                     onChange={(e) => setTypeFilter(e.target.value)}
-                    className="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-xs font-bold text-white outline-none focus:ring-2 focus:ring-fuchsia-500 transition-all"
+                    className="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-xs font-bold text-white outline-none focus:ring-2 focus:ring-cyan-500 transition-all"
                 >
                     <option value="all">All Types</option>
                     <option value="bed">Bed Application</option>
@@ -305,7 +305,7 @@ export default function SuperAdminApplicationsPage() {
             <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
                 {loading ? (
                     <div className="py-20 text-center">
-                        <div className="w-10 h-10 border-4 border-fuchsia-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                        <div className="w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
                         <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Loading...</p>
                     </div>
                 ) : filteredApplications.length === 0 ? (
@@ -330,7 +330,7 @@ export default function SuperAdminApplicationsPage() {
                                 {filteredApplications.map((app) => (
                                     <tr key={app.id} className="hover:bg-white/[0.03] transition-colors group">
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="font-bold text-white group-hover:text-fuchsia-300 transition-colors">{app.applicantName}</div>
+                                            <div className="font-bold text-white group-hover:text-cyan-300 transition-colors">{app.applicantName}</div>
                                             <div className="text-[10px] text-slate-500 font-medium">{app.applicantEmail}</div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap"><TypeBadge type={app.type} /></td>
@@ -344,7 +344,7 @@ export default function SuperAdminApplicationsPage() {
                                                         {(app.type === 'bed' || app.type === 'staff') ? (
                                                             <button
                                                                 onClick={() => handleDispatchClick(app)}
-                                                                className="text-white bg-fuchsia-600 hover:bg-fuchsia-500 px-3 py-1.5 rounded-lg text-xs transition-colors shadow-lg shadow-fuchsia-500/20"
+                                                                className="text-white bg-cyan-700 hover:bg-cyan-600 px-3 py-1.5 rounded-lg text-xs transition-colors shadow-lg shadow-cyan-500/20"
                                                             >
                                                                 Dispatch
                                                             </button>
@@ -383,10 +383,10 @@ export default function SuperAdminApplicationsPage() {
             {/* Dispatch Modal */}
             {dispatchApp && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <div className="w-full max-w-2xl rounded-2xl bg-[#1A0B2E] border border-white/10 p-6 shadow-xl relative">
+                    <div className="w-full max-w-2xl rounded-2xl bg-[#0D1117] border border-white/10 p-6 shadow-xl relative">
                         {dispatching && (
                             <div className="absolute inset-0 bg-black/50 z-10 flex items-center justify-center backdrop-blur-[2px] rounded-2xl">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-fuchsia-500" />
+                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-cyan-500" />
                             </div>
                         )}
                         <h3 className="text-xl font-bold text-white mb-2 uppercase italic tracking-tight">AI-Assisted Dispatch</h3>
@@ -396,11 +396,11 @@ export default function SuperAdminApplicationsPage() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between">
-                                    <h4 className="text-xs font-semibold text-fuchsia-400 uppercase tracking-wider">Property Matches</h4>
+                                    <h4 className="text-xs font-semibold text-cyan-400 uppercase tracking-wider">Property Matches</h4>
                                     <select
                                         value={matchSort}
                                         onChange={(e) => setMatchSort(e.target.value as 'score' | 'distance' | 'availability')}
-                                        className="bg-white/5 border border-white/10 rounded px-2 py-1 text-[10px] text-slate-400 outline-none focus:border-fuchsia-500"
+                                        className="bg-white/5 border border-white/10 rounded px-2 py-1 text-[10px] text-slate-400 outline-none focus:border-cyan-500"
                                     >
                                         <option value="score">By Score</option>
                                         <option value="distance">By Distance</option>
@@ -420,7 +420,7 @@ export default function SuperAdminApplicationsPage() {
                                                 key={match.tenantId}
                                                 onClick={() => setSelectedTenantId(match.tenantId)}
                                                 className={`w-full text-left p-3 rounded-xl border transition-all ${selectedTenantId === match.tenantId
-                                                    ? 'bg-fuchsia-500/20 border-fuchsia-500/50 ring-1 ring-fuchsia-500/50'
+                                                    ? 'bg-fuchsia-500/20 border-cyan-500/50 ring-1 ring-cyan-500/50'
                                                     : 'bg-white/5 border-white/10 hover:border-white/20'
                                                 }`}
                                             >
@@ -442,8 +442,8 @@ export default function SuperAdminApplicationsPage() {
                             <div className="space-y-4 border-l border-white/10 pl-6">
                                 <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Routing Details</h4>
                                 {dispatchApp.requestedTenantId && (
-                                    <div className="p-3 bg-fuchsia-500/5 border border-fuchsia-500/20 rounded-xl">
-                                        <span className="text-[10px] text-fuchsia-400 block mb-1 font-bold uppercase">Applicant Preferred:</span>
+                                    <div className="p-3 bg-fuchsia-500/5 border border-cyan-500/20 rounded-xl">
+                                        <span className="text-[10px] text-cyan-400 block mb-1 font-bold uppercase">Applicant Preferred:</span>
                                         <span className="text-white text-sm font-medium">
                                             {tenants.find(t => t.id === dispatchApp.requestedTenantId)?.name || dispatchApp.requestedTenantId}
                                         </span>
@@ -454,7 +454,7 @@ export default function SuperAdminApplicationsPage() {
                                     <select
                                         value={selectedTenantId}
                                         onChange={(e) => setSelectedTenantId(e.target.value)}
-                                        className="w-full bg-black/50 border border-white/20 rounded-xl p-3 text-sm text-white focus:ring-2 focus:ring-fuchsia-500 outline-none transition-all"
+                                        className="w-full bg-black/50 border border-white/20 rounded-xl p-3 text-sm text-white focus:ring-2 focus:ring-cyan-500 outline-none transition-all"
                                         disabled={dispatching}
                                     >
                                         <option value="" disabled>Select manually...</option>
@@ -467,7 +467,7 @@ export default function SuperAdminApplicationsPage() {
                                     <button
                                         onClick={handleDispatch}
                                         disabled={!selectedTenantId || dispatching}
-                                        className="w-full bg-fuchsia-600 hover:bg-fuchsia-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-fuchsia-500/20 disabled:opacity-50 transition-all active:scale-[0.98]"
+                                        className="w-full bg-cyan-700 hover:bg-cyan-600 text-white font-bold py-3 rounded-xl shadow-lg shadow-cyan-500/20 disabled:opacity-50 transition-all active:scale-[0.98]"
                                     >
                                         Dispatch Application
                                     </button>
@@ -488,7 +488,7 @@ export default function SuperAdminApplicationsPage() {
             {/* Rejection Modal */}
             {rejectingApp && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                    <div className="w-full max-w-lg rounded-2xl bg-[#1A0B2E] border border-white/10 p-6 shadow-xl">
+                    <div className="w-full max-w-lg rounded-2xl bg-[#0D1117] border border-white/10 p-6 shadow-xl">
                         <h3 className="text-xl font-bold text-white mb-2 uppercase italic tracking-tighter">⚠️ Reject Application</h3>
                         <p className="text-sm text-slate-400 mb-6">
                             Provide a reason for rejecting <strong>{rejectingApp.applicantName}</strong>.

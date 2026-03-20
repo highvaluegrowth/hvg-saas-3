@@ -5,14 +5,19 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { authService } from '@/features/auth/services/authService';
 import { getNavigationForRole, iconPaths } from '@/lib/constants/navigation';
-import { LogOut, Inbox, Building2, CircleDollarSign, ServerCrash } from 'lucide-react';
+import { LogOut, Inbox, Building2, CircleDollarSign, ServerCrash, LayoutDashboard, Bug, BookOpen, CalendarDays, BarChart3 } from 'lucide-react';
 
 const PLATFORM_ADMIN_ITEMS = [
-  { href: '/superadmin/applications', label: 'Tenant Approvals', Icon: Inbox },
-  { href: '/superadmin/tenants', label: 'All Tenants', Icon: Building2 },
-  { href: '/superadmin/financials', label: 'Financials', Icon: CircleDollarSign },
-  { href: '/superadmin/system', label: 'System Health', Icon: ServerCrash },
-] as const;
+  { href: '/superadmin', label: 'Command Center', Icon: LayoutDashboard, exact: true },
+  { href: '/superadmin/applications', label: 'Tenant Approvals', Icon: Inbox, exact: false },
+  { href: '/superadmin/tenants', label: 'All Tenants', Icon: Building2, exact: false },
+  { href: '/superadmin/qa', label: 'QA Feedback', Icon: Bug, exact: false },
+  { href: '/superadmin/courses', label: 'Courses', Icon: BookOpen, exact: false },
+  { href: '/superadmin/events', label: 'Events', Icon: CalendarDays, exact: false },
+  { href: '/superadmin/financials', label: 'Financials', Icon: CircleDollarSign, exact: false },
+  { href: '/superadmin/reporting', label: 'Reporting', Icon: BarChart3, exact: false },
+  { href: '/superadmin/system', label: 'System Health', Icon: ServerCrash, exact: false },
+];
 
 interface SidebarProps {
   tenantId: string;
@@ -74,7 +79,7 @@ export function Sidebar({ tenantId, tenantName, isOpen = true, onClose, isCollap
             className={`flex items-center h-16 px-6 ${isCollapsed ? 'justify-center' : 'justify-between'}`}
             style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}
           >
-            <Link href={`/${tenantId}`} className="flex items-center space-x-2">
+            <Link href={user?.role === 'super_admin' ? `/${tenantId}/superadmin` : `/${tenantId}`} className="flex items-center space-x-2">
               <div
                 className="w-8 h-8 shrink-0 rounded-lg flex items-center justify-center"
                 style={{ background: 'linear-gradient(135deg, #0891B2, #0e7490)' }}
@@ -201,34 +206,37 @@ export function Sidebar({ tenantId, tenantName, isOpen = true, onClose, isCollap
             <div className="px-3 pb-3">
               {/* Divider with label */}
               <div className="flex items-center gap-2 mb-2 mt-1">
-                <div className="flex-1 h-px" style={{ background: 'rgba(217,70,239,0.25)' }} />
+                <div className="flex-1 h-px" style={{ background: 'rgba(59,130,246,0.25)' }} />
                 {!isCollapsed && (
                   <span
                     className="text-[9px] font-black uppercase tracking-widest shrink-0"
-                    style={{ color: 'rgba(217,70,239,0.55)' }}
+                    style={{ color: 'rgba(59,130,246,0.55)' }}
                   >
                     Platform Admin
                   </span>
                 )}
-                <div className="flex-1 h-px" style={{ background: 'rgba(217,70,239,0.25)' }} />
+                <div className="flex-1 h-px" style={{ background: 'rgba(59,130,246,0.25)' }} />
               </div>
 
               <div className="space-y-0.5">
                 {PLATFORM_ADMIN_ITEMS.map((item) => {
-                  const isActive = pathname.startsWith(`/${tenantId}${item.href}`);
+                  const fullHref = `/${tenantId}${item.href}`;
+                  const isActive = item.exact
+                    ? pathname === fullHref
+                    : pathname.startsWith(fullHref);
                   return (
                     <Link
                       key={item.href}
-                      href={`/${tenantId}${item.href}`}
+                      href={fullHref}
                       className={`flex items-center rounded-lg text-sm font-medium transition-colors duration-150 ${isCollapsed ? 'justify-center py-3 px-2' : 'px-3 py-2.5'}`}
                       style={{
-                        background: isActive ? 'rgba(217,70,239,0.12)' : 'transparent',
-                        color: isActive ? '#E879F9' : 'rgba(255,255,255,0.45)',
+                        background: isActive ? 'rgba(59,130,246,0.12)' : 'transparent',
+                        color: isActive ? '#93C5FD' : 'rgba(255,255,255,0.45)',
                       }}
                       onMouseEnter={(e) => {
                         if (!isActive) {
-                          (e.currentTarget as HTMLElement).style.background = 'rgba(217,70,239,0.07)';
-                          (e.currentTarget as HTMLElement).style.color = 'rgba(217,70,239,0.85)';
+                          (e.currentTarget as HTMLElement).style.background = 'rgba(59,130,246,0.07)';
+                          (e.currentTarget as HTMLElement).style.color = 'rgba(147,197,253,0.85)';
                         }
                       }}
                       onMouseLeave={(e) => {
@@ -242,7 +250,7 @@ export function Sidebar({ tenantId, tenantName, isOpen = true, onClose, isCollap
                     >
                       <item.Icon
                         className={`shrink-0 w-5 h-5 ${isCollapsed ? '' : 'mr-3'}`}
-                        style={{ color: isActive ? '#E879F9' : 'rgba(217,70,239,0.5)' }}
+                        style={{ color: isActive ? '#93C5FD' : 'rgba(59,130,246,0.5)' }}
                       />
                       {!isCollapsed && <span>{item.label}</span>}
                     </Link>
