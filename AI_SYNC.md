@@ -2,25 +2,33 @@
 
 ## Operational Directives & Constraints Update
 * **Lead Engineer:** Claude
-* **Current Phase:** Sweep 7.9.2 Hotfix — Vercel Build Repair (TypeScript)
+* **Current Phase:** Master Plan - Sweep 9, Phase 9.4 (Kanban Wiring & Submission Actions)
 * **CRITICAL RULE:** Claude is strictly forbidden from running `git` commands. Pure code manipulation only.
 
 ---
 
-## Vercel Build Failure: TypeScript `badge` Error
-The live Vercel deployment is failing during `npm run build` due to a strict TypeScript error in `GlobalNavbar.tsx` that `npm run dev` ignored.
-
-**Error Log:**
-`Type error: Property 'badge' does not exist on type '{ name: string; href: string; icon: ForwardRefExoticComponent... }'`
-`> 95 | {link.badge && link.badge > 0 ? (`
+## Sweep 9, Phase 9.4: Kanban Wiring & Submission Actions
+**Target:** `app/apply/[tenantId]/page.tsx` (`handleSubmit`) and Success UI.
 
 ### Action Plan for Claude:
-1. Open `components/layout/GlobalNavbar.tsx`.
-2. Locate the definition of the navigation links array/objects.
-3. The array's inferred type is missing the optional `badge` property. 
-4. **The Fix:** Explicitly type the navigation items. Create an interface (e.g., `interface NavItem { name: string; href: string; icon: any; roles?: string[]; badge?: number; }`) and apply it to the link mapping, OR use a safe fallback so `link.badge` does not throw a Next.js compiler error.
-5. Quickly scan the file for any other obvious strict typing errors that might fail a production build.
+
+1. **Wire the Database Write:**
+   - Locate the `handleSubmit` function inside `ApplicationWizardPage`.
+   - Replace the `TODO` comment with a Firebase `addDoc` call pointing to `collection(db, 'tenants', tenantId, 'applications')`.
+   - Pass the perfectly formatted `CreateFacilityApplicationInput` payload.
+   - Wrap this in a `try/catch` block. If it fails, show a toast or error message to the user.
+
+2. **Build the Success State:**
+   - Once the `addDoc` resolves successfully, update the wizard state to a 4th "Success" step (or redirect to a dedicated `/apply/[tenantId]/success` route).
+   - The Success UI should be a highly polished, Emerald-themed glassmorphic card stating: "Application Submitted Successfully." 
+   - Tell the user that the facility operators have been notified and will be in touch shortly. Include a button to return to their portal or the main site.
+
+3. **Verify Operator Handoff (Mental Check/Audit):**
+   - Briefly review the Kanban implementation from Sweep 7 (e.g., `useOperationsBoard` hook). 
+   - Confirm that documents created in the `applications` subcollection with `status: 'pending_triage'` will automatically be picked up by the listener and routed to the "Action Required" column. (No code changes should be needed here if Sweep 7 was done correctly, just verify).
 
 ### Claude's Execution Report:
-* **TypeScript Fixed:** ✅ Added `NavItem` interface with optional `badge?: number` property. Applied `NavItem[]` type annotation to `navLinks`. Added `import type React` for `React.ElementType`. The `link.badge` access is now fully typed and will pass strict `tsc`.
-* **Status:** "Vercel build error patched. Ready to push to production."
+* **Database Wired:** ✅ `handleSubmit` is now async — calls `addDoc(collection(db, 'tenants', tenantId, 'applications'), payload)` with the fully typed `CreateFacilityApplicationInput` (status: 'pending_triage'). try/catch surfaces errors into a red error banner on Step 3. `setStep(4)` on success.
+* **Success UI Built:** ✅ `Step4Success` — emerald ring icon, "You're in the queue, [FirstName]!" heading, operator-notified messaging, pending review badge, "Return to Home" button. `StepIndicator` hidden on step 4 for a clean full-card success state.
+* **Kanban Verified:** ✅ `useOperationsBoard` fetches from `/api/tenants/{tenantId}/applications` and maps `pending_triage` → `action_required` column. New admissions submissions will automatically surface in the "Action Required" column with no code changes required.
+* **Status:** "Phase 9.4 Complete. The Admissions Pipeline is fully operational end-to-end."

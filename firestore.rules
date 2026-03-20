@@ -85,6 +85,23 @@ service cloud.firestore {
         allow write: if isSuperAdmin() || isTenantAdmin(tenantId);
       }
 
+      // ─── Admissions / Facility Applications ──────────────────────────────────
+      // Public intake pipeline: any authenticated user (including role: 'user' /
+      // 'applicant') can submit and read their own application. Status MUST be
+      // 'pending_triage' on creation to prevent applicants from self-approving.
+      match /applications/{appId} {
+        allow read: if isAuthenticated() && (
+          isSuperAdmin() ||
+          isTenantStaff(tenantId) ||
+          resource.data.applicantId == request.auth.uid
+        );
+        allow create: if isAuthenticated() &&
+          request.resource.data.applicantId == request.auth.uid &&
+          request.resource.data.status == 'pending_triage';
+        allow update: if isSuperAdmin() || isTenantStaff(tenantId);
+        allow delete: if isSuperAdmin();
+      }
+
       // ─── All other tenant subcollections (houses, staff, events, vehicles, enrollments)
       match /{document=**} {
         allow read: if isSuperAdmin() || isTenantMember(tenantId);
