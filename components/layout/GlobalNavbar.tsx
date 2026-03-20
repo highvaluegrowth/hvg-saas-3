@@ -3,7 +3,7 @@
 import { usePathname, useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { useAISidebarStore } from '@/lib/stores/aiSidebarStore';
+import { useChatStore } from '@/lib/stores/useChatStore';
 import { useInboxStore } from '@/lib/stores/inboxStore';
 import { GlobalSearch } from '@/components/search/GlobalSearch';
 import {
@@ -25,7 +25,7 @@ export function GlobalNavbar({ onMenuClick }: GlobalNavbarProps) {
     const params = useParams();
     const tenantId = params.tenantId as string;
     const { user } = useAuth();
-    const { isOpen, setOpen } = useAISidebarStore();
+    const { isOpen, openDrawer, setFilterType } = useChatStore();
     const { unreadCount } = useInboxStore();
 
     const isAdminRoute = pathname?.startsWith('/admin');
@@ -111,11 +111,11 @@ export function GlobalNavbar({ onMenuClick }: GlobalNavbarProps) {
                     style={{ width: 1, background: 'rgba(255,255,255,0.1)' }}
                 />
 
-                {/* AI Sidebar Toggle */}
+                {/* AI Drawer Toggle */}
                 <button
-                    onClick={() => setOpen(!isOpen)}
+                    onClick={() => { setFilterType('ai'); openDrawer(); }}
                     data-ai-toggle
-                    title="Toggle AI Assistant"
+                    title="Open Outlet AI"
                     style={{
                         color: isOpen
                             ? (isAdminRoute ? '#D946EF' : '#67E8F9')

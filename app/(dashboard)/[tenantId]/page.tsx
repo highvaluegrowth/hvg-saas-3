@@ -4,6 +4,7 @@ import React, { use } from 'react';
 import Link from 'next/link';
 import { useDashboardStats } from '@/features/dashboard/hooks/useDashboardStats';
 import { useEvents } from '@/features/events/hooks/useEvents';
+import { useChatStore } from '@/lib/stores/useChatStore';
 
 interface DashboardPageProps {
   params: Promise<{ tenantId: string }>;
@@ -163,6 +164,7 @@ export default function DashboardPage({ params }: DashboardPageProps) {
   const { tenantId } = use(params);
   const { stats, loading } = useDashboardStats(tenantId);
   const { events, loading: eventsLoading } = useEvents(tenantId);
+  const { openDrawer, setFilterType } = useChatStore();
 
   const upcomingEvents = events.slice(0, 6);
 
@@ -397,7 +399,7 @@ export default function DashboardPage({ params }: DashboardPageProps) {
             </div>
           </div>
 
-          {/* AI Partner shortcut */}
+          {/* Outlet AI shortcut */}
           <div className="bg-linear-to-br from-slate-800 to-slate-900 rounded-xl p-4 text-white">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-7 h-7 rounded-lg bg-cyan-500 flex items-center justify-center">
@@ -405,17 +407,14 @@ export default function DashboardPage({ params }: DashboardPageProps) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
               </div>
-              <span className="text-sm font-semibold">HVG Partner</span>
+              <span className="text-sm font-semibold">Outlet</span>
             </div>
             <p className="text-slate-400 text-xs mb-3">Your AI house manager — ask anything about operations, residents, or analytics.</p>
             <button
-              onClick={() => {
-                const btn = document.querySelector<HTMLButtonElement>('[data-ai-toggle]');
-                btn?.click();
-              }}
+              onClick={() => { setFilterType('ai'); openDrawer(); }}
               className="w-full bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold py-2 rounded-lg transition-colors"
             >
-              Open AI Assistant →
+              Open Outlet →
             </button>
           </div>
         </div>
