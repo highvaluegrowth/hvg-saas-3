@@ -6,6 +6,14 @@ import { authService } from '@/features/auth/services/authService';
 import { CalendarDays, MapPin, Users, Globe, Shield, Home, Search, Clock, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 
+function getSafeDate(timestamp: any): Date {
+    if (!timestamp) return new Date();
+    if (typeof timestamp.toDate === 'function') return timestamp.toDate();
+    if (timestamp._seconds) return new Date(timestamp._seconds * 1000);
+    const parsed = new Date(timestamp);
+    return isNaN(parsed.getTime()) ? new Date() : parsed;
+}
+
 export default function SuperAdminEventsPage() {
     const { user } = useAuth();
     const [events, setEvents] = useState<any[]>([]);
@@ -97,10 +105,10 @@ export default function SuperAdminEventsPage() {
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <div className="text-xs font-bold text-white">{format(new Date(event.scheduledAt), 'MMM d, yyyy')}</div>
+                                        <div className="text-xs font-bold text-white">{format(getSafeDate(event.scheduledAt), 'MMM d, yyyy')}</div>
                                         <div className="text-[10px] text-slate-500 flex items-center gap-1">
                                             <Clock className="w-3 h-3" />
-                                            {format(new Date(event.scheduledAt), 'h:mm a')}
+                                            {format(getSafeDate(event.scheduledAt), 'h:mm a')}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
