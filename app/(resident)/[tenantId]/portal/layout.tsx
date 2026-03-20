@@ -3,6 +3,8 @@
 import { use, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/features/auth/hooks/useAuth';
+import { GlobalDrawerContainer } from '@/features/chat/components/GlobalDrawerContainer';
+import { MobileBottomNav } from '@/components/resident/MobileBottomNav';
 
 interface ResidentLayoutProps {
   children: React.ReactNode;
@@ -22,12 +24,7 @@ export default function ResidentLayout({ children, params }: ResidentLayoutProps
       router.push('/login');
       return;
     }
-    // Staff/admins can preview resident portal but residents are locked here
-    // Non-residents with a tenant mismatch shouldn't be here either
-    if (
-      !STAFF_ROLES.has(user.role ?? '') &&
-      user.role !== 'resident'
-    ) {
+    if (!STAFF_ROLES.has(user.role ?? '') && user.role !== 'resident') {
       router.push('/login');
       return;
     }
@@ -47,11 +44,20 @@ export default function ResidentLayout({ children, params }: ResidentLayoutProps
   if (!user) return null;
 
   return (
-    <div
-      className="relative min-h-screen pb-20"
-      style={{ background: '#060E1A', maxWidth: '28rem', margin: '0 auto' }}
-    >
-      {children}
-    </div>
+    <>
+      {/* Page shell — mobile-first, max-width centered */}
+      <div
+        className="relative min-h-screen pb-24"
+        style={{ background: '#060E1A', maxWidth: '28rem', margin: '0 auto' }}
+      >
+        {children}
+      </div>
+
+      {/* Universal comms drawer — accessible from any resident page */}
+      <GlobalDrawerContainer currentUserId={user.uid} />
+
+      {/* Mobile bottom nav — fixed, constrained to max-w-md */}
+      <MobileBottomNav tenantId={tenantId} />
+    </>
   );
 }
