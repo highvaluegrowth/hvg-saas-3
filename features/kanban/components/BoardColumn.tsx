@@ -1,50 +1,9 @@
 'use client';
 
 import { useDroppable } from '@dnd-kit/core';
-import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { PolymorphicCard } from './PolymorphicCard';
 import type { BoardColumn as BoardColumnType, BoardItem } from '../types';
-
-// ─── Sortable placeholder card (Phase 7.3 will replace with polymorphic cards) ─
-
-function PlaceholderCard({ item }: { item: BoardItem }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: item.id,
-    data: { type: 'BoardItem', item },
-  });
-
-  const style = {
-    transform: CSS.Translate.toString(transform),
-    transition,
-    opacity: isDragging ? 0.3 : 1,
-  };
-
-  const TYPE_ICON: Record<string, string> = {
-    application: '📋',
-    chore: '✅',
-    task: '🗒️',
-  };
-
-  return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 cursor-grab active:cursor-grabbing hover:border-white/20 transition-all select-none"
-    >
-      <div className="flex items-center gap-2 mb-1">
-        <span className="text-sm">{TYPE_ICON[item.type] ?? '📄'}</span>
-        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{item.type}</span>
-      </div>
-      <p className="text-sm font-semibold text-white truncate">{item.title}</p>
-      <p className="text-xs text-slate-500 truncate mt-0.5">{item.subtitle}</p>
-      <p className="text-[9px] text-slate-600 mt-2">
-        {item.timestamp.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-      </p>
-    </div>
-  );
-}
 
 // ─── Column ───────────────────────────────────────────────────────────────────
 
@@ -80,7 +39,7 @@ export function BoardColumn({ column, items }: BoardColumnProps) {
       >
         <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
           {items.map(item => (
-            <PlaceholderCard key={item.id} item={item} />
+            <PolymorphicCard key={item.id} item={item} />
           ))}
         </SortableContext>
 
