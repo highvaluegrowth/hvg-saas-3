@@ -97,3 +97,45 @@ The Hub tab must serve as the resident's operational center. It needs to fetch t
 * **Firestore Chores Wired:** ✅ Real-time `onSnapshot` listener on `tenants/{tenantId}/chores` with `where('assigneeIds', 'array-contains', uid)` + `where('status', 'in', ['pending', 'in_progress'])` — re-subscribes on uid/tenantId change, unsubs on cleanup. Error state shown on listener failure.
 * **Tactile UI Built:** ✅ `components/chores/ChoreCard.tsx` — optimistic `setOptimisticDone(true)` on tap before Firestore write; `ReactNativeHapticFeedback.trigger('notificationSuccess')` fires immediately; reverts + `Alert.alert` on write failure. Check button is 44×44px. Priority dot (red=high, cyan=medium). Due date pill.
 * **Status:** "Phase 10.2 code complete. Ready for Phase 10.3."
+
+---
+
+# AI Sync Log — HVG Sober-Living Platform
+
+## Operational Directives & Constraints Update
+* **Lead Engineer:** Claude
+* **Current Phase:** Master Plan - Sweep 10, Phase 10.3 (Universal Comms Hub)
+* **CRITICAL RULE:** Claude is strictly forbidden from running `git` commands. Pure code manipulation only.
+* **DESIGN CONSTRAINT:** The primary color Amber (#F59E0B) is strictly forbidden. Use Dark Slate/Navy and Cyan.
+* **ENVIRONMENT CONSTRAINT:** Bare React Native CLI.
+
+## Sweep 10, Phase 10.3: Universal Comms Hub
+**Target:** `app/(tabs)/outlet.tsx` (ThreadList), create `app/chat/[id].tsx` (Chat interface), and associated components.
+
+### Architectural Diagnosis:
+The mobile app must abandon legacy inbox structures and wire directly into the Sweep 6 polymorphic conversations architecture via real-time Firestore listeners. It must also support the `__new_outlet__` AI flow natively.
+
+### Action Plan for Claude:
+
+1. **ThreadList Screen (`app/(tabs)/outlet.tsx`):**
+   - Implement a real-time `onSnapshot` listener using `@react-native-firebase/firestore` to query the `conversations` collection: `where('participants', 'array-contains', uid)`, ordered by `updatedAt` descending.
+   - Build a clean list UI (Dark Slate background) displaying the threads.
+   - **The "Outlet" Trigger:** Implement a prominent "Chat with Outlet" Floating Action Button (FAB) or fixed header button using the Cyan primary color.
+
+2. **The "Outlet" AI Flow Logic:**
+   - Wire the Outlet trigger to check the fetched threads for an active `ai_chat`. 
+   - If one exists, navigate to it. 
+   - If not, replicate the web's sentinel logic: Fire a mutation or create a document with the target `__new_outlet__` to instantiate the AI conversation on the backend, then navigate to the newly created thread.
+
+3. **Native Chat Interface (`app/chat/[id].tsx`):**
+   - Create the dynamic chat route.
+   - Fetch messages for the specific conversation ID via a real-time Firestore listener, ordered by `createdAt` descending.
+   - **UI Construction:** Use a `FlatList` with `inverted={true}` so new messages appear at the bottom naturally. 
+   - **Keyboard Handling:** Wrap the view in a `KeyboardAvoidingView` with `behavior={Platform.OS === 'ios' ? 'padding' : undefined}` to ensure the text input is pushed up by the native keyboard.
+   - **Bubble Styling:** User messages = Cyan background. AI/Other messages = Dark Slate/Glassmorphic background. 
+
+### Claude's Execution Report:
+* **ThreadList Built:** ✅ `app/(tabs)/outlet.tsx` — real-time `onSnapshot` on top-level `conversations` collection with `where('participants', 'array-contains', uid)` ordered by `updatedAt` desc. Shows ThreadRow per conversation (icon, title, last message preview, timestamp). Tab renamed from `chat` → `outlet` in `_layout.tsx`; old `chat.tsx` moved to hidden.
+* **AI Flow Wired:** ✅ Outlet FAB checks for existing `ai_chat` conversation → navigates to it if found. If not, creates new `conversations` doc (`type: 'ai_chat'`, `participants: [uid, 'system_ai']`) via direct Firestore write, then navigates to `/chat/{newId}`. Matches web sentinel pattern from `DrawerRouter.tsx`.
+* **Chat UI Built:** ✅ `app/chat/[id].tsx` — `FlatList inverted={true}` with `orderBy('createdAt', 'desc')`; `KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}`; user bubbles = Cyan (#0891b2); AI/other bubbles = Dark Slate glassmorphic. Optimistic user message shown immediately (cleared when Firestore confirms). For `ai_chat`: calls `chatApi.send({ message, conversationId })` — backend writes both user+AI msgs to Firestore, listener surfaces them. For human threads: direct Firestore batch write (message + conversation `lastMessage` update).
+* **Status:** "Phase 10.3 code complete. Ready for Phase 10.4."

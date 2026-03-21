@@ -75,7 +75,7 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="chat"
+        name="outlet"
         options={{
           title: 'HVG Outlet',
           tabBarLabel: 'Outlet',
@@ -109,6 +109,7 @@ export default function TabsLayout() {
       />
 
       {/* ── Hidden tabs (accessible via router.push) ─── */}
+      <Tabs.Screen name="chat"     options={{ href: null, headerShown: false }} />
       <Tabs.Screen name="admin"    options={{ href: null, headerShown: false }} />
       <Tabs.Screen name="explore"  options={{ href: null, headerShown: false }} />
       <Tabs.Screen name="activity" options={{ href: null, headerShown: false }} />
