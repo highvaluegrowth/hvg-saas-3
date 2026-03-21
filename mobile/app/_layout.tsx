@@ -2,6 +2,7 @@ import { Stack } from 'expo-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AuthProvider } from '@/lib/auth/AuthContext';
+import { colors } from '@/lib/constants/theme';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -18,7 +19,12 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <Stack screenOptions={{ headerShown: false }} />
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.bg.primary },
+            }}
+          />
         </AuthProvider>
       </QueryClientProvider>
     </SafeAreaProvider>

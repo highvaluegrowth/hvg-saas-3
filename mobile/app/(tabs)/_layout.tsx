@@ -1,12 +1,30 @@
+import { Platform, StyleSheet, View } from 'react-native';
 import { Tabs } from 'expo-router';
-import { Platform } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { TAB_BAR_BASE_HEIGHT } from '@/lib/constants/layout';
+import { BlurView } from '@react-native-community/blur';
 
-const ACTIVE = '#6366f1';
-const INACTIVE = '#475569';
-const BAR_BG = '#0a0f1e';
+import { TAB_BAR_BASE_HEIGHT } from '@/lib/constants/layout';
+import { colors } from '@/lib/constants/theme';
+
+function TabBarBackground() {
+  if (Platform.OS === 'ios') {
+    return (
+      <BlurView
+        style={StyleSheet.absoluteFill}
+        blurType="dark"
+        blurAmount={20}
+        reducedTransparencyFallbackColor={colors.bg.primary}
+      />
+    );
+  }
+  // Android: plain dark overlay (BlurView can be heavy on older devices)
+  return (
+    <View
+      style={[StyleSheet.absoluteFill, { backgroundColor: colors.bg.overlay }]}
+    />
+  );
+}
 
 export default function TabsLayout() {
   const insets = useSafeAreaInsets();
@@ -17,27 +35,28 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         tabBarStyle: {
-          backgroundColor: BAR_BG,
-          borderTopColor: '#1e293b',
+          backgroundColor: 'transparent',
+          borderTopColor: colors.border.strong,
           borderTopWidth: 1,
           height: tabBarHeight,
           paddingBottom: tabBarPaddingBottom,
           paddingTop: 6,
           position: 'absolute',
         },
-        tabBarActiveTintColor: ACTIVE,
-        tabBarInactiveTintColor: INACTIVE,
+        tabBarBackground: () => <TabBarBackground />,
+        tabBarActiveTintColor: colors.tab.active,
+        tabBarInactiveTintColor: colors.tab.inactive,
         tabBarLabelStyle: { fontSize: 11, fontWeight: '500', marginTop: 2 },
-        headerStyle: { backgroundColor: '#0a0f1e' },
-        headerTintColor: '#f8fafc',
+        headerStyle: { backgroundColor: colors.bg.primary },
+        headerTintColor: colors.text.primary,
       }}
     >
       {/* ── Visible tabs ─────────────────────────────── */}
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Dashboard',
-          tabBarLabel: 'Dashboard',
+          title: 'Home',
+          tabBarLabel: 'Home',
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="home" size={size} color={color} />
@@ -45,13 +64,13 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="hub"
         options={{
-          title: 'Explore',
-          tabBarLabel: 'Explore',
+          title: 'Hub',
+          tabBarLabel: 'Hub',
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="explore" size={size} color={color} />
+            <MaterialIcons name="grid-view" size={size} color={color} />
           ),
         }}
       />
@@ -60,40 +79,42 @@ export default function TabsLayout() {
         options={{
           title: 'HVG Outlet',
           tabBarLabel: 'Outlet',
+          headerShown: false,
           tabBarIcon: ({ color, size }) => (
             <MaterialIcons name="auto-awesome" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="activity"
+        name="lms"
         options={{
-          title: 'Activity',
-          tabBarLabel: 'Activity',
+          title: 'LMS',
+          tabBarLabel: 'LMS',
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="bar-chart" size={size} color={color} />
+            <MaterialIcons name="school" size={size} color={color} />
           ),
         }}
       />
       <Tabs.Screen
-        name="inbox"
+        name="profile"
         options={{
-          title: 'Inbox',
-          tabBarLabel: 'Inbox',
+          title: 'Profile',
+          tabBarLabel: 'Profile',
           headerShown: false,
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="inbox" size={size} color={color} />
+            <MaterialIcons name="person" size={size} color={color} />
           ),
         }}
       />
 
       {/* ── Hidden tabs (accessible via router.push) ─── */}
-      <Tabs.Screen name="admin"     options={{ href: null, headerShown: false }} />
-      <Tabs.Screen name="lms"      options={{ href: null }} />
-      <Tabs.Screen name="schedule" options={{ href: null }} />
-      <Tabs.Screen name="progress" options={{ href: null }} />
-      <Tabs.Screen name="profile"  options={{ href: null }} />
+      <Tabs.Screen name="admin"    options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="explore"  options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="activity" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="inbox"    options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="schedule" options={{ href: null, headerShown: false }} />
+      <Tabs.Screen name="progress" options={{ href: null, headerShown: false }} />
     </Tabs>
   );
 }
