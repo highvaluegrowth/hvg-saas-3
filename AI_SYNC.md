@@ -139,3 +139,44 @@ The mobile app must abandon legacy inbox structures and wire directly into the S
 * **AI Flow Wired:** ✅ Outlet FAB checks for existing `ai_chat` conversation → navigates to it if found. If not, creates new `conversations` doc (`type: 'ai_chat'`, `participants: [uid, 'system_ai']`) via direct Firestore write, then navigates to `/chat/{newId}`. Matches web sentinel pattern from `DrawerRouter.tsx`.
 * **Chat UI Built:** ✅ `app/chat/[id].tsx` — `FlatList inverted={true}` with `orderBy('createdAt', 'desc')`; `KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}`; user bubbles = Cyan (#0891b2); AI/other bubbles = Dark Slate glassmorphic. Optimistic user message shown immediately (cleared when Firestore confirms). For `ai_chat`: calls `chatApi.send({ message, conversationId })` — backend writes both user+AI msgs to Firestore, listener surfaces them. For human threads: direct Firestore batch write (message + conversation `lastMessage` update).
 * **Status:** "Phase 10.3 code complete. Ready for Phase 10.4."
+
+---
+
+# AI Sync Log — HVG Sober-Living Platform
+
+## Operational Directives & Constraints Update
+* **Lead Engineer:** Claude
+* **Current Phase:** Master Plan - Sweep 10, Phase 10.4 (Curriculum & Events)
+* **CRITICAL RULE:** Claude is strictly forbidden from running `git` commands. Pure code manipulation only.
+* **DESIGN CONSTRAINT:** The primary color Amber (#F59E0B) is strictly forbidden. Use Dark Slate/Navy (`#0C1A2E`, `#0f172a`), Cyan (`#06b6d4`), and Emerald (`#10b981`).
+* **ENVIRONMENT CONSTRAINT:** Bare React Native CLI. Use `react-native-haptic-feedback` for touch interactions.
+
+## Sweep 10, Phase 10.4: Curriculum & Events (The Recovery Ecosystem)
+**Target:** `app/(tabs)/lms.tsx` (or equivalent curriculum tab), and a new `app/events/index.tsx` (or integrate into the Hub/Dashboard).
+
+### Architectural Diagnosis:
+The app needs to provide native interfaces for the facility's Learning Management System (LMS) and master calendar, allowing residents to view coursework, track meetings, and RSVP with optimistic UI feedback.
+
+### Action Plan for Claude:
+
+1. **LMS & Coursework (`app/(tabs)/lms.tsx`):**
+   - Implement data fetching for the user's `courseEnrollments` using React Query to hit the Next.js REST API. (Ensure cache keys mirror the web: `['lms', 'courses', tenantId, uid]`).
+   - Build a native course list UI using Dark Slate cards with subtle borders. Show progress bars (using Emerald for completed portions) and course titles.
+   - If a course details screen doesn't exist yet, build a lightweight placeholder route (e.g., `app/lms/[courseId].tsx`) to handle the tap action.
+
+2. **Master Calendar & Meetings (UI Construction):**
+   - Fetch the facility's events/meetings calendar via the REST API.
+   - Build a highly readable `SectionList` grouped by Date (e.g., "Today", "Tomorrow", "Next Week"). 
+   - Render touch-friendly Event/Meeting cards. Distinguish between mandatory house meetings, 12-step meetings, and general events using Cyan accents or icons.
+
+3. **Tactile RSVP / Attendance Toggle:**
+   - On the Event/Meeting cards, add an "RSVP" or "Check-In" button.
+   - **Optimistic UI:** When tapped, immediately update local state to show an Emerald success state (e.g., "Attending ✓").
+   - **Haptics:** Trigger `ReactNativeHapticFeedback.trigger('impactLight')`.
+   - **Mutation:** Fire the background backend request to log the attendance/RSVP. If it fails, revert the state and show a native error toast/alert.
+
+### Claude's Execution Report:
+* **LMS UI Built:** ✅ `app/(tabs)/lms/index.tsx` rewritten — cache key updated to `['lms', 'courses', tenantId, uid]`; progress bar color changed from indigo to Emerald (`#10b981`); all indigo accents replaced with Cyan (`#06b6d4`); `SafeAreaView` with theme colors; `statusBadge` chip with colored border; "Events & Meetings →" card at bottom navigates to `/events`.
+* **Calendar Built:** ✅ `app/events/index.tsx` created — `SectionList` with `groupEventsByDate()` bucketing: Today / Tomorrow / This Week / Next Week / Later using `date-fns`. Section headers with inline separator line. Event type icons (meeting/AA/class/social/etc.). Mandatory events get left cyan border + "Required" badge. Attendee count shown. `RefreshControl` wired.
+* **Tactile RSVP:** ✅ `EventCard` has per-event `attending` state (starts false). On press: optimistic `setAttending(!attending)` + `ReactNativeHapticFeedback.trigger('impactLight')`, then background `tenantApi.attendEvent()` / `tenantApi.unattendEvent()`. On failure: revert state + `Alert.alert`. RSVP button shows "Going ✓" emerald when attending, outline "RSVP" when not.
+* **Status:** "Phase 10.4 code complete. Ready for Phase 10.5."
