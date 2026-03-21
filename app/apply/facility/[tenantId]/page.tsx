@@ -411,12 +411,13 @@ function Step2Clinical({
 
 // ─── Step 3: Review & Submit ──────────────────────────────────────────────────
 
-function ReviewRow({ label, value }: { label: string; value?: string | null }) {
-  if (!value && value !== false) return null;
+function ReviewRow({ label, value }: { label: string; value?: string | boolean | null }) {
+  if (value === undefined || value === null || value === '') return null;
+  const display = typeof value === 'boolean' ? (value ? 'Yes' : 'No') : value;
   return (
     <div className="flex justify-between items-start gap-4 py-2.5 border-b last:border-0" style={{ borderColor: 'rgba(255,255,255,0.06)' }}>
       <span className="text-xs font-bold shrink-0" style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</span>
-      <span className="text-sm font-semibold text-white text-right">{value}</span>
+      <span className="text-sm font-semibold text-white text-right">{display}</span>
     </div>
   );
 }
