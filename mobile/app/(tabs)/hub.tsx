@@ -7,9 +7,11 @@ import {
   StyleSheet,
   RefreshControl,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 import firestore, { FirebaseFirestoreTypes } from '@react-native-firebase/firestore';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
@@ -47,6 +49,7 @@ function HouseCard({ house }: { house: TenantHouse }) {
 
 export default function HubScreen() {
   const { firebaseUser, appUser } = useAuth();
+  const router = useRouter();
   const insets = useSafeAreaInsets();
   const bottomPad = TAB_BAR_BASE_HEIGHT + insets.bottom + 16;
 
@@ -133,6 +136,30 @@ export default function HubScreen() {
     return () => unsub();
   }, [firebaseUser?.uid, enrolledTenantId]);
 
+  // ── Real-time active rides (for logistics badge) ──────────────
+  const [activeRideCount, setActiveRideCount] = useState(0);
+
+  useEffect(() => {
+    const uid = firebaseUser?.uid;
+    const tenantId = enrolledTenantId;
+    if (!uid || !tenantId) { setActiveRideCount(0); return; }
+
+    const unsub = firestore()
+      .collection('tenants')
+      .doc(tenantId)
+      .collection('rides')
+      .where('requestedBy', '==', uid)
+      .where('status', 'in', ['pending_triage', 'requested', 'approved', 'in_progress'])
+      .onSnapshot(
+        (snapshot: FirebaseFirestoreTypes.QuerySnapshot) => {
+          setActiveRideCount(snapshot.size);
+        },
+        () => {}
+      );
+
+    return () => unsub();
+  }, [firebaseUser?.uid, enrolledTenantId]);
+
   // ── Pull-to-refresh (REST only; Firestore is real-time) ───────
   const [isRefreshing, setIsRefreshing] = useState(false);
   const handleRefresh = async () => {
@@ -213,6 +240,48 @@ export default function HubScreen() {
             chores.map((chore) => <ChoreCard key={chore.id} chore={chore} />)
           )}
         </View>
+
+        {/* ── Logistics ───────────────────────────────────── */}
+        {!!enrolledTenantId && (
+          <View style={styles.section}>
+            <Text style={styles.sectionLabel}>LOGISTICS</Text>
+
+            {/* My Rides nav card */}
+            <TouchableOpacity
+              style={styles.logisticsCard}
+              onPress={() => router.push('/logistics' as any)}
+              activeOpacity={0.75}
+            >
+              <View style={styles.logisticsIconWrap}>
+                <MaterialIcons name="directions-car" size={22} color={colors.primary.DEFAULT} />
+              </View>
+              <View style={styles.logisticsBody}>
+                <Text style={styles.logisticsTitle}>My Rides</Text>
+                <Text style={styles.logisticsSub}>
+                  {activeRideCount > 0
+                    ? `${activeRideCount} active request${activeRideCount !== 1 ? 's' : ''}`
+                    : 'View & manage ride requests'}
+                </Text>
+              </View>
+              {activeRideCount > 0 && (
+                <View style={styles.rideBadge}>
+                  <Text style={styles.rideBadgeText}>{activeRideCount}</Text>
+                </View>
+              )}
+              <MaterialIcons name="chevron-right" size={20} color={colors.text.muted} />
+            </TouchableOpacity>
+
+            {/* Request a Ride quick action */}
+            <TouchableOpacity
+              style={styles.requestRideBtn}
+              onPress={() => router.push('/logistics/ride-request' as any)}
+              activeOpacity={0.75}
+            >
+              <MaterialIcons name="add" size={18} color={colors.primary.DEFAULT} />
+              <Text style={styles.requestRideBtnText}>Request a Ride</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -366,5 +435,70 @@ const styles = StyleSheet.create({
   allDoneText: {
     fontSize: 13,
     color: colors.text.muted,
+  },
+
+  // ── Logistics ──────────────────────────────────
+  logisticsCard: {
+    backgroundColor: colors.bg.elevated,
+    borderRadius: 14,
+    padding: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    borderWidth: 1,
+    borderColor: colors.border.DEFAULT,
+    marginBottom: 8,
+  },
+  logisticsIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: colors.primary.glow,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+  logisticsBody: {
+    flex: 1,
+    gap: 2,
+  },
+  logisticsTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: colors.text.primary,
+  },
+  logisticsSub: {
+    fontSize: 12,
+    color: colors.text.muted,
+  },
+  rideBadge: {
+    minWidth: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: colors.primary.DEFAULT,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+  },
+  rideBadgeText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#fff',
+  },
+  requestRideBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    backgroundColor: colors.bg.elevated,
+    borderRadius: 12,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: colors.primary.dark + '88',
+  },
+  requestRideBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: colors.primary.DEFAULT,
   },
 });

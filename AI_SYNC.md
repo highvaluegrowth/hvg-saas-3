@@ -180,3 +180,43 @@ The app needs to provide native interfaces for the facility's Learning Managemen
 * **Calendar Built:** ✅ `app/events/index.tsx` created — `SectionList` with `groupEventsByDate()` bucketing: Today / Tomorrow / This Week / Next Week / Later using `date-fns`. Section headers with inline separator line. Event type icons (meeting/AA/class/social/etc.). Mandatory events get left cyan border + "Required" badge. Attendee count shown. `RefreshControl` wired.
 * **Tactile RSVP:** ✅ `EventCard` has per-event `attending` state (starts false). On press: optimistic `setAttending(!attending)` + `ReactNativeHapticFeedback.trigger('impactLight')`, then background `tenantApi.attendEvent()` / `tenantApi.unattendEvent()`. On failure: revert state + `Alert.alert`. RSVP button shows "Going ✓" emerald when attending, outline "RSVP" when not.
 * **Status:** "Phase 10.4 code complete. Ready for Phase 10.5."
+
+---
+
+# AI Sync Log — HVG Sober-Living Platform
+
+## Operational Directives & Constraints Update
+* **Lead Engineer:** Claude
+* **Current Phase:** Master Plan - Sweep 10, Phase 10.5 (Logistics & Rides)
+* **CRITICAL RULE:** Claude is strictly forbidden from running `git` commands. Pure code manipulation only.
+* **DESIGN CONSTRAINT:** The primary color Amber (#F59E0B) is strictly forbidden. Use Dark Slate/Navy, Cyan, and Emerald.
+* **ENVIRONMENT CONSTRAINT:** Bare React Native CLI.
+
+## Sweep 10, Phase 10.5: Logistics & Rides
+**Target:** Add Logistics UI to `app/(tabs)/hub.tsx` (or a dedicated route like `app/logistics/index.tsx`) and build the request forms.
+
+### Architectural Diagnosis:
+Residents need a frictionless native interface to request rides, transportation, and overnight passes. These requests must seamlessly integrate into the facility Operator's Kanban board (Sweep 7) for approval.
+
+### Action Plan for Claude:
+
+1. **Logistics Dashboard (The Tracker):**
+   - Update the Hub tab or create a new Logistics view.
+   - Fetch the user's active/pending requests (Rides, Passes) using a real-time Firestore listener or React Query.
+   - Build a status tracker UI using Dark Slate cards. Show clear status badges (e.g., "Pending Approval" in Cyan, "Approved/Scheduled" in Emerald). 
+
+2. **Ride Request & Pass Forms (The Inputs):**
+   - Build touch-friendly form screens/modals for "Request a Ride" and "Request a Pass".
+   - Include necessary native inputs (Date/Time pickers, Destination text inputs, Purpose dropdowns).
+   - Ensure `KeyboardAvoidingView` is used so inputs are not blocked on iOS/Android.
+
+3. **Kanban Integration (The Submission):**
+   - Wire the form submission to write directly to the appropriate Firestore collection (e.g., `tenants/{tenantId}/requests` or however the Kanban board is currently configured to receive resident requests).
+   - **CRITICAL:** Ensure the payload includes the exact status string required to trigger the "Action Required" column on the Operator's Kanban board (e.g., `status: 'pending_triage'`).
+   - Use optimistic UI and haptic feedback (`notificationSuccess`) upon successful submission, closing the modal and updating the tracker.
+
+### Claude's Execution Report:
+* **Logistics Tracker Built:** [Confirm the status list is fetching and rendering]
+* **Request Forms Built:** [Confirm native forms with proper keyboard handling]
+* **Kanban Handoff Wired:** [Confirm the payload targets the Operator's board]
+* **Status:** "Phase 10.5 code complete. Sweep 10 is fully finished."
